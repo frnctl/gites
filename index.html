@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gîtes — Gestion locations saisonnières</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Jost:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0E0E10; --panel:#16161A; --panel2:#1d1d22;
+  --text:#F2EFE9; --muted:#8A8A92; --red:#C1121F; --gold:#C9A227;
+  --line:rgba(201,162,39,.25); --line-strong:rgba(201,162,39,.5);
+  --ch-airbnb:#FF5A5F; --ch-booking:#1E5BCB; --ch-home:#2E9E5B;
+  --ch-sabb:#8B5CF6; --ch-direct:#C9A227; --ch-autre:#6B7280;
+  --green:#2E9E5B; --dw:40px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:'Jost',system-ui,sans-serif; font-size:15px; line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:'Anton',Impact,sans-serif; font-weight:400; letter-spacing:.5px; margin:0}
+.mono{font-family:'Space Mono',monospace}
+.num{font-family:'Space Mono',monospace; font-variant-numeric:tabular-nums}
+a{color:var(--gold);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* Focus visible */
+:focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:3px}
+
+/* Layout */
+header.app{
+  border-bottom:1px solid var(--line); background:linear-gradient(180deg,#121214,#0E0E10);
+  padding:18px 20px 0; position:sticky; top:0; z-index:40;
+}
+.brand{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap}
+.brand h1{font-size:34px; color:var(--text)}
+.brand .accent{color:var(--red)}
+.brand .sub{color:var(--muted); font-size:13px; letter-spacing:1px; text-transform:uppercase}
+.toolbar{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+.tabs{display:flex; gap:4px; margin-top:14px; flex-wrap:wrap}
+.tab{
+  appearance:none; border:none; background:transparent; color:var(--muted);
+  font-family:'Jost'; font-size:14px; font-weight:600; letter-spacing:.5px; text-transform:uppercase;
+  padding:10px 16px; cursor:pointer; border-bottom:2px solid transparent;
+}
+.tab:hover{color:var(--text)}
+.tab[aria-selected="true"]{color:var(--text); border-bottom-color:var(--red)}
+main{padding:22px 20px 80px; max-width:1400px; margin:0 auto}
+.view{display:none}
+.view.active{display:block}
+
+/* Buttons */
+.btn{
+  appearance:none; cursor:pointer; font-family:'Jost'; font-size:13px; font-weight:600;
+  letter-spacing:.4px; padding:8px 14px; border-radius:6px; border:1px solid var(--line-strong);
+  background:var(--panel); color:var(--text); transition:.15s ease;
+}
+.btn:hover{border-color:var(--gold); background:var(--panel2)}
+.btn.primary{background:var(--red); border-color:var(--red); color:#fff}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:5px 9px; font-size:12px}
+.btn.danger{color:#ff8a8a; border-color:rgba(193,18,31,.5)}
+.btn.danger:hover{background:rgba(193,18,31,.15); border-color:var(--red)}
+
+/* Panels */
+.panel{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:18px; margin-bottom:18px}
+.panel-h{display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap}
+.panel-h h2{font-size:20px; color:var(--text)}
+.panel-h .spacer{margin-left:auto}
+.gold-rule{height:1px; background:linear-gradient(90deg,var(--gold),transparent); border:0; margin:0 0 14px}
+
+/* Legend */
+.legend{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px}
+.legend .item{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted)}
+.dot{width:12px; height:12px; border-radius:3px; display:inline-block; flex:none}
+
+/* Calendar */
+.cal-nav{display:flex; align-items:center; gap:10px}
+.cal-nav .month{font-family:'Space Mono',monospace; font-size:16px; min-width:170px; text-align:center; text-transform:capitalize}
+.cal-scroll{overflow-x:auto; border:1px solid var(--line); border-radius:8px; background:var(--panel2)}
+.cal-grid{display:grid; min-width:max-content}
+.cal-cell{border-right:1px solid rgba(255,255,255,.04); border-bottom:1px solid rgba(255,255,255,.04)}
+.cal-corner,.cal-rowlabel{
+  position:sticky; left:0; z-index:3; background:var(--panel2);
+  border-right:1px solid var(--line); padding:8px 10px; width:140px; min-width:140px;
+}
+.cal-corner{z-index:5; font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); display:flex; align-items:center}
+.cal-rowlabel{display:flex; flex-direction:column; justify-content:center}
+.cal-rowlabel .nm{font-weight:600; font-size:14px}
+.cal-rowlabel .rf{font-size:11px; color:var(--muted)}
+.cal-rowlabel .gs{font-size:10px; color:var(--gold); letter-spacing:.5px; text-transform:uppercase}
+.cal-headtrack,.cal-track{grid-column:2 / -1; position:relative}
+.cal-bg{display:grid; grid-auto-flow:column; grid-auto-columns:var(--dw); height:100%}
+.cal-day{border-right:1px solid rgba(255,255,255,.045); height:100%; position:relative}
+.cal-day.we{background:rgba(255,255,255,.035)}
+.cal-day.today{box-shadow:inset 0 0 0 1px var(--gold)}
+.cal-dayhead{
+  display:grid; grid-auto-flow:column; grid-auto-columns:var(--dw);
+  border-bottom:1px solid var(--line);
+}
+.cal-dnum{text-align:center; padding:6px 0 7px; font-family:'Space Mono',monospace; font-size:12px; border-right:1px solid rgba(255,255,255,.045)}
+.cal-dnum.we{background:rgba(255,255,255,.035)}
+.cal-dnum.today{color:var(--gold); font-weight:700}
+.cal-dnum small{display:block; font-size:9px; color:var(--muted); text-transform:uppercase}
+.cal-track{padding:5px 0}
+.cal-bar{
+  position:absolute; height:20px; border-radius:5px; cursor:pointer;
+  display:flex; align-items:center; padding:0 7px; overflow:hidden;
+  font-size:11px; color:#0E0E10; font-weight:600; white-space:nowrap;
+  border:1px solid rgba(0,0,0,.25);
+}
+.cal-bar.cancel{opacity:.4; background-image:repeating-linear-gradient(45deg,rgba(0,0,0,.25) 0 5px,transparent 5px 10px)}
+.cal-bar:hover{filter:brightness(1.12); z-index:6}
+
+/* Tables */
+.table-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:8px}
+table{border-collapse:collapse; width:100%; min-width:640px}
+th,td{text-align:left; padding:9px 11px; border-bottom:1px solid rgba(255,255,255,.06); font-size:13.5px; white-space:nowrap}
+th{font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); background:var(--panel2); position:sticky; top:0}
+tbody tr:hover{background:rgba(201,162,39,.05)}
+td.notes{white-space:normal; min-width:160px; max-width:260px; color:var(--muted)}
+tfoot td{font-weight:700; background:var(--panel2); border-top:2px solid var(--line)}
+.pill{display:inline-flex; align-items:center; gap:6px; font-size:12px}
+.tag{display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600}
+.tag.paid{background:rgba(46,158,91,.18); color:#7ee0a4}
+.tag.wait{background:rgba(193,18,31,.18); color:#ff9b9b}
+.tag.part{background:rgba(201,162,39,.18); color:#e6c65a}
+.status-c{color:#7ee0a4}.status-o{color:#e6c65a}.status-t{color:var(--muted)}.status-a{color:#ff9b9b;text-decoration:line-through}
+.row-actions{display:flex; gap:5px}
+.empty{color:var(--muted); text-align:center; padding:26px; font-style:italic}
+
+/* Forms */
+.form{display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; margin-bottom:6px}
+.field{display:flex; flex-direction:column; gap:4px}
+.field.wide{grid-column:1/-1}
+label{font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted)}
+input,select,textarea{
+  background:var(--bg); border:1px solid var(--line); color:var(--text);
+  border-radius:6px; padding:8px 10px; font-family:'Jost'; font-size:14px; width:100%;
+}
+input.num,input[type=number],input[type=date]{font-family:'Space Mono',monospace}
+textarea{min-height:54px; resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--gold); outline:none}
+.form-actions{display:flex; gap:8px; margin-top:6px}
+.calc{color:var(--gold); font-family:'Space Mono',monospace; padding:8px 0}
+
+/* Filters */
+.filters{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px}
+.chip{appearance:none; cursor:pointer; background:var(--panel2); border:1px solid var(--line); color:var(--muted);
+  padding:6px 12px; border-radius:20px; font-family:'Jost'; font-size:13px}
+.chip[aria-pressed="true"]{background:var(--red); border-color:var(--red); color:#fff}
+
+/* Synthèse */
+.kpis{display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; margin-bottom:18px}
+.kpi{background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:14px}
+.kpi .k{font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted)}
+.kpi .v{font-family:'Space Mono',monospace; font-size:24px; margin-top:6px}
+.kpi .v.red{color:#ff9b9b}.kpi .v.green{color:#7ee0a4}.kpi .v.gold{color:var(--gold)}
+.synth-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:18px}
+.bar-row{display:grid; grid-template-columns:130px 1fr auto; align-items:center; gap:10px; margin-bottom:8px; font-size:13px}
+.bar-row .lbl{color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.bar-track{background:var(--bg); border-radius:5px; height:14px; overflow:hidden; border:1px solid var(--line)}
+.bar-fill{height:100%; border-radius:5px; background:var(--gold)}
+.bar-row .val{font-family:'Space Mono',monospace; font-size:12px; white-space:nowrap}
+
+/* Tooltip */
+#tip{
+  position:fixed; z-index:100; pointer-events:none; background:#000; border:1px solid var(--gold);
+  border-radius:8px; padding:9px 11px; font-size:12px; max-width:240px; display:none;
+  box-shadow:0 6px 24px rgba(0,0,0,.6);
+}
+#tip .t{font-weight:700; margin-bottom:3px}
+#tip .l{color:var(--muted)} #tip .l b{color:var(--text); font-weight:600}
+#tip .mono{font-family:'Space Mono',monospace}
+
+.hint{color:var(--muted); font-size:12px; margin-top:4px}
+.note-banner{font-size:11px; color:var(--muted); text-align:center; padding:14px 0 0}
+
+@media (max-width:640px){
+  .brand h1{font-size:26px}
+  main{padding:16px 12px 70px}
+  .toolbar{width:100%; margin:10px 0 0}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important; scroll-behavior:auto !important}
+}
+</style>
+</head>
+<body>
+<header class="app">
+  <div class="brand">
+    <h1>GÎTES<span class="accent">.</span></h1>
+    <span class="sub">Gestion location saisonnière · 4 appartements</span>
+    <div class="toolbar">
+      <button class="btn sm" id="btnExport">Exporter JSON</button>
+      <button class="btn sm" id="btnImport">Importer JSON</button>
+      <button class="btn sm danger" id="btnReset">Réinitialiser</button>
+      <input type="file" id="fileImport" accept="application/json" hidden>
+    </div>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button class="tab" role="tab" aria-selected="true" data-view="cal">Calendrier</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="res">Réservations</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="int">Interventions</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="syn">Synthèse</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ============ CALENDRIER ============ -->
+  <section class="view active" id="view-cal" role="tabpanel">
+    <div class="panel">
+      <div class="panel-h">
+        <h2>Calendrier d'occupation</h2>
+        <div class="spacer"></div>
+        <div class="cal-nav">
+          <button class="btn sm" id="calPrev" aria-label="Mois précédent">‹</button>
+          <span class="month num" id="calMonth"></span>
+          <button class="btn sm" id="calNext" aria-label="Mois suivant">›</button>
+          <button class="btn sm ghost" id="calToday">Aujourd'hui</button>
+        </div>
+      </div>
+      <hr class="gold-rule">
+      <div class="legend" id="calLegend"></div>
+      <div class="cal-scroll">
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+      <p class="hint">Le jour de départ n'est pas compté comme nuit occupée. Survole ou clique une barre pour le détail.</p>
+    </div>
+  </section>
+
+  <!-- ============ RÉSERVATIONS ============ -->
+  <section class="view" id="view-res" role="tabpanel">
+    <div class="panel">
+      <div class="panel-h">
+        <h2 id="resFormTitle">Nouvelle réservation</h2>
+        <div class="spacer"></div>
+        <button class="btn ghost sm" id="resCancel" hidden>Annuler l'édition</button>
+      </div>
+      <hr class="gold-rule">
+      <form class="form" id="resForm">
+        <input type="hidden" id="resId">
+        <div class="field"><label for="resApt">Appartement</label><select id="resApt" required></select></div>
+        <div class="field"><label for="resChannel">Canal</label><select id="resChannel" required></select></div>
+        <div class="field"><label for="resGuest">Voyageur</label><input id="resGuest" required></div>
+        <div class="field"><label for="resArrival">Arrivée</label><input type="date" id="resArrival" required></div>
+        <div class="field"><label for="resDeparture">Départ</label><input type="date" id="resDeparture" required></div>
+        <div class="field"><label>Nuits</label><div class="calc num" id="resNights">—</div></div>
+        <div class="field"><label for="resAmount">Montant €</label><input type="number" step="0.01" min="0" id="resAmount" class="num"></div>
+        <div class="field"><label for="resStatus">Statut</label><select id="resStatus"></select></div>
+        <div class="field wide"><label for="resNotes">Notes</label><textarea id="resNotes"></textarea></div>
+        <div class="form-actions"><button type="submit" class="btn primary">Enregistrer</button></div>
+      </form>
+    </div>
+    <div class="panel">
+      <div class="panel-h"><h2>Réservations</h2></div>
+      <div class="table-wrap">
+        <table id="resTable">
+          <thead><tr><th>Appart.</th><th>Canal</th><th>Voyageur</th><th>Arrivée</th><th>Départ</th><th>Nuits</th><th>Montant</th><th>Statut</th><th>Notes</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ INTERVENTIONS ============ -->
+  <section class="view" id="view-int" role="tabpanel">
+    <div class="panel">
+      <div class="panel-h">
+        <h2 id="intFormTitle">Nouvelle intervention</h2>
+        <div class="spacer"></div>
+        <button class="btn ghost sm" id="intCancel" hidden>Annuler l'édition</button>
+      </div>
+      <hr class="gold-rule">
+      <form class="form" id="intForm">
+        <input type="hidden" id="intId">
+        <div class="field"><label for="intApt">Appartement</label><select id="intApt" required></select></div>
+        <div class="field"><label for="intDate">Date</label><input type="date" id="intDate" required></div>
+        <div class="field"><label for="intWho">Intervenant</label><input id="intWho"></div>
+        <div class="field"><label for="intType">Type</label><select id="intType"></select></div>
+        <div class="field"><label for="intDur">Durée (h)</label><input type="number" step="0.25" min="0" id="intDur" class="num"></div>
+        <div class="field"><label for="intCost">Coût €</label><input type="number" step="0.01" min="0" id="intCost" class="num"></div>
+        <div class="field"><label for="intPayMode">Mode règlement</label><select id="intPayMode"></select></div>
+        <div class="field"><label for="intPayStatus">Statut règlement</label><select id="intPayStatus"></select></div>
+        <div class="field"><label for="intPayDate">Date règlement</label><input type="date" id="intPayDate"></div>
+        <div class="field"><label for="intInvoice">Réf facture</label><input id="intInvoice"></div>
+        <div class="field"><label for="intGestion">Gestion</label><input id="intGestion"></div>
+        <div class="field wide"><label for="intDesc">Description</label><input id="intDesc"></div>
+        <div class="field wide"><label for="intNotes">Notes</label><textarea id="intNotes"></textarea></div>
+        <div class="form-actions"><button type="submit" class="btn primary">Enregistrer</button></div>
+      </form>
+    </div>
+    <div class="panel">
+      <div class="panel-h"><h2>Interventions</h2></div>
+      <div class="filters" id="intFilters"></div>
+      <div class="table-wrap">
+        <table id="intTable">
+          <thead><tr><th>Appart.</th><th>Date</th><th>Intervenant</th><th>Type</th><th>Description</th><th>Durée</th><th>Coût</th><th>Règlement</th><th>Statut</th><th>Date règl.</th><th>Réf</th><th>Gestion</th><th>Notes</th><th></th></tr></thead>
+          <tbody></tbody>
+          <tfoot><tr><td colspan="5">Total</td><td id="intTotH">0 h</td><td id="intTotC">0 €</td><td colspan="7"></td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SYNTHÈSE ============ -->
+  <section class="view" id="view-syn" role="tabpanel">
+    <div class="panel">
+      <div class="panel-h"><h2>Synthèse</h2></div>
+      <hr class="gold-rule">
+      <div class="kpis" id="synKpis"></div>
+    </div>
+    <div class="synth-grid">
+      <div class="panel"><div class="panel-h"><h2>Revenu par canal</h2></div><div id="synByChannel"></div></div>
+      <div class="panel"><div class="panel-h"><h2>Coût par appartement</h2></div><div id="synByApt"></div></div>
+      <div class="panel"><div class="panel-h"><h2>Coût par type d'intervention</h2></div><div id="synByType"></div></div>
+      <div class="panel"><div class="panel-h"><h2>Coût par mois</h2></div><div id="synByMonth"></div></div>
+    </div>
+  </section>
+
+  <p class="note-banner">Données stockées localement (localStorage) sur ce navigateur. Pense à exporter régulièrement.</p>
+</main>
+
+<div id="tip" role="tooltip"></div>
+
+<script>
+"use strict";
+const STORE_KEY = 'gites_v1';
+const DW = 40;
+
+const APARTMENTS = [
+  {id:'rdj',    name:'RDJ',           ref:'49 RV RDJ', gestion:'Propriétaire', url:'https://www.airbnb.fr/rooms/1666841556768571133'},
+  {id:'etage1', name:'1er étage',     ref:'RV 1er',    gestion:'Propriétaire', url:'http://www.airbnb.fr/rooms/1556406620212142683'},
+  {id:'studio', name:'Studio',        ref:'',          gestion:'Maria',        url:''},
+  {id:'atelier',name:'Atelier (SST)', ref:'SST',       gestion:'Anabela',      url:'https://www.airbnb.com/h/eiffeltower_headtotoe'},
+];
+const APT_BY_ID = Object.fromEntries(APARTMENTS.map(a=>[a.id,a]));
+
+const CHANNELS = {
+  'Airbnb':'#FF5A5F','Booking.com':'#1E5BCB','HomeExchange':'#2E9E5B',
+  'SabbaticalHomes':'#8B5CF6','Direct':'#C9A227','Autre':'#6B7280'
+};
+const RES_STATUS = ['Confirmé','Option','Terminé','Annulé'];
+const STATUS_CLASS = {'Confirmé':'status-c','Option':'status-o','Terminé':'status-t','Annulé':'status-a'};
+const INT_TYPES = ['Électricité','Plomberie','Ménage','Peinture','Serrurerie','Chauffage/Chaudière','Internet/Box','Électroménager','Jardinage','Clés/Gardiennage','Inspection','Autre'];
+const PAY_MODES = ['Espèces','Virement','Chèque','CB','Non réglé'];
+const PAY_STATUS = ['Payé','En attente','Partiel'];
+
+let state = {reservations:[], interventions:[]};
+let calRef = (()=>{const d=new Date(); return {y:d.getFullYear(), m:d.getMonth()};})();
+let intFilter = 'all';
+
+/* ---------- storage ---------- */
+function load(){
+  try{const raw=localStorage.getItem(STORE_KEY); if(raw){const o=JSON.parse(raw); state.reservations=o.reservations||[]; state.interventions=o.interventions||[];}}
+  catch(e){console.warn('load',e);}
+}
+function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+function uid(){ return (crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(16).slice(2)); }
+
+/* ---------- date / format ---------- */
+function parseD(s){ if(!s) return null; const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
+function fmtD(s){ if(!s) return '—'; const d=parseD(s); return d?d.toLocaleDateString('fr-FR'):'—'; }
+function nightsBetween(a,b){ const da=parseD(a),db=parseD(b); if(!da||!db) return 0; const n=Math.round((db-da)/86400000); return n>0?n:0; }
+function money(n){ n=Number(n)||0; return n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'; }
+function hours(n){ n=Number(n)||0; return (Number.isInteger(n)?n:n.toFixed(2))+' h'; }
+function esc(s){ return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+const MONTHS=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const WD=['L','M','M','J','V','S','D']; // lundi..dimanche
+
+/* ---------- selects ---------- */
+function fillSelect(sel, items, withEmpty){
+  sel.innerHTML = (withEmpty?'<option value=""></option>':'') +
+    items.map(i=>`<option value="${esc(i.v??i)}">${esc(i.l??i)}</option>`).join('');
+}
+function initSelects(){
+  const aptOpts = APARTMENTS.map(a=>({v:a.id,l:a.name}));
+  fillSelect(document.getElementById('resApt'), aptOpts);
+  fillSelect(document.getElementById('resChannel'), Object.keys(CHANNELS));
+  fillSelect(document.getElementById('resStatus'), RES_STATUS);
+  fillSelect(document.getElementById('intApt'), aptOpts);
+  fillSelect(document.getElementById('intType'), INT_TYPES);
+  fillSelect(document.getElementById('intPayMode'), PAY_MODES);
+  fillSelect(document.getElementById('intPayStatus'), PAY_STATUS);
+}
+
+/* ---------- tabs ---------- */
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected','false'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    t.setAttribute('aria-selected','true');
+    document.getElementById('view-'+t.dataset.view).classList.add('active');
+  });
+});
+
+/* ---------- CALENDRIER ---------- */
+function renderLegend(){
+  document.getElementById('calLegend').innerHTML = Object.entries(CHANNELS)
+    .map(([n,c])=>`<span class="item"><span class="dot" style="background:${c}"></span>${esc(n)}</span>`).join('');
+}
+function renderCalendar(){
+  document.getElementById('calMonth').textContent = MONTHS[calRef.m]+' '+calRef.y;
+  const grid = document.getElementById('calGrid');
+  const first = new Date(calRef.y, calRef.m, 1);
+  const days = new Date(calRef.y, calRef.m+1, 0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+  grid.style.gridTemplateColumns = `140px repeat(${days}, ${DW}px)`;
+
+  // header
+  let html = `<div class="cal-corner cal-cell">Appartement</div><div class="cal-headtrack"><div class="cal-dayhead">`;
+  for(let d=1; d<=days; d++){
+    const date = new Date(calRef.y, calRef.m, d);
+    const wd = (date.getDay()+6)%7; // 0=lundi
+    const we = wd>=5;
+    const isToday = date.getTime()===today.getTime();
+    html += `<div class="cal-dnum${we?' we':''}${isToday?' today':''}">${d}<small>${WD[wd]}</small></div>`;
+  }
+  html += `</div></div>`;
+
+  // rows
+  APARTMENTS.forEach(apt=>{
+    const res = state.reservations
+      .filter(r=>r.aptId===apt.id && r.status!=='Annulé')
+      .map(r=>({...r, s:parseD(r.arrival), e:parseD(r.departure)}))
+      .filter(r=>r.s && r.e)
+      .sort((a,b)=>a.s-b.s);
+    // lane assignment (occupied nights = [arrival, departure-1])
+    const lanes=[];
+    res.forEach(r=>{
+      const occEnd = new Date(r.e.getTime()-86400000); // last occupied night
+      let placed=false;
+      for(const lane of lanes){ if(lane.lastEnd < r.s){ lane.items.push(r); lane.lastEnd=occEnd; r._lane=lanes.indexOf(lane); placed=true; break; } }
+      if(!placed){ r._lane=lanes.length; lanes.push({items:[r],lastEnd:occEnd}); }
+    });
+    const nLanes = Math.max(1, lanes.length);
+    const rowH = nLanes*25 + 10;
+
+    let bg='';
+    for(let d=1; d<=days; d++){
+      const date=new Date(calRef.y,calRef.m,d); const wd=(date.getDay()+6)%7;
+      const isToday=date.getTime()===today.getTime();
+      bg+=`<div class="cal-day${wd>=5?' we':''}${isToday?' today':''}"></div>`;
+    }
+    let bars='';
+    const monthStart=new Date(calRef.y,calRef.m,1), monthEnd=new Date(calRef.y,calRef.m,days);
+    res.forEach(r=>{
+      const occStart=r.s, occEnd=new Date(r.e.getTime()-86400000);
+      if(occEnd<monthStart || occStart>monthEnd) return; // not in month
+      const cs = occStart<monthStart?monthStart:occStart;
+      const ce = occEnd>monthEnd?monthEnd:occEnd;
+      const startIdx = cs.getDate()-1;
+      const span = (ce.getDate()-cs.getDate())+1;
+      const color = CHANNELS[r.channel]||CHANNELS['Autre'];
+      const top = 5 + r._lane*25;
+      const label = esc(r.guest||r.channel);
+      bars += `<div class="cal-bar${r.status==='Annulé'?' cancel':''}" tabindex="0" role="button"
+        style="left:${startIdx*DW+2}px; width:${span*DW-4}px; top:${top}px; background:${color}"
+        data-id="${r.id}">${label}</div>`;
+    });
+    html += `<div class="cal-rowlabel cal-cell" style="min-height:${rowH}px">
+        <span class="nm">${esc(apt.name)}</span>
+        ${apt.ref?`<span class="rf mono">${esc(apt.ref)}</span>`:''}
+        <span class="gs">${esc(apt.gestion)}</span>
+      </div>
+      <div class="cal-track" style="height:${rowH}px">
+        <div class="cal-bg">${bg}</div>${bars}
+      </div>`;
+  });
+  grid.innerHTML = html;
+}
+
+/* tooltip on bars */
+const tip = document.getElementById('tip');
+function showTip(r, x, y){
+  const apt = APT_BY_ID[r.aptId];
+  tip.innerHTML = `<div class="t" style="color:${CHANNELS[r.channel]||'#fff'}">${esc(r.guest||'(sans nom)')}</div>
+    <div class="l">${esc(apt?apt.name:'')} · <b>${esc(r.channel)}</b></div>
+    <div class="l mono">${fmtD(r.arrival)} → ${fmtD(r.departure)}</div>
+    <div class="l">${nightsBetween(r.arrival,r.departure)} nuit(s) · <b class="mono">${money(r.amount)}</b></div>
+    <div class="l">${esc(r.status)}</div>`;
+  tip.style.display='block';
+  const w=tip.offsetWidth, h=tip.offsetHeight;
+  tip.style.left=Math.min(x+12, window.innerWidth-w-8)+'px';
+  tip.style.top=Math.max(8, y-h-12)+'px';
+}
+function hideTip(){ tip.style.display='none'; }
+document.getElementById('calGrid').addEventListener('mouseover', e=>{
+  const bar=e.target.closest('.cal-bar'); if(!bar) return;
+  const r=state.reservations.find(x=>x.id===bar.dataset.id); if(r) showTip(r,e.clientX,e.clientY);
+});
+document.getElementById('calGrid').addEventListener('mousemove', e=>{
+  if(tip.style.display==='block'){ const bar=e.target.closest('.cal-bar'); if(bar){ tip.style.left=Math.min(e.clientX+12, window.innerWidth-tip.offsetWidth-8)+'px'; tip.style.top=Math.max(8,e.clientY-tip.offsetHeight-12)+'px'; } }
+});
+document.getElementById('calGrid').addEventListener('mouseout', e=>{ if(e.target.closest('.cal-bar')) hideTip(); });
+document.getElementById('calGrid').addEventListener('click', e=>{
+  const bar=e.target.closest('.cal-bar'); if(!bar) return;
+  const r=state.reservations.find(x=>x.id===bar.dataset.id);
+  if(r){ const rect=bar.getBoundingClientRect(); showTip(r,rect.left,rect.bottom+rect.height); setTimeout(hideTip,3000); }
+});
+document.getElementById('calGrid').addEventListener('focusin', e=>{
+  const bar=e.target.closest('.cal-bar'); if(!bar) return;
+  const r=state.reservations.find(x=>x.id===bar.dataset.id);
+  if(r){ const rect=bar.getBoundingClientRect(); showTip(r,rect.left,rect.bottom+rect.height); }
+});
+document.getElementById('calGrid').addEventListener('focusout', hideTip);
+
+document.getElementById('calPrev').onclick=()=>{ calRef.m--; if(calRef.m<0){calRef.m=11;calRef.y--;} renderCalendar(); };
+document.getElementById('calNext').onclick=()=>{ calRef.m++; if(calRef.m>11){calRef.m=0;calRef.y++;} renderCalendar(); };
+document.getElementById('calToday').onclick=()=>{ const d=new Date(); calRef={y:d.getFullYear(),m:d.getMonth()}; renderCalendar(); };
+
+/* ---------- RÉSERVATIONS ---------- */
+const resForm=document.getElementById('resForm');
+function resUpdateNights(){ document.getElementById('resNights').textContent = nightsBetween(document.getElementById('resArrival').value, document.getElementById('resDeparture').value)||'—'; }
+document.getElementById('resArrival').addEventListener('change',resUpdateNights);
+document.getElementById('resDeparture').addEventListener('change',resUpdateNights);
+function resReset(){ resForm.reset(); document.getElementById('resId').value=''; document.getElementById('resNights').textContent='—';
+  document.getElementById('resFormTitle').textContent='Nouvelle réservation'; document.getElementById('resCancel').hidden=true; }
+document.getElementById('resCancel').onclick=resReset;
+resForm.addEventListener('submit', e=>{
+  e.preventDefault();
+  const id=document.getElementById('resId').value || uid();
+  const rec={ id, aptId:document.getElementById('resApt').value, channel:document.getElementById('resChannel').value,
+    guest:document.getElementById('resGuest').value.trim(), arrival:document.getElementById('resArrival').value,
+    departure:document.getElementById('resDeparture').value, amount:parseFloat(document.getElementById('resAmount').value)||0,
+    status:document.getElementById('resStatus').value, notes:document.getElementById('resNotes').value.trim() };
+  if(nightsBetween(rec.arrival,rec.departure)<=0){ alert('La date de départ doit être après l\'arrivée.'); return; }
+  const i=state.reservations.findIndex(r=>r.id===id);
+  if(i>=0) state.reservations[i]=rec; else state.reservations.push(rec);
+  save(); resReset(); renderAll();
+});
+function resEdit(id){
+  const r=state.reservations.find(x=>x.id===id); if(!r) return;
+  document.getElementById('resId').value=r.id; document.getElementById('resApt').value=r.aptId;
+  document.getElementById('resChannel').value=r.channel; document.getElementById('resGuest').value=r.guest||'';
+  document.getElementById('resArrival').value=r.arrival; document.getElementById('resDeparture').value=r.departure;
+  document.getElementById('resAmount').value=r.amount||''; document.getElementById('resStatus').value=r.status;
+  document.getElementById('resNotes').value=r.notes||''; resUpdateNights();
+  document.getElementById('resFormTitle').textContent='Éditer la réservation'; document.getElementById('resCancel').hidden=false;
+  document.querySelector('[data-view=res]').click(); window.scrollTo({top:0,behavior:'smooth'});
+}
+function resDel(id){ if(!confirm('Supprimer cette réservation ?')) return; state.reservations=state.reservations.filter(r=>r.id!==id); save(); renderAll(); }
+function renderReservations(){
+  const tb=document.querySelector('#resTable tbody');
+  const rows=[...state.reservations].sort((a,b)=>(a.arrival||'').localeCompare(b.arrival||''));
+  if(!rows.length){ tb.innerHTML='<tr><td colspan="10" class="empty">Aucune réservation</td></tr>'; return; }
+  tb.innerHTML=rows.map(r=>{
+    const apt=APT_BY_ID[r.aptId]; const c=CHANNELS[r.channel]||'#6B7280';
+    return `<tr>
+      <td>${esc(apt?apt.name:'?')}</td>
+      <td><span class="pill"><span class="dot" style="background:${c}"></span>${esc(r.channel)}</span></td>
+      <td>${esc(r.guest)}</td>
+      <td class="num">${fmtD(r.arrival)}</td>
+      <td class="num">${fmtD(r.departure)}</td>
+      <td class="num">${nightsBetween(r.arrival,r.departure)}</td>
+      <td class="num">${money(r.amount)}</td>
+      <td class="${STATUS_CLASS[r.status]||''}">${esc(r.status)}</td>
+      <td class="notes">${esc(r.notes)}</td>
+      <td><div class="row-actions"><button class="btn sm" onclick="resEdit('${r.id}')">Éditer</button><button class="btn sm danger" onclick="resDel('${r.id}')">✕</button></div></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ---------- INTERVENTIONS ---------- */
+const intForm=document.getElementById('intForm');
+function intReset(){ intForm.reset(); document.getElementById('intId').value='';
+  document.getElementById('intFormTitle').textContent='Nouvelle intervention'; document.getElementById('intCancel').hidden=true; }
+document.getElementById('intCancel').onclick=intReset;
+intForm.addEventListener('submit', e=>{
+  e.preventDefault();
+  const id=document.getElementById('intId').value || uid();
+  const rec={ id, aptId:document.getElementById('intApt').value, date:document.getElementById('intDate').value,
+    who:document.getElementById('intWho').value.trim(), type:document.getElementById('intType').value,
+    dur:parseFloat(document.getElementById('intDur').value)||0, cost:parseFloat(document.getElementById('intCost').value)||0,
+    payMode:document.getElementById('intPayMode').value, payStatus:document.getElementById('intPayStatus').value,
+    payDate:document.getElementById('intPayDate').value, invoice:document.getElementById('intInvoice').value.trim(),
+    gestion:document.getElementById('intGestion').value.trim(), desc:document.getElementById('intDesc').value.trim(),
+    notes:document.getElementById('intNotes').value.trim() };
+  const i=state.interventions.findIndex(x=>x.id===id);
+  if(i>=0) state.interventions[i]=rec; else state.interventions.push(rec);
+  save(); intReset(); renderAll();
+});
+function intEdit(id){
+  const r=state.interventions.find(x=>x.id===id); if(!r) return;
+  const g=v=>document.getElementById(v);
+  g('intId').value=r.id; g('intApt').value=r.aptId; g('intDate').value=r.date; g('intWho').value=r.who||'';
+  g('intType').value=r.type; g('intDur').value=r.dur||''; g('intCost').value=r.cost||''; g('intPayMode').value=r.payMode;
+  g('intPayStatus').value=r.payStatus; g('intPayDate').value=r.payDate||''; g('intInvoice').value=r.invoice||'';
+  g('intGestion').value=r.gestion||''; g('intDesc').value=r.desc||''; g('intNotes').value=r.notes||'';
+  g('intFormTitle').textContent='Éditer l\'intervention'; g('intCancel').hidden=false;
+  document.querySelector('[data-view=int]').click(); window.scrollTo({top:0,behavior:'smooth'});
+}
+function intDel(id){ if(!confirm('Supprimer cette intervention ?')) return; state.interventions=state.interventions.filter(r=>r.id!==id); save(); renderAll(); }
+function renderIntFilters(){
+  const wrap=document.getElementById('intFilters');
+  const opts=[{id:'all',name:'Tous'},...APARTMENTS];
+  wrap.innerHTML=opts.map(o=>`<button class="chip" aria-pressed="${intFilter===o.id}" data-f="${o.id}">${esc(o.name)}</button>`).join('');
+  wrap.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{intFilter=c.dataset.f; renderInterventions();});
+}
+function payTag(s){ const m={'Payé':'paid','En attente':'wait','Partiel':'part'}; return `<span class="tag ${m[s]||''}">${esc(s)}</span>`; }
+function renderInterventions(){
+  renderIntFilters();
+  const tb=document.querySelector('#intTable tbody');
+  let rows=[...state.interventions].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  if(intFilter!=='all') rows=rows.filter(r=>r.aptId===intFilter);
+  let totH=0,totC=0;
+  if(!rows.length){ tb.innerHTML='<tr><td colspan="14" class="empty">Aucune intervention</td></tr>'; }
+  else tb.innerHTML=rows.map(r=>{
+    totH+=Number(r.dur)||0; totC+=Number(r.cost)||0; const apt=APT_BY_ID[r.aptId];
+    return `<tr>
+      <td>${esc(apt?apt.name:'?')}</td><td class="num">${fmtD(r.date)}</td><td>${esc(r.who)}</td>
+      <td>${esc(r.type)}</td><td class="notes">${esc(r.desc)}</td><td class="num">${r.dur?hours(r.dur):'—'}</td>
+      <td class="num">${money(r.cost)}</td><td>${esc(r.payMode)}</td><td>${payTag(r.payStatus)}</td>
+      <td class="num">${fmtD(r.payDate)}</td><td class="mono">${esc(r.invoice)}</td><td>${esc(r.gestion)}</td>
+      <td class="notes">${esc(r.notes)}</td>
+      <td><div class="row-actions"><button class="btn sm" onclick="intEdit('${r.id}')">Éditer</button><button class="btn sm danger" onclick="intDel('${r.id}')">✕</button></div></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('intTotH').textContent=hours(totH);
+  document.getElementById('intTotC').textContent=money(totC);
+}
+
+/* ---------- SYNTHÈSE ---------- */
+function occupiedNightsStats(){
+  const now=new Date(); const cy=now.getFullYear(), cm=now.getMonth();
+  let month=0, year=0;
+  state.reservations.filter(r=>r.status!=='Annulé').forEach(r=>{
+    const s=parseD(r.arrival), e=parseD(r.departure); if(!s||!e) return;
+    for(let d=new Date(s); d<e; d.setDate(d.getDate()+1)){
+      if(d.getFullYear()===cy){ year++; if(d.getMonth()===cm) month++; }
+    }
+  });
+  return {month,year};
+}
+function barList(container, entries, colorFn){
+  const max=Math.max(1,...entries.map(e=>e.val));
+  container.innerHTML = entries.length? entries.map(e=>`
+    <div class="bar-row">
+      <span class="lbl">${esc(e.label)}</span>
+      <span class="bar-track"><span class="bar-fill" style="width:${(e.val/max*100).toFixed(1)}%;background:${colorFn?colorFn(e):'var(--gold)'}"></span></span>
+      <span class="val">${e.fmt||money(e.val)}</span>
+    </div>`).join('') : '<p class="empty">—</p>';
+}
+function renderSynthese(){
+  const active=state.reservations.filter(r=>r.status!=='Annulé');
+  const revTotal=active.reduce((s,r)=>s+(Number(r.amount)||0),0);
+  const intTotal=state.interventions.reduce((s,r)=>s+(Number(r.cost)||0),0);
+  const paid=state.interventions.filter(r=>r.payStatus==='Payé').reduce((s,r)=>s+(Number(r.cost)||0),0);
+  const due=state.interventions.filter(r=>r.payStatus==='En attente'||r.payStatus==='Partiel').reduce((s,r)=>s+(Number(r.cost)||0),0);
+  const occ=occupiedNightsStats();
+  document.getElementById('synKpis').innerHTML=`
+    <div class="kpi"><div class="k">Revenu total</div><div class="v gold">${money(revTotal)}</div></div>
+    <div class="kpi"><div class="k">Nuits occupées (mois)</div><div class="v">${occ.month}</div></div>
+    <div class="kpi"><div class="k">Nuits occupées (année)</div><div class="v">${occ.year}</div></div>
+    <div class="kpi"><div class="k">Coût interventions</div><div class="v">${money(intTotal)}</div></div>
+    <div class="kpi"><div class="k">Déjà réglé</div><div class="v green">${money(paid)}</div></div>
+    <div class="kpi"><div class="k">Reste à régler</div><div class="v red">${money(due)}</div></div>`;
+
+  // revenu par canal
+  const byCh={}; active.forEach(r=>{byCh[r.channel]=(byCh[r.channel]||0)+(Number(r.amount)||0);});
+  barList(document.getElementById('synByChannel'),
+    Object.keys(CHANNELS).filter(c=>byCh[c]).map(c=>({label:c,val:byCh[c]})).sort((a,b)=>b.val-a.val),
+    e=>CHANNELS[e.label]||'var(--gold)');
+  // coût par appartement
+  const byApt={}; state.interventions.forEach(r=>{byApt[r.aptId]=(byApt[r.aptId]||0)+(Number(r.cost)||0);});
+  barList(document.getElementById('synByApt'),
+    APARTMENTS.filter(a=>byApt[a.id]).map(a=>({label:a.name,val:byApt[a.id]})).sort((a,b)=>b.val-a.val));
+  // coût par type
+  const byType={}; state.interventions.forEach(r=>{byType[r.type]=(byType[r.type]||0)+(Number(r.cost)||0);});
+  barList(document.getElementById('synByType'),
+    Object.keys(byType).map(t=>({label:t,val:byType[t]})).sort((a,b)=>b.val-a.val));
+  // coût par mois
+  const byMonth={}; state.interventions.forEach(r=>{ if(!r.date) return; const k=r.date.slice(0,7); byMonth[k]=(byMonth[k]||0)+(Number(r.cost)||0);});
+  barList(document.getElementById('synByMonth'),
+    Object.keys(byMonth).sort().map(k=>{const [y,m]=k.split('-'); return {label:MONTHS[+m-1]+' '+y,val:byMonth[k]};}));
+}
+
+/* ---------- backup ---------- */
+document.getElementById('btnExport').onclick=()=>{
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='gites-backup-'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
+document.getElementById('btnImport').onclick=()=>document.getElementById('fileImport').click();
+document.getElementById('fileImport').onchange=e=>{
+  const f=e.target.files[0]; if(!f) return; const rd=new FileReader();
+  rd.onload=()=>{ try{ const o=JSON.parse(rd.result);
+    if(!o || (!Array.isArray(o.reservations)&&!Array.isArray(o.interventions))) throw new Error('format');
+    if(!confirm('Remplacer les données actuelles par le fichier importé ?')) return;
+    state.reservations=o.reservations||[]; state.interventions=o.interventions||[]; save(); renderAll();
+    alert('Import réussi.');
+  }catch(err){ alert('Fichier JSON invalide.'); } };
+  rd.readAsText(f); e.target.value='';
+};
+document.getElementById('btnReset').onclick=()=>{
+  if(!confirm('Tout effacer ? Pense à exporter d\'abord. Cette action est irréversible.')) return;
+  state={reservations:[],interventions:[]}; save(); renderAll();
+};
+
+/* ---------- boot ---------- */
+function renderAll(){ renderCalendar(); renderReservations(); renderInterventions(); renderSynthese(); }
+load(); initSelects(); renderLegend(); renderAll();
+</script>
+</body>
+</html>
