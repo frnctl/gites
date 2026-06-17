@@ -508,7 +508,18 @@ const Store = {
   },
   save(){
     localStorage.setItem(STORE_KEY, JSON.stringify(this.data));
-    // === SUPABASE HOOK (Phase 2) : pousser this.data vers le cloud ici ===
+    if(this.cloudSync) this.cloudSync();          // pousse vers Supabase (défini par le module cloud)
+  },
+  // défini par le module Supabase une fois l'utilisateur connecté :
+  cloudSync:null,
+  // remplace les données locales par celles du cloud puis redessine
+  applyCloud(data){
+    this.data.apartments    = data.apartments?.length ? data.apartments : structuredCloneSafe(DEFAULT_APARTMENTS);
+    this.data.reservations  = data.reservations  || [];
+    this.data.interventions = data.interventions || [];
+    this.data.contacts      = data.contacts      || [];
+    localStorage.setItem(STORE_KEY, JSON.stringify(this.data));
+    initSelects(); renderAll();
   },
 };
 function structuredCloneSafe(o){ return JSON.parse(JSON.stringify(o)); }
@@ -1158,7 +1169,154 @@ gv('btnPrint').onclick=()=>window.print();
    BOOT
    ===================================================================== */
 function renderAll(){ renderCalendar(); renderReservations(); renderInterventions(); renderSynthese(); renderBiens(); renderContacts(); }
+window.Store = Store;                              // exposé au module de synchro cloud
 Store.load(); initSelects(); renderLegend(); renderAll();
+</script>
+
+<!-- =====================================================================
+     SYNCHRO CLOUD (Supabase) — module ES, chargé après l'app.
+     Si pas de réseau / pas de connexion : l'app reste en mode local.
+     ===================================================================== -->
+<script type="module">
+const SUPA = {
+  url: 'https://rujozrissqjvvhghltix.supabase.co',
+  key: 'sb_publishable_NH1aWfppbPotWDIGazQ7Dw_K_xN37f8'
+};
+const TABLES = ['apartments','reservations','interventions','contacts'];
+
+const $  = id => document.getElementById(id);
+const Store = window.Store;
+
+let sb=null, user=null, cloudIds={}, pushTimer=null, pullTimer=null, suppressUntil=0;
+
+if(SUPA.url && SUPA.key) boot().catch(e=>{ console.warn('cloud boot', e); setDot('local','Local'); });
+
+async function boot(){
+  let createClient;
+  try{ ({ createClient } = await import('https://esm.sh/@supabase/supabase-js@2')); }
+  catch(e){ setDot('local','Hors-ligne'); return; }   // pas de réseau → mode local
+  sb = createClient(SUPA.url, SUPA.key, { auth:{ persistSession:true, autoRefreshToken:true } });
+
+  const { data:{ session } } = await sb.auth.getSession();
+  if(session) await onLogin(session.user);
+  else showLogin();
+
+  sb.auth.onAuthStateChange((_evt, sess)=>{
+    if(sess && !user) onLogin(sess.user);
+    else if(!sess && user){ user=null; setDot('local','Déconnecté'); }
+  });
+}
+
+/* ---- état visuel ---- */
+function setDot(state,label){
+  const d=$('syncDot'); if(!d) return;
+  d.className='sync-dot '+(state==='ok'?'ok':state==='local'?'local':'');
+  d.textContent=label||(state==='ok'?'Sync':'Local'); d.title=label||'';
+}
+function renderBanner(){
+  const b=$('syncBanner'); if(!b||!user) return;
+  b.innerHTML=`✅ Synchro active — connecté : <b>${(window.esc||(s=>s))(user.email)}</b>`
+    +` <button class="btn sm" id="sb_logout" style="margin-left:8px">Se déconnecter</button>`;
+  const lo=$('sb_logout'); if(lo) lo.onclick=async()=>{ await sb.auth.signOut(); location.reload(); };
+}
+
+/* ---- connexion ---- */
+function showLogin(){
+  setDot('local','Connexion');
+  window.openModal(`
+   <h2 style="margin-bottom:6px">Connexion</h2>
+   <p class="hint" style="margin-bottom:12px">Connecte-toi pour synchroniser tes données entre l'iPhone et l'ordinateur.</p>
+   <div class="form">
+    <div class="field wide"><label>Email</label><input id="sb_email" type="email" autocomplete="username"></div>
+    <div class="field wide"><label>Mot de passe</label><input id="sb_pass" type="password" autocomplete="current-password"></div>
+   </div>
+   <div id="sb_msg" class="hint" style="min-height:16px"></div>
+   <div class="form-actions">
+     <button class="btn primary" id="sb_login">Se connecter</button>
+     <button class="btn" id="sb_signup">Créer le compte</button>
+     <button class="btn ghost" id="sb_skip">Plus tard</button>
+   </div>`);
+  $('sb_login').onclick=()=>doAuth(false);
+  $('sb_signup').onclick=()=>doAuth(true);
+  $('sb_skip').onclick=()=>{ window.closeModal(); setDot('local','Local'); };
+  $('sb_pass').addEventListener('keydown',e=>{ if(e.key==='Enter') doAuth(false); });
+}
+async function doAuth(signup){
+  const email=$('sb_email').value.trim(), password=$('sb_pass').value, msg=$('sb_msg');
+  if(!email||!password){ msg.textContent='Email et mot de passe requis.'; return; }
+  msg.textContent='…';
+  try{
+    let res;
+    if(signup){
+      res=await sb.auth.signUp({ email, password });
+      if(res.error) throw res.error;
+      if(!res.data.session){ msg.textContent='Compte créé. Confirme ton email, puis reconnecte-toi (ou désactive « Confirm email » dans Supabase).'; return; }
+    }else{
+      res=await sb.auth.signInWithPassword({ email, password });
+      if(res.error) throw res.error;
+    }
+    window.closeModal();
+    await onLogin(res.data.user);
+  }catch(e){ msg.textContent='Erreur : '+(e.message||e); }
+}
+
+/* ---- connecté : pull, migration, abonnement ---- */
+async function onLogin(u){
+  user=u; setDot('ok','Sync…');
+  let cloud;
+  try{ cloud=await fetchAll(); }catch(e){ console.warn('fetch',e); setDot('ok','Cache local'); Store.cloudSync=schedulePush; subscribe(); renderBanner(); return; }
+  const total=TABLES.reduce((n,t)=>n+cloud[t].length,0);
+  let local={}; try{ local=JSON.parse(localStorage.getItem('gites_v2')||'{}'); }catch(_){}
+  const localTotal=(local.apartments||[]).length+(local.reservations||[]).length+(local.interventions||[]).length+(local.contacts||[]).length;
+  Store.cloudSync=schedulePush;
+  if(total===0 && localTotal>0){ await pushAll(); }   // 1er login : on envoie le local au cloud
+  else Store.applyCloud(cloud);
+  setDot('ok','Sync ✓'); subscribe(); renderBanner();
+}
+
+async function fetchAll(){
+  const out={apartments:[],reservations:[],interventions:[],contacts:[]};
+  for(const t of TABLES){
+    const { data, error }=await sb.from(t).select('id,doc');
+    if(error) throw error;
+    out[t]=(data||[]).map(r=>({ ...r.doc, id:r.id }));
+    cloudIds[t]=new Set((data||[]).map(r=>String(r.id)));
+  }
+  return out;
+}
+
+/* ---- écriture (upsert + suppression différentielle) ---- */
+function schedulePush(){ clearTimeout(pushTimer); pushTimer=setTimeout(()=>pushAll(), 700); }
+async function pushAll(){
+  if(!sb||!user) return;
+  try{
+    suppressUntil=Date.now()+2500;
+    for(const t of TABLES) await syncTable(t, Store.data[t]||[]);
+    setDot('ok','Sync ✓');
+  }catch(e){ console.warn('push',e); setDot('ok','Erreur sync'); }
+}
+async function syncTable(name, items){
+  const rows=items.map(it=>({ id:String(it.id), doc:it, updated_at:new Date().toISOString() }));
+  if(rows.length){ const { error }=await sb.from(name).upsert(rows); if(error) throw error; }
+  const ids=new Set(rows.map(r=>r.id));
+  const del=[...(cloudIds[name]||[])].filter(id=>!ids.has(id));
+  if(del.length){ const { error }=await sb.from(name).delete().in('id', del); if(error) throw error; }
+  cloudIds[name]=ids;
+}
+
+/* ---- temps réel ---- */
+function subscribe(){
+  const ch=sb.channel('gites-sync');
+  TABLES.forEach(t=>ch.on('postgres_changes',{event:'*',schema:'public',table:t},schedulePull));
+  ch.subscribe();
+}
+function schedulePull(){
+  if(Date.now()<suppressUntil) return;            // écho de notre propre écriture
+  clearTimeout(pullTimer);
+  pullTimer=setTimeout(async()=>{
+    try{ Store.applyCloud(await fetchAll()); setDot('ok','Sync ✓'); }catch(e){ console.warn('pull',e); }
+  },400);
+}
 </script>
 </body>
 </html>

@@ -29,8 +29,13 @@ HomeExchange et SabbaticalHomes sont traités comme **échanges** (comptés en o
 
 ## Données & sauvegarde
 
-Stockage **localStorage** (clé `gites_v2`), migration automatique depuis l'ancienne clé `gites_v1`.
-La couche de données est isolée (`Store`) pour brancher une **synchro cloud (Supabase)** sans refonte — voir le commentaire `SUPABASE HOOK` dans le code.
+Stockage **localStorage** (clé `gites_v2`, cache hors-ligne), migration automatique depuis `gites_v1`.
+
+**Synchro multi-appareils (Supabase)** — module `<script type="module">` en bas d'`index.html` :
+connexion email + mot de passe, données protégées par **RLS** (chacun ne voit que les siennes),
+**temps réel** iPhone ↔ ordinateur. Si pas de réseau / pas de connexion, l'app fonctionne en local.
+Configuration : renseigner `SUPA = { url, key }` (clé *publishable*) et exécuter une fois
+[`supabase/schema.sql`](supabase/schema.sql) dans le *SQL Editor* de Supabase.
 
 - **Export / Import JSON** : sauvegarde / restauration complète.
 - **Export CSV** : réservations et interventions (compatibles Excel FR).
