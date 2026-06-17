@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Gîtes — Cockpit locations saisonnières</title>
+<title>Best Friend — Cockpit locations saisonnières</title>
 
 <!-- Favicons / icône d'app (initiales « BF » en hébreu : פב) -->
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -14,7 +14,7 @@
 <!-- Webapp iOS (écran d'accueil iPhone) -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Gîtes">
+<meta name="apple-mobile-web-app-title" content="Best Friend">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0E0E10">
 
@@ -255,8 +255,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); outline:none}
 <body>
 <header class="app">
   <div class="brand">
-    <h1>GÎTES<span class="accent">.</span></h1>
-    <span class="sub">Cockpit location saisonnière</span>
+    <h1>BEST FRIEND<span class="accent">.</span></h1>
+    <span class="sub">Cockpit location saisonnière · 4 appartements</span>
     <div class="toolbar">
       <span class="sync-dot local" id="syncDot" title="Stockage">Local</span>
       <button class="btn sm" id="btnExport">Export</button>
@@ -1129,7 +1129,7 @@ function download(name, content, type){
   const blob=new Blob([content],{type}); const a=document.createElement('a');
   a.href=URL.createObjectURL(blob); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
-gv('btnExport').onclick=()=>download('gites-backup-'+new Date().toISOString().slice(0,10)+'.json', JSON.stringify(Store.data,null,2), 'application/json');
+gv('btnExport').onclick=()=>download('best-friend-backup-'+new Date().toISOString().slice(0,10)+'.json', JSON.stringify(Store.data,null,2), 'application/json');
 gv('btnImport').onclick=()=>gv('fileImport').click();
 gv('fileImport').onchange=e=>{
   const f=e.target.files[0]; if(!f)return; const rd=new FileReader();

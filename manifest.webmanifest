@@ -1,6 +1,6 @@
 {
-  "name": "Gîtes — Gestion locations saisonnières",
-  "short_name": "Gîtes",
+  "name": "Best Friend — Gestion locations saisonnières",
+  "short_name": "Best Friend",
   "description": "Dashboard de gestion des locations saisonnières.",
   "start_url": "./index.html",
   "scope": "./",
