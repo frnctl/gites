@@ -1,0 +1,17 @@
+{
+  "name": "Gîtes — Gestion locations saisonnières",
+  "short_name": "Gîtes",
+  "description": "Dashboard de gestion des locations saisonnières.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0E0E10",
+  "theme_color": "#0E0E10",
+  "lang": "fr",
+  "icons": [
+    { "src": "icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any" },
+    { "src": "icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" },
+    { "src": "apple-touch-icon.png", "type": "image/png", "sizes": "180x180" }
+  ]
+}
