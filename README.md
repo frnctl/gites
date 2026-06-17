@@ -1,4 +1,6 @@
-# Gîtes — Cockpit de gestion (location saisonnière)
+# Best Friend — Cockpit de gestion (location saisonnière)
+
+> « Best Friend » (BF) — en clin d'œil aux initiales de **Bruno Fulda**. Le favicon reprend ces initiales en hébreu (פב).
 
 Tableau de bord autonome pour piloter 4 appartements en location saisonnière.
 **Un seul fichier** (`index.html`) : HTML + CSS + JS vanilla, aucune dépendance, aucun build.
