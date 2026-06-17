@@ -2,63 +2,83 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gîtes — Gestion locations saisonnières</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Gîtes — Cockpit locations saisonnières</title>
+
+<!-- Favicons / icône d'app (initiales « BF » en hébreu : פב) -->
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+
+<!-- Webapp iOS (écran d'accueil iPhone) -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gîtes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0E0E10">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Jost:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0E0E10; --panel:#16161A; --panel2:#1d1d22;
+  --bg:#0E0E10; --panel:#16161A; --panel2:#1d1d22; --panel3:#26262d;
   --text:#F2EFE9; --muted:#8A8A92; --red:#C1121F; --gold:#C9A227;
   --line:rgba(201,162,39,.25); --line-strong:rgba(201,162,39,.5);
-  --ch-airbnb:#FF5A5F; --ch-booking:#1E5BCB; --ch-home:#2E9E5B;
-  --ch-sabb:#8B5CF6; --ch-direct:#C9A227; --ch-autre:#6B7280;
-  --green:#2E9E5B; --dw:40px;
+  --green:#2E9E5B; --dw:38px;
+  --safe-b:env(safe-area-inset-bottom,0px);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{
   background:var(--bg); color:var(--text);
   font-family:'Jost',system-ui,sans-serif; font-size:15px; line-height:1.45;
-  -webkit-font-smoothing:antialiased;
+  -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:100%;
 }
 h1,h2,h3{font-family:'Anton',Impact,sans-serif; font-weight:400; letter-spacing:.5px; margin:0}
 .mono{font-family:'Space Mono',monospace}
 .num{font-family:'Space Mono',monospace; font-variant-numeric:tabular-nums}
 a{color:var(--gold);text-decoration:none}
 a:hover{text-decoration:underline}
-
-/* Focus visible */
 :focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:3px}
 
-/* Layout */
+/* ---------- Header ---------- */
 header.app{
   border-bottom:1px solid var(--line); background:linear-gradient(180deg,#121214,#0E0E10);
-  padding:18px 20px 0; position:sticky; top:0; z-index:40;
+  padding:14px 16px 0; position:sticky; top:0; z-index:40;
 }
-.brand{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap}
-.brand h1{font-size:34px; color:var(--text)}
+.brand{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
+.brand h1{font-size:30px; color:var(--text)}
 .brand .accent{color:var(--red)}
-.brand .sub{color:var(--muted); font-size:13px; letter-spacing:1px; text-transform:uppercase}
-.toolbar{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
-.tabs{display:flex; gap:4px; margin-top:14px; flex-wrap:wrap}
+.brand .sub{color:var(--muted); font-size:12px; letter-spacing:1px; text-transform:uppercase}
+.toolbar{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.sync-dot{display:inline-flex; align-items:center; gap:6px; font-size:11px; color:var(--muted)}
+.sync-dot::before{content:''; width:8px; height:8px; border-radius:50%; background:var(--muted)}
+.sync-dot.local::before{background:var(--gold)}
+.sync-dot.ok::before{background:var(--green)}
+
+/* tabs scrollable on mobile */
+.tabs{display:flex; gap:2px; margin-top:12px; overflow-x:auto; scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
 .tab{
   appearance:none; border:none; background:transparent; color:var(--muted);
-  font-family:'Jost'; font-size:14px; font-weight:600; letter-spacing:.5px; text-transform:uppercase;
-  padding:10px 16px; cursor:pointer; border-bottom:2px solid transparent;
+  font-family:'Jost'; font-size:13px; font-weight:600; letter-spacing:.4px; text-transform:uppercase;
+  padding:10px 14px; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap;
 }
 .tab:hover{color:var(--text)}
 .tab[aria-selected="true"]{color:var(--text); border-bottom-color:var(--red)}
-main{padding:22px 20px 80px; max-width:1400px; margin:0 auto}
-.view{display:none}
-.view.active{display:block}
 
-/* Buttons */
+main{padding:18px 16px calc(90px + var(--safe-b)); max-width:1500px; margin:0 auto}
+.view{display:none; animation:fade .2s ease}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ---------- Buttons ---------- */
 .btn{
   appearance:none; cursor:pointer; font-family:'Jost'; font-size:13px; font-weight:600;
-  letter-spacing:.4px; padding:8px 14px; border-radius:6px; border:1px solid var(--line-strong);
-  background:var(--panel); color:var(--text); transition:.15s ease;
+  letter-spacing:.3px; padding:8px 14px; border-radius:7px; border:1px solid var(--line-strong);
+  background:var(--panel); color:var(--text); transition:.15s ease; white-space:nowrap;
 }
 .btn:hover{border-color:var(--gold); background:var(--panel2)}
 .btn.primary{background:var(--red); border-color:var(--red); color:#fff}
@@ -67,47 +87,55 @@ main{padding:22px 20px 80px; max-width:1400px; margin:0 auto}
 .btn.sm{padding:5px 9px; font-size:12px}
 .btn.danger{color:#ff8a8a; border-color:rgba(193,18,31,.5)}
 .btn.danger:hover{background:rgba(193,18,31,.15); border-color:var(--red)}
+.btn.gold{background:var(--gold); border-color:var(--gold); color:#0E0E10}
 
-/* Panels */
-.panel{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:18px; margin-bottom:18px}
-.panel-h{display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap}
-.panel-h h2{font-size:20px; color:var(--text)}
+/* ---------- Panels ---------- */
+.panel{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; margin-bottom:16px}
+.panel-h{display:flex; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap}
+.panel-h h2{font-size:19px; color:var(--text)}
 .panel-h .spacer{margin-left:auto}
 .gold-rule{height:1px; background:linear-gradient(90deg,var(--gold),transparent); border:0; margin:0 0 14px}
+.hint{color:var(--muted); font-size:12px; margin-top:6px}
 
-/* Legend */
-.legend{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px}
+/* ---------- Banners ---------- */
+.banner{border-radius:10px; padding:11px 14px; font-size:13px; margin-bottom:14px; display:flex; gap:10px; align-items:flex-start}
+.banner.warn{background:rgba(193,18,31,.12); border:1px solid rgba(193,18,31,.4); color:#ff9b9b}
+.banner.warn b{color:#fff}
+.banner.info{background:rgba(201,162,39,.1); border:1px solid var(--line); color:var(--muted)}
+
+/* ---------- Legend ---------- */
+.legend{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px}
 .legend .item{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted)}
-.dot{width:12px; height:12px; border-radius:3px; display:inline-block; flex:none}
+.dot{width:11px; height:11px; border-radius:3px; display:inline-block; flex:none}
 
-/* Calendar */
-.cal-nav{display:flex; align-items:center; gap:10px}
-.cal-nav .month{font-family:'Space Mono',monospace; font-size:16px; min-width:170px; text-align:center; text-transform:capitalize}
-.cal-scroll{overflow-x:auto; border:1px solid var(--line); border-radius:8px; background:var(--panel2)}
-.cal-grid{display:grid; min-width:max-content}
-.cal-cell{border-right:1px solid rgba(255,255,255,.04); border-bottom:1px solid rgba(255,255,255,.04)}
+/* ---------- Calendar / Timeline ---------- */
+.cal-controls{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.cal-controls .month{font-family:'Space Mono',monospace; font-size:15px; min-width:150px; text-align:center; text-transform:capitalize}
+.seg{display:inline-flex; border:1px solid var(--line); border-radius:7px; overflow:hidden}
+.seg button{appearance:none; border:none; background:var(--panel); color:var(--muted); padding:6px 11px; font-size:12px; cursor:pointer; font-family:'Jost'; font-weight:600}
+.seg button[aria-pressed="true"]{background:var(--gold); color:#0E0E10}
+.cal-scroll{overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:var(--panel2); -webkit-overflow-scrolling:touch}
+.cal-grid{display:grid; min-width:max-content; position:relative}
 .cal-corner,.cal-rowlabel{
   position:sticky; left:0; z-index:3; background:var(--panel2);
-  border-right:1px solid var(--line); padding:8px 10px; width:140px; min-width:140px;
+  border-right:1px solid var(--line); padding:7px 9px; width:124px; min-width:124px;
 }
-.cal-corner{z-index:5; font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); display:flex; align-items:center}
+.cal-corner{z-index:6; font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); display:flex; align-items:flex-end}
 .cal-rowlabel{display:flex; flex-direction:column; justify-content:center}
-.cal-rowlabel .nm{font-weight:600; font-size:14px}
-.cal-rowlabel .rf{font-size:11px; color:var(--muted)}
-.cal-rowlabel .gs{font-size:10px; color:var(--gold); letter-spacing:.5px; text-transform:uppercase}
-.cal-headtrack,.cal-track{grid-column:2 / -1; position:relative}
-.cal-bg{display:grid; grid-auto-flow:column; grid-auto-columns:var(--dw); height:100%}
-.cal-day{border-right:1px solid rgba(255,255,255,.045); height:100%; position:relative}
-.cal-day.we{background:rgba(255,255,255,.035)}
-.cal-day.today{box-shadow:inset 0 0 0 1px var(--gold)}
-.cal-dayhead{
-  display:grid; grid-auto-flow:column; grid-auto-columns:var(--dw);
-  border-bottom:1px solid var(--line);
-}
-.cal-dnum{text-align:center; padding:6px 0 7px; font-family:'Space Mono',monospace; font-size:12px; border-right:1px solid rgba(255,255,255,.045)}
+.cal-rowlabel .nm{font-weight:600; font-size:13px}
+.cal-rowlabel .gs{font-size:10px; color:var(--gold); letter-spacing:.4px; text-transform:uppercase}
+.cal-monthrow,.cal-headtrack,.cal-track{grid-column:2 / -1; position:relative}
+.cal-months{display:flex; height:22px; border-bottom:1px solid var(--line)}
+.cal-mlabel{font-family:'Space Mono',monospace; font-size:11px; color:var(--gold); text-transform:capitalize; padding:3px 8px; border-right:1px solid var(--line); white-space:nowrap; position:sticky}
+.cal-dayhead{display:grid; grid-auto-flow:column; grid-auto-columns:var(--dw); border-bottom:1px solid var(--line)}
+.cal-dnum{text-align:center; padding:5px 0 6px; font-family:'Space Mono',monospace; font-size:11px; border-right:1px solid rgba(255,255,255,.045)}
 .cal-dnum.we{background:rgba(255,255,255,.035)}
 .cal-dnum.today{color:var(--gold); font-weight:700}
 .cal-dnum small{display:block; font-size:9px; color:var(--muted); text-transform:uppercase}
+.cal-bg{display:grid; grid-auto-flow:column; grid-auto-columns:var(--dw); height:100%; position:absolute; inset:0}
+.cal-day{border-right:1px solid rgba(255,255,255,.045); height:100%}
+.cal-day.we{background:rgba(255,255,255,.03)}
+.cal-day.today{box-shadow:inset 1px 0 0 var(--gold)}
 .cal-track{padding:5px 0}
 .cal-bar{
   position:absolute; height:20px; border-radius:5px; cursor:pointer;
@@ -115,61 +143,79 @@ main{padding:22px 20px 80px; max-width:1400px; margin:0 auto}
   font-size:11px; color:#0E0E10; font-weight:600; white-space:nowrap;
   border:1px solid rgba(0,0,0,.25);
 }
-.cal-bar.cancel{opacity:.4; background-image:repeating-linear-gradient(45deg,rgba(0,0,0,.25) 0 5px,transparent 5px 10px)}
-.cal-bar:hover{filter:brightness(1.12); z-index:6}
+.cal-bar.exch{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.18) 0 6px,transparent 6px 12px)}
+.cal-bar.conflict{box-shadow:0 0 0 2px var(--red); z-index:5}
+.cal-bar:hover{filter:brightness(1.12); z-index:7}
 
-/* Tables */
-.table-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:8px}
-table{border-collapse:collapse; width:100%; min-width:640px}
-th,td{text-align:left; padding:9px 11px; border-bottom:1px solid rgba(255,255,255,.06); font-size:13.5px; white-space:nowrap}
-th{font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); background:var(--panel2); position:sticky; top:0}
+/* ---------- Tables ---------- */
+.table-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:10px; -webkit-overflow-scrolling:touch}
+table{border-collapse:collapse; width:100%; min-width:680px}
+th,td{text-align:left; padding:9px 11px; border-bottom:1px solid rgba(255,255,255,.06); font-size:13px; white-space:nowrap}
+th{font-size:10.5px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); background:var(--panel2); position:sticky; top:0; cursor:pointer; user-select:none}
+th .arr{color:var(--gold)}
 tbody tr:hover{background:rgba(201,162,39,.05)}
-td.notes{white-space:normal; min-width:160px; max-width:260px; color:var(--muted)}
+td.notes{white-space:normal; min-width:150px; max-width:240px; color:var(--muted)}
 tfoot td{font-weight:700; background:var(--panel2); border-top:2px solid var(--line)}
 .pill{display:inline-flex; align-items:center; gap:6px; font-size:12px}
 .tag{display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600}
 .tag.paid{background:rgba(46,158,91,.18); color:#7ee0a4}
 .tag.wait{background:rgba(193,18,31,.18); color:#ff9b9b}
 .tag.part{background:rgba(201,162,39,.18); color:#e6c65a}
+.tag.plan{background:rgba(138,138,146,.2); color:#cfcfd6}
 .status-c{color:#7ee0a4}.status-o{color:#e6c65a}.status-t{color:var(--muted)}.status-a{color:#ff9b9b;text-decoration:line-through}
 .row-actions{display:flex; gap:5px}
 .empty{color:var(--muted); text-align:center; padding:26px; font-style:italic}
 
-/* Forms */
-.form{display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; margin-bottom:6px}
-.field{display:flex; flex-direction:column; gap:4px}
+/* ---------- Forms ---------- */
+.form{display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:12px; margin-bottom:6px}
+.field{display:flex; flex-direction:column; gap:4px; min-width:0}
 .field.wide{grid-column:1/-1}
+.field.check{flex-direction:row; align-items:center; gap:8px}
+.field.check input{width:auto}
 label{font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted)}
 input,select,textarea{
   background:var(--bg); border:1px solid var(--line); color:var(--text);
-  border-radius:6px; padding:8px 10px; font-family:'Jost'; font-size:14px; width:100%;
+  border-radius:7px; padding:9px 10px; font-family:'Jost'; font-size:15px; width:100%;
 }
 input.num,input[type=number],input[type=date]{font-family:'Space Mono',monospace}
 textarea{min-height:54px; resize:vertical}
 input:focus,select:focus,textarea:focus{border-color:var(--gold); outline:none}
-.form-actions{display:flex; gap:8px; margin-top:6px}
-.calc{color:var(--gold); font-family:'Space Mono',monospace; padding:8px 0}
+.form-actions{display:flex; gap:8px; margin-top:6px; grid-column:1/-1; flex-wrap:wrap}
+.calc{color:var(--gold); font-family:'Space Mono',monospace; padding:9px 0; font-size:15px}
 
-/* Filters */
-.filters{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px}
+/* ---------- Filters / search ---------- */
+.filters{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; align-items:center}
 .chip{appearance:none; cursor:pointer; background:var(--panel2); border:1px solid var(--line); color:var(--muted);
   padding:6px 12px; border-radius:20px; font-family:'Jost'; font-size:13px}
 .chip[aria-pressed="true"]{background:var(--red); border-color:var(--red); color:#fff}
+.search{max-width:220px}
 
-/* Synthèse */
-.kpis{display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; margin-bottom:18px}
-.kpi{background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:14px}
-.kpi .k{font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted)}
-.kpi .v{font-family:'Space Mono',monospace; font-size:24px; margin-top:6px}
+/* ---------- KPIs / Synthèse ---------- */
+.kpis{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; margin-bottom:16px}
+.kpi{background:var(--panel2); border:1px solid var(--line); border-radius:11px; padding:13px}
+.kpi .k{font-size:10.5px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted)}
+.kpi .v{font-family:'Space Mono',monospace; font-size:22px; margin-top:6px}
 .kpi .v.red{color:#ff9b9b}.kpi .v.green{color:#7ee0a4}.kpi .v.gold{color:var(--gold)}
-.synth-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:18px}
-.bar-row{display:grid; grid-template-columns:130px 1fr auto; align-items:center; gap:10px; margin-bottom:8px; font-size:13px}
+.kpi .sub2{font-size:11px; color:var(--muted); margin-top:3px}
+.synth-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px}
+.bar-row{display:grid; grid-template-columns:120px 1fr auto; align-items:center; gap:10px; margin-bottom:8px; font-size:13px}
 .bar-row .lbl{color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .bar-track{background:var(--bg); border-radius:5px; height:14px; overflow:hidden; border:1px solid var(--line)}
 .bar-fill{height:100%; border-radius:5px; background:var(--gold)}
 .bar-row .val{font-family:'Space Mono',monospace; font-size:12px; white-space:nowrap}
 
-/* Tooltip */
+/* per-apartment P&L cards */
+.apt-cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px}
+.apt-card{background:var(--panel2); border:1px solid var(--line); border-radius:11px; padding:14px; border-left:4px solid var(--gold)}
+.apt-card h3{font-family:'Jost'; font-weight:600; font-size:15px; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.apt-card .gs{font-size:10px; color:var(--gold); text-transform:uppercase; letter-spacing:.4px}
+.apt-card .line{display:flex; justify-content:space-between; font-size:13px; margin-top:7px; color:var(--muted)}
+.apt-card .line b{font-family:'Space Mono',monospace; color:var(--text)}
+.apt-card .net{margin-top:10px; padding-top:8px; border-top:1px solid var(--line); display:flex; justify-content:space-between; font-size:14px}
+.apt-card .net b{font-family:'Space Mono',monospace; font-size:16px}
+.pos{color:#7ee0a4}.neg{color:#ff9b9b}
+
+/* ---------- Tooltip ---------- */
 #tip{
   position:fixed; z-index:100; pointer-events:none; background:#000; border:1px solid var(--gold);
   border-radius:8px; padding:9px 11px; font-size:12px; max-width:240px; display:none;
@@ -179,16 +225,30 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); outline:none}
 #tip .l{color:var(--muted)} #tip .l b{color:var(--text); font-weight:600}
 #tip .mono{font-family:'Space Mono',monospace}
 
-.hint{color:var(--muted); font-size:12px; margin-top:4px}
 .note-banner{font-size:11px; color:var(--muted); text-align:center; padding:14px 0 0}
 
-@media (max-width:640px){
-  .brand h1{font-size:26px}
-  main{padding:16px 12px 70px}
-  .toolbar{width:100%; margin:10px 0 0}
+/* ---------- Modal ---------- */
+.modal-bg{position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:90; display:none; align-items:center; justify-content:center; padding:16px}
+.modal-bg.open{display:flex}
+.modal{background:var(--panel); border:1px solid var(--line-strong); border-radius:14px; padding:18px; max-width:520px; width:100%; max-height:88vh; overflow:auto}
+
+@media (max-width:680px){
+  .brand h1{font-size:24px}
+  .form{grid-template-columns:1fr 1fr}
+  .bar-row{grid-template-columns:96px 1fr auto}
+  .kpi .v{font-size:20px}
+}
+@media (max-width:430px){
+  .form{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:reduce){
-  *{transition:none !important; scroll-behavior:auto !important}
+  *{transition:none !important; animation:none !important; scroll-behavior:auto !important}
+}
+@media print{
+  header.app,.toolbar,.cal-controls,.filters,.row-actions,.note-banner,.form,.panel-h .spacer~*{display:none !important}
+  body{background:#fff;color:#000}
+  .panel{border-color:#ccc; break-inside:avoid}
+  table{min-width:0}
 }
 </style>
 </head>
@@ -196,11 +256,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); outline:none}
 <header class="app">
   <div class="brand">
     <h1>GÎTES<span class="accent">.</span></h1>
-    <span class="sub">Gestion location saisonnière · 4 appartements</span>
+    <span class="sub">Cockpit location saisonnière</span>
     <div class="toolbar">
-      <button class="btn sm" id="btnExport">Exporter JSON</button>
-      <button class="btn sm" id="btnImport">Importer JSON</button>
-      <button class="btn sm danger" id="btnReset">Réinitialiser</button>
+      <span class="sync-dot local" id="syncDot" title="Stockage">Local</span>
+      <button class="btn sm" id="btnExport">Export</button>
+      <button class="btn sm" id="btnImport">Import</button>
       <input type="file" id="fileImport" accept="application/json" hidden>
     </div>
   </div>
@@ -209,6 +269,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); outline:none}
     <button class="tab" role="tab" aria-selected="false" data-view="res">Réservations</button>
     <button class="tab" role="tab" aria-selected="false" data-view="int">Interventions</button>
     <button class="tab" role="tab" aria-selected="false" data-view="syn">Synthèse</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="biens">Biens</button>
   </nav>
 </header>
 
@@ -219,19 +280,23 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); outline:none}
       <div class="panel-h">
         <h2>Calendrier d'occupation</h2>
         <div class="spacer"></div>
-        <div class="cal-nav">
-          <button class="btn sm" id="calPrev" aria-label="Mois précédent">‹</button>
+        <div class="cal-controls">
+          <div class="seg" id="calRange" role="group" aria-label="Durée affichée">
+            <button data-m="1" aria-pressed="false">1 mois</button>
+            <button data-m="2" aria-pressed="false">2</button>
+            <button data-m="3" aria-pressed="true">3</button>
+          </div>
+          <button class="btn sm" id="calPrev" aria-label="Précédent">‹</button>
           <span class="month num" id="calMonth"></span>
-          <button class="btn sm" id="calNext" aria-label="Mois suivant">›</button>
-          <button class="btn sm ghost" id="calToday">Aujourd'hui</button>
+          <button class="btn sm" id="calNext" aria-label="Suivant">›</button>
+          <button class="btn sm ghost" id="calToday">Auj.</button>
         </div>
       </div>
       <hr class="gold-rule">
+      <div id="calConflicts"></div>
       <div class="legend" id="calLegend"></div>
-      <div class="cal-scroll">
-        <div class="cal-grid" id="calGrid"></div>
-      </div>
-      <p class="hint">Le jour de départ n'est pas compté comme nuit occupée. Survole ou clique une barre pour le détail.</p>
+      <div class="cal-scroll"><div class="cal-grid" id="calGrid"></div></div>
+      <p class="hint">Le jour de départ ne compte pas comme nuit. Trame hachurée = séjour d'échange. Liseré rouge = chevauchement (double réservation).</p>
     </div>
   </section>
 
@@ -241,6 +306,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); outline:none}
       <div class="panel-h">
         <h2 id="resFormTitle">Nouvelle réservation</h2>
         <div class="spacer"></div>
+        <button class="btn ghost sm" id="resImportIcal">Importer .ics</button>
         <button class="btn ghost sm" id="resCancel" hidden>Annuler l'édition</button>
       </div>
       <hr class="gold-rule">
@@ -248,22 +314,33 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); outline:none}
         <input type="hidden" id="resId">
         <div class="field"><label for="resApt">Appartement</label><select id="resApt" required></select></div>
         <div class="field"><label for="resChannel">Canal</label><select id="resChannel" required></select></div>
-        <div class="field"><label for="resGuest">Voyageur</label><input id="resGuest" required></div>
+        <div class="field"><label for="resGuest">Voyageur</label><input id="resGuest" autocomplete="off"></div>
+        <div class="field"><label for="resGuests">Voyageurs</label><input type="number" min="1" step="1" id="resGuests" class="num"></div>
         <div class="field"><label for="resArrival">Arrivée</label><input type="date" id="resArrival" required></div>
         <div class="field"><label for="resDeparture">Départ</label><input type="date" id="resDeparture" required></div>
-        <div class="field"><label>Nuits</label><div class="calc num" id="resNights">—</div></div>
-        <div class="field"><label for="resAmount">Montant €</label><input type="number" step="0.01" min="0" id="resAmount" class="num"></div>
+        <div class="field"><label>Nuits / €/nuit</label><div class="calc num" id="resNights">—</div></div>
+        <div class="field"><label for="resAmount">Montant total €</label><input type="number" step="0.01" min="0" id="resAmount" class="num"></div>
+        <div class="field"><label for="resCleaning">Frais ménage €</label><input type="number" step="0.01" min="0" id="resCleaning" class="num"></div>
         <div class="field"><label for="resStatus">Statut</label><select id="resStatus"></select></div>
+        <div class="field check"><input type="checkbox" id="resExchange"><label for="resExchange" style="letter-spacing:.3px">Séjour d'échange (sans revenu)</label></div>
         <div class="field wide"><label for="resNotes">Notes</label><textarea id="resNotes"></textarea></div>
         <div class="form-actions"><button type="submit" class="btn primary">Enregistrer</button></div>
       </form>
     </div>
     <div class="panel">
-      <div class="panel-h"><h2>Réservations</h2></div>
+      <div class="panel-h"><h2>Réservations</h2><div class="spacer"></div>
+        <input class="search" id="resSearch" placeholder="Rechercher…" aria-label="Rechercher">
+      </div>
+      <div class="filters" id="resFilters"></div>
       <div class="table-wrap">
         <table id="resTable">
-          <thead><tr><th>Appart.</th><th>Canal</th><th>Voyageur</th><th>Arrivée</th><th>Départ</th><th>Nuits</th><th>Montant</th><th>Statut</th><th>Notes</th><th></th></tr></thead>
+          <thead><tr>
+            <th data-k="apt">Appart.</th><th data-k="channel">Canal</th><th data-k="guest">Voyageur</th>
+            <th data-k="arrival">Arrivée</th><th data-k="departure">Départ</th><th data-k="nights">Nuits</th>
+            <th data-k="amount">Montant</th><th data-k="status">Statut</th><th>Notes</th><th></th>
+          </tr></thead>
           <tbody></tbody>
+          <tfoot><tr><td colspan="5">Total (hors échanges/annulés)</td><td class="num" id="resTotN">0</td><td class="num" id="resTotA">0 €</td><td colspan="3"></td></tr></tfoot>
         </table>
       </div>
     </div>
@@ -282,7 +359,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); outline:none}
         <input type="hidden" id="intId">
         <div class="field"><label for="intApt">Appartement</label><select id="intApt" required></select></div>
         <div class="field"><label for="intDate">Date</label><input type="date" id="intDate" required></div>
-        <div class="field"><label for="intWho">Intervenant</label><input id="intWho"></div>
+        <div class="field"><label for="intWho">Intervenant</label><input id="intWho" list="contactList" autocomplete="off"></div>
+        <datalist id="contactList"></datalist>
         <div class="field"><label for="intType">Type</label><select id="intType"></select></div>
         <div class="field"><label for="intDur">Durée (h)</label><input type="number" step="0.25" min="0" id="intDur" class="num"></div>
         <div class="field"><label for="intCost">Coût €</label><input type="number" step="0.01" min="0" id="intCost" class="num"></div>
@@ -290,20 +368,22 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); outline:none}
         <div class="field"><label for="intPayStatus">Statut règlement</label><select id="intPayStatus"></select></div>
         <div class="field"><label for="intPayDate">Date règlement</label><input type="date" id="intPayDate"></div>
         <div class="field"><label for="intInvoice">Réf facture</label><input id="intInvoice"></div>
-        <div class="field"><label for="intGestion">Gestion</label><input id="intGestion"></div>
+        <div class="field check"><input type="checkbox" id="intPlanned"><label for="intPlanned" style="letter-spacing:.3px">À faire / planifié</label></div>
         <div class="field wide"><label for="intDesc">Description</label><input id="intDesc"></div>
         <div class="field wide"><label for="intNotes">Notes</label><textarea id="intNotes"></textarea></div>
         <div class="form-actions"><button type="submit" class="btn primary">Enregistrer</button></div>
       </form>
     </div>
     <div class="panel">
-      <div class="panel-h"><h2>Interventions</h2></div>
+      <div class="panel-h"><h2>Interventions</h2><div class="spacer"></div>
+        <input class="search" id="intSearch" placeholder="Rechercher…" aria-label="Rechercher">
+      </div>
       <div class="filters" id="intFilters"></div>
       <div class="table-wrap">
         <table id="intTable">
-          <thead><tr><th>Appart.</th><th>Date</th><th>Intervenant</th><th>Type</th><th>Description</th><th>Durée</th><th>Coût</th><th>Règlement</th><th>Statut</th><th>Date règl.</th><th>Réf</th><th>Gestion</th><th>Notes</th><th></th></tr></thead>
+          <thead><tr><th>Appart.</th><th>Date</th><th>Intervenant</th><th>Type</th><th>Description</th><th>Durée</th><th>Coût</th><th>Règlement</th><th>Statut</th><th>Date règl.</th><th>Réf</th><th>Notes</th><th></th></tr></thead>
           <tbody></tbody>
-          <tfoot><tr><td colspan="5">Total</td><td id="intTotH">0 h</td><td id="intTotC">0 €</td><td colspan="7"></td></tr></tfoot>
+          <tfoot><tr><td colspan="5">Total</td><td class="num" id="intTotH">0 h</td><td class="num" id="intTotC">0 €</td><td colspan="5"></td></tr></tfoot>
         </table>
       </div>
     </div>
@@ -312,39 +392,86 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); outline:none}
   <!-- ============ SYNTHÈSE ============ -->
   <section class="view" id="view-syn" role="tabpanel">
     <div class="panel">
-      <div class="panel-h"><h2>Synthèse</h2></div>
+      <div class="panel-h"><h2>Synthèse</h2><div class="spacer"></div>
+        <select id="synYear" style="width:auto" aria-label="Année"></select>
+        <button class="btn sm" id="btnCsvRes">CSV réserv.</button>
+        <button class="btn sm" id="btnCsvInt">CSV interv.</button>
+        <button class="btn sm ghost" id="btnPrint">Imprimer / PDF</button>
+      </div>
       <hr class="gold-rule">
       <div class="kpis" id="synKpis"></div>
     </div>
+    <div class="panel">
+      <div class="panel-h"><h2>Rentabilité par appartement</h2></div>
+      <div class="apt-cards" id="synAptCards"></div>
+    </div>
     <div class="synth-grid">
       <div class="panel"><div class="panel-h"><h2>Revenu par canal</h2></div><div id="synByChannel"></div></div>
-      <div class="panel"><div class="panel-h"><h2>Coût par appartement</h2></div><div id="synByApt"></div></div>
       <div class="panel"><div class="panel-h"><h2>Coût par type d'intervention</h2></div><div id="synByType"></div></div>
-      <div class="panel"><div class="panel-h"><h2>Coût par mois</h2></div><div id="synByMonth"></div></div>
+      <div class="panel"><div class="panel-h"><h2>Revenu par mois</h2></div><div id="synRevMonth"></div></div>
+      <div class="panel"><div class="panel-h"><h2>Coût interventions par mois</h2></div><div id="synByMonth"></div></div>
     </div>
   </section>
 
-  <p class="note-banner">Données stockées localement (localStorage) sur ce navigateur. Pense à exporter régulièrement.</p>
+  <!-- ============ BIENS ============ -->
+  <section class="view" id="view-biens" role="tabpanel">
+    <div class="panel">
+      <div class="panel-h"><h2>Les biens</h2><div class="spacer"></div>
+        <button class="btn sm gold" id="aptAdd">+ Ajouter</button>
+      </div>
+      <hr class="gold-rule">
+      <div class="apt-cards" id="biensList"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-h"><h2>Annuaire intervenants</h2><div class="spacer"></div>
+        <button class="btn sm gold" id="contactAdd">+ Ajouter</button>
+      </div>
+      <hr class="gold-rule">
+      <div class="table-wrap">
+        <table id="contactTable">
+          <thead><tr><th>Nom</th><th>Rôle</th><th>Téléphone</th><th>Email</th><th>Notes</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="banner info" id="syncBanner">⚙️ Synchro multi-appareils (Supabase) : prête à brancher. Renseigne tes clés pour activer le partage iPhone ↔ Mac.</div>
+      <button class="btn sm" id="btnReset" style="color:#ff8a8a;border-color:rgba(193,18,31,.5)">Réinitialiser toutes les données</button>
+    </div>
+  </section>
+
+  <p class="note-banner" id="storeNote">Données stockées localement (localStorage). Pense à exporter régulièrement.</p>
 </main>
 
 <div id="tip" role="tooltip"></div>
 
+<!-- Modal générique (édition biens / contacts / import ics) -->
+<div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
+
 <script>
 "use strict";
-const STORE_KEY = 'gites_v1';
-const DW = 40;
 
-const APARTMENTS = [
-  {id:'rdj',    name:'RDJ',           ref:'49 RV RDJ', gestion:'Propriétaire', url:'https://www.airbnb.fr/rooms/1666841556768571133'},
-  {id:'etage1', name:'1er étage',     ref:'RV 1er',    gestion:'Propriétaire', url:'http://www.airbnb.fr/rooms/1556406620212142683'},
-  {id:'studio', name:'Studio',        ref:'',          gestion:'Maria',        url:''},
-  {id:'atelier',name:'Atelier (SST)', ref:'SST',       gestion:'Anabela',      url:'https://www.airbnb.com/h/eiffeltower_headtotoe'},
+/* =====================================================================
+   DATA LAYER  (isolé — bascule localStorage → Supabase en un seul endroit)
+   ===================================================================== */
+const STORE_KEY = 'gites_v2';
+const OLD_KEY = 'gites_v1';
+const DW = 38;
+
+const DEFAULT_APARTMENTS = [
+  {id:'rdj',    name:'RDJ',           ref:'49 RV RDJ', gestion:'Propriétaire', url:'https://www.airbnb.fr/rooms/1666841556768571133', address:'', color:'#C1121F', active:true},
+  {id:'etage1', name:'1er étage',     ref:'RV 1er',    gestion:'Propriétaire', url:'https://www.airbnb.fr/rooms/1556406620212142683', address:'', color:'#C9A227', active:true},
+  {id:'studio', name:'Studio',        ref:'',          gestion:'Maria',        url:'', address:'', color:'#2E9E5B', active:true},
+  {id:'atelier',name:'Atelier (SST)', ref:'SST',       gestion:'Anabela',      url:'https://www.airbnb.com/h/eiffeltower_headtotoe', address:'', color:'#8B5CF6', active:true},
 ];
-const APT_BY_ID = Object.fromEntries(APARTMENTS.map(a=>[a.id,a]));
 
 const CHANNELS = {
-  'Airbnb':'#FF5A5F','Booking.com':'#1E5BCB','HomeExchange':'#2E9E5B',
-  'SabbaticalHomes':'#8B5CF6','Direct':'#C9A227','Autre':'#6B7280'
+  'Airbnb':         {color:'#FF5A5F', exchange:false},
+  'Booking.com':    {color:'#1E5BCB', exchange:false},
+  'HomeExchange':   {color:'#2E9E5B', exchange:true},
+  'SabbaticalHomes':{color:'#8B5CF6', exchange:true},
+  'Direct':         {color:'#C9A227', exchange:false},
+  'Autre':          {color:'#6B7280', exchange:false},
 };
 const RES_STATUS = ['Confirmé','Option','Terminé','Annulé'];
 const STATUS_CLASS = {'Confirmé':'status-c','Option':'status-o','Terminé':'status-t','Annulé':'status-a'};
@@ -352,45 +479,95 @@ const INT_TYPES = ['Électricité','Plomberie','Ménage','Peinture','Serrurerie'
 const PAY_MODES = ['Espèces','Virement','Chèque','CB','Non réglé'];
 const PAY_STATUS = ['Payé','En attente','Partiel'];
 
-let state = {reservations:[], interventions:[]};
-let calRef = (()=>{const d=new Date(); return {y:d.getFullYear(), m:d.getMonth()};})();
-let intFilter = 'all';
+const Store = {
+  data:{apartments:[], reservations:[], interventions:[], contacts:[]},
+  load(){
+    try{
+      const raw = localStorage.getItem(STORE_KEY);
+      if(raw){
+        const o = JSON.parse(raw);
+        this.data.apartments   = o.apartments?.length ? o.apartments : structuredCloneSafe(DEFAULT_APARTMENTS);
+        this.data.reservations = o.reservations || [];
+        this.data.interventions= o.interventions|| [];
+        this.data.contacts     = o.contacts || [];
+        return;
+      }
+      // migration v1 -> v2
+      const old = localStorage.getItem(OLD_KEY);
+      if(old){
+        const o = JSON.parse(old);
+        this.data.apartments    = structuredCloneSafe(DEFAULT_APARTMENTS);
+        this.data.reservations  = (o.reservations||[]).map(r=>({isExchange:!!CHANNELS[r.channel]?.exchange, guests:'', cleaning:0, ...r}));
+        this.data.interventions = (o.interventions||[]).map(r=>({planned:false, ...r}));
+        this.data.contacts      = [];
+        this.save();
+        return;
+      }
+      this.data.apartments = structuredCloneSafe(DEFAULT_APARTMENTS);
+    }catch(e){ console.warn('load', e); this.data.apartments = structuredCloneSafe(DEFAULT_APARTMENTS); }
+  },
+  save(){
+    localStorage.setItem(STORE_KEY, JSON.stringify(this.data));
+    if(this.cloudSync) this.cloudSync();          // pousse vers Supabase (défini par le module cloud)
+  },
+  // défini par le module Supabase une fois l'utilisateur connecté :
+  cloudSync:null,
+  // remplace les données locales par celles du cloud puis redessine
+  applyCloud(data){
+    this.data.apartments    = data.apartments?.length ? data.apartments : structuredCloneSafe(DEFAULT_APARTMENTS);
+    this.data.reservations  = data.reservations  || [];
+    this.data.interventions = data.interventions || [];
+    this.data.contacts      = data.contacts      || [];
+    localStorage.setItem(STORE_KEY, JSON.stringify(this.data));
+    initSelects(); renderAll();
+  },
+};
+function structuredCloneSafe(o){ return JSON.parse(JSON.stringify(o)); }
 
-/* ---------- storage ---------- */
-function load(){
-  try{const raw=localStorage.getItem(STORE_KEY); if(raw){const o=JSON.parse(raw); state.reservations=o.reservations||[]; state.interventions=o.interventions||[];}}
-  catch(e){console.warn('load',e);}
-}
-function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+// raccourcis
+let apts = ()=>Store.data.apartments;
+let aptById = id => Store.data.apartments.find(a=>a.id===id);
+let reservations = ()=>Store.data.reservations;
+let interventions = ()=>Store.data.interventions;
+let contacts = ()=>Store.data.contacts;
+
+/* =====================================================================
+   UTILITAIRES
+   ===================================================================== */
 function uid(){ return (crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(16).slice(2)); }
-
-/* ---------- date / format ---------- */
-function parseD(s){ if(!s) return null; const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
+function parseD(s){ if(!s) return null; const [y,m,d]=s.split('-').map(Number); if(!y||!m||!d) return null; return new Date(y,m-1,d); }
 function fmtD(s){ if(!s) return '—'; const d=parseD(s); return d?d.toLocaleDateString('fr-FR'):'—'; }
-function nightsBetween(a,b){ const da=parseD(a),db=parseD(b); if(!da||!db) return 0; const n=Math.round((db-da)/86400000); return n>0?n:0; }
+function ymd(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function nights(a,b){ const da=parseD(a),db=parseD(b); if(!da||!db) return 0; const n=Math.round((db-da)/86400000); return n>0?n:0; }
 function money(n){ n=Number(n)||0; return n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'; }
+function money0(n){ n=Number(n)||0; return Math.round(n).toLocaleString('fr-FR')+' €'; }
 function hours(n){ n=Number(n)||0; return (Number.isInteger(n)?n:n.toFixed(2))+' h'; }
 function esc(s){ return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function isExchangeRes(r){ return r.isExchange ?? !!CHANNELS[r.channel]?.exchange; }
+function chColor(c){ return CHANNELS[c]?.color || '#6B7280'; }
 const MONTHS=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
-const WD=['L','M','M','J','V','S','D']; // lundi..dimanche
+const MONTHS_SH=['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
+const WD=['L','M','M','J','V','S','D'];
 
-/* ---------- selects ---------- */
+/* =====================================================================
+   SELECTS / TABS
+   ===================================================================== */
 function fillSelect(sel, items, withEmpty){
+  if(!sel) return;
   sel.innerHTML = (withEmpty?'<option value=""></option>':'') +
     items.map(i=>`<option value="${esc(i.v??i)}">${esc(i.l??i)}</option>`).join('');
 }
+function aptOptions(){ return apts().filter(a=>a.active!==false).map(a=>({v:a.id,l:a.name})); }
 function initSelects(){
-  const aptOpts = APARTMENTS.map(a=>({v:a.id,l:a.name}));
-  fillSelect(document.getElementById('resApt'), aptOpts);
+  fillSelect(document.getElementById('resApt'), aptOptions());
   fillSelect(document.getElementById('resChannel'), Object.keys(CHANNELS));
   fillSelect(document.getElementById('resStatus'), RES_STATUS);
-  fillSelect(document.getElementById('intApt'), aptOpts);
+  fillSelect(document.getElementById('intApt'), aptOptions());
   fillSelect(document.getElementById('intType'), INT_TYPES);
   fillSelect(document.getElementById('intPayMode'), PAY_MODES);
   fillSelect(document.getElementById('intPayStatus'), PAY_STATUS);
+  document.getElementById('contactList').innerHTML = contacts().map(c=>`<option value="${esc(c.name)}">`).join('');
 }
-
-/* ---------- tabs ---------- */
 document.querySelectorAll('.tab').forEach(t=>{
   t.addEventListener('click',()=>{
     document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected','false'));
@@ -400,313 +577,746 @@ document.querySelectorAll('.tab').forEach(t=>{
   });
 });
 
-/* ---------- CALENDRIER ---------- */
+/* =====================================================================
+   CALENDRIER (timeline multi-mois + détection de conflits)
+   ===================================================================== */
+let calRef = (()=>{const d=new Date(); return {y:d.getFullYear(), m:d.getMonth()};})();
+let calMonths = 3;
+
 function renderLegend(){
   document.getElementById('calLegend').innerHTML = Object.entries(CHANNELS)
-    .map(([n,c])=>`<span class="item"><span class="dot" style="background:${c}"></span>${esc(n)}</span>`).join('');
+    .map(([n,c])=>`<span class="item"><span class="dot" style="background:${c.color}"></span>${esc(n)}</span>`).join('');
 }
-function renderCalendar(){
-  document.getElementById('calMonth').textContent = MONTHS[calRef.m]+' '+calRef.y;
-  const grid = document.getElementById('calGrid');
-  const first = new Date(calRef.y, calRef.m, 1);
-  const days = new Date(calRef.y, calRef.m+1, 0).getDate();
-  const today = new Date(); today.setHours(0,0,0,0);
-  grid.style.gridTemplateColumns = `140px repeat(${days}, ${DW}px)`;
 
-  // header
-  let html = `<div class="cal-corner cal-cell">Appartement</div><div class="cal-headtrack"><div class="cal-dayhead">`;
-  for(let d=1; d<=days; d++){
-    const date = new Date(calRef.y, calRef.m, d);
-    const wd = (date.getDay()+6)%7; // 0=lundi
-    const we = wd>=5;
-    const isToday = date.getTime()===today.getTime();
-    html += `<div class="cal-dnum${we?' we':''}${isToday?' today':''}">${d}<small>${WD[wd]}</small></div>`;
-  }
-  html += `</div></div>`;
-
-  // rows
-  APARTMENTS.forEach(apt=>{
-    const res = state.reservations
-      .filter(r=>r.aptId===apt.id && r.status!=='Annulé')
-      .map(r=>({...r, s:parseD(r.arrival), e:parseD(r.departure)}))
-      .filter(r=>r.s && r.e)
+function detectConflicts(){
+  // renvoie un Set d'ids en conflit + liste lisible
+  const inConflict = new Set(); const list=[];
+  apts().forEach(apt=>{
+    const rs = reservations().filter(r=>r.aptId===apt.id && r.status!=='Annulé')
+      .map(r=>({...r, s:parseD(r.arrival), e:parseD(r.departure)})).filter(r=>r.s&&r.e)
       .sort((a,b)=>a.s-b.s);
-    // lane assignment (occupied nights = [arrival, departure-1])
-    const lanes=[];
-    res.forEach(r=>{
-      const occEnd = new Date(r.e.getTime()-86400000); // last occupied night
-      let placed=false;
-      for(const lane of lanes){ if(lane.lastEnd < r.s){ lane.items.push(r); lane.lastEnd=occEnd; r._lane=lanes.indexOf(lane); placed=true; break; } }
-      if(!placed){ r._lane=lanes.length; lanes.push({items:[r],lastEnd:occEnd}); }
-    });
-    const nLanes = Math.max(1, lanes.length);
-    const rowH = nLanes*25 + 10;
+    for(let i=0;i<rs.length;i++){
+      for(let j=i+1;j<rs.length;j++){
+        // chevauchement de nuits occupées : [s, e) se croisent
+        if(rs[i].s < rs[j].e && rs[j].s < rs[i].e){
+          inConflict.add(rs[i].id); inConflict.add(rs[j].id);
+          list.push(`${apt.name} : ${esc(rs[i].guest||rs[i].channel)} (${fmtD(rs[i].arrival)}) ↔ ${esc(rs[j].guest||rs[j].channel)} (${fmtD(rs[j].arrival)})`);
+        }
+      }
+    }
+  });
+  return {set:inConflict, list};
+}
 
+function renderCalendar(){
+  document.querySelectorAll('#calRange button').forEach(b=>b.setAttribute('aria-pressed', String(+b.dataset.m===calMonths)));
+  const start = new Date(calRef.y, calRef.m, 1);
+  const end = new Date(calRef.y, calRef.m+calMonths, 0); // dernier jour
+  const totalDays = Math.round((end-start)/86400000)+1;
+  const endLabel = MONTHS_SH[end.getMonth()]+' '+end.getFullYear();
+  document.getElementById('calMonth').textContent = calMonths===1
+    ? MONTHS[calRef.m]+' '+calRef.y
+    : MONTHS_SH[calRef.m]+' '+calRef.y+' → '+endLabel;
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const grid = document.getElementById('calGrid');
+  grid.style.gridTemplateColumns = `124px repeat(${totalDays}, ${DW}px)`;
+  const dayIndex = d => Math.round((d-start)/86400000);
+
+  // ----- bandeau mois -----
+  let monthsHtml='';
+  for(let mm=0; mm<calMonths; mm++){
+    const mDate=new Date(calRef.y, calRef.m+mm, 1);
+    const dim=new Date(calRef.y, calRef.m+mm+1, 0).getDate();
+    monthsHtml += `<div class="cal-mlabel" style="min-width:${dim*DW}px;width:${dim*DW}px">${MONTHS[mDate.getMonth()]} ${mDate.getFullYear()}</div>`;
+  }
+  // ----- entête jours -----
+  let headHtml='';
+  for(let i=0;i<totalDays;i++){
+    const date=new Date(start.getTime()+i*86400000);
+    const wd=(date.getDay()+6)%7, we=wd>=5;
+    const isToday=date.getTime()===today.getTime();
+    headHtml += `<div class="cal-dnum${we?' we':''}${isToday?' today':''}">${date.getDate()}<small>${WD[wd]}</small></div>`;
+  }
+
+  const {set:conflictSet} = detectConflicts();
+
+  let html = `<div class="cal-corner cal-cell">Bien</div>`
+    + `<div class="cal-monthrow"><div class="cal-months">${monthsHtml}</div></div>`
+    + `<div class="cal-headtrack"><div class="cal-dayhead">${headHtml}</div></div>`;
+
+  apts().filter(a=>a.active!==false).forEach(apt=>{
+    const rs = reservations().filter(r=>r.aptId===apt.id && r.status!=='Annulé')
+      .map(r=>({...r, s:parseD(r.arrival), e:parseD(r.departure)})).filter(r=>r.s&&r.e)
+      .sort((a,b)=>a.s-b.s);
+    // lanes (par nuits occupées : départ exclu)
+    const lanes=[];
+    rs.forEach(r=>{
+      const occEnd=new Date(r.e.getTime()-86400000);
+      let placed=false;
+      for(const lane of lanes){ if(lane.lastEnd < r.s){ lane.lastEnd=occEnd; r._lane=lanes.indexOf(lane); placed=true; break; } }
+      if(!placed){ r._lane=lanes.length; lanes.push({lastEnd:occEnd}); }
+    });
+    const nLanes=Math.max(1,lanes.length); const rowH=nLanes*25+10;
+
+    // fond
     let bg='';
-    for(let d=1; d<=days; d++){
-      const date=new Date(calRef.y,calRef.m,d); const wd=(date.getDay()+6)%7;
+    for(let i=0;i<totalDays;i++){
+      const date=new Date(start.getTime()+i*86400000); const wd=(date.getDay()+6)%7;
       const isToday=date.getTime()===today.getTime();
       bg+=`<div class="cal-day${wd>=5?' we':''}${isToday?' today':''}"></div>`;
     }
+    // barres
     let bars='';
-    const monthStart=new Date(calRef.y,calRef.m,1), monthEnd=new Date(calRef.y,calRef.m,days);
-    res.forEach(r=>{
+    rs.forEach(r=>{
       const occStart=r.s, occEnd=new Date(r.e.getTime()-86400000);
-      if(occEnd<monthStart || occStart>monthEnd) return; // not in month
-      const cs = occStart<monthStart?monthStart:occStart;
-      const ce = occEnd>monthEnd?monthEnd:occEnd;
-      const startIdx = cs.getDate()-1;
-      const span = (ce.getDate()-cs.getDate())+1;
-      const color = CHANNELS[r.channel]||CHANNELS['Autre'];
-      const top = 5 + r._lane*25;
-      const label = esc(r.guest||r.channel);
-      bars += `<div class="cal-bar${r.status==='Annulé'?' cancel':''}" tabindex="0" role="button"
-        style="left:${startIdx*DW+2}px; width:${span*DW-4}px; top:${top}px; background:${color}"
+      if(occEnd<start || occStart>end) return;
+      const cs = occStart<start?start:occStart;
+      const ce = occEnd>end?end:occEnd;
+      const i0=dayIndex(cs), span=dayIndex(ce)-i0+1;
+      const exch=isExchangeRes(r);
+      const label=esc(r.guest||r.channel);
+      bars += `<div class="cal-bar${exch?' exch':''}${conflictSet.has(r.id)?' conflict':''}" tabindex="0" role="button"
+        style="left:${i0*DW+2}px; width:${span*DW-4}px; top:${5+r._lane*25}px; background:${chColor(r.channel)}"
         data-id="${r.id}">${label}</div>`;
     });
+
     html += `<div class="cal-rowlabel cal-cell" style="min-height:${rowH}px">
         <span class="nm">${esc(apt.name)}</span>
-        ${apt.ref?`<span class="rf mono">${esc(apt.ref)}</span>`:''}
-        <span class="gs">${esc(apt.gestion)}</span>
+        <span class="gs">${esc(apt.gestion||'')}</span>
       </div>
-      <div class="cal-track" style="height:${rowH}px">
-        <div class="cal-bg">${bg}</div>${bars}
-      </div>`;
+      <div class="cal-track" style="height:${rowH}px"><div class="cal-bg">${bg}</div>${bars}</div>`;
   });
   grid.innerHTML = html;
+  renderConflictBanner();
 }
 
-/* tooltip on bars */
-const tip = document.getElementById('tip');
-function showTip(r, x, y){
-  const apt = APT_BY_ID[r.aptId];
-  tip.innerHTML = `<div class="t" style="color:${CHANNELS[r.channel]||'#fff'}">${esc(r.guest||'(sans nom)')}</div>
-    <div class="l">${esc(apt?apt.name:'')} · <b>${esc(r.channel)}</b></div>
+function renderConflictBanner(){
+  const {list}=detectConflicts();
+  const el=document.getElementById('calConflicts');
+  if(!list.length){ el.innerHTML=''; return; }
+  el.innerHTML = `<div class="banner warn">⚠️<div><b>${list.length} chevauchement(s) détecté(s)</b><br>${list.map(esc).join('<br>')}</div></div>`;
+}
+
+/* tooltip */
+const tip=document.getElementById('tip');
+function showTip(r,x,y){
+  const apt=aptById(r.aptId);
+  const exch=isExchangeRes(r);
+  tip.innerHTML=`<div class="t" style="color:${chColor(r.channel)}">${esc(r.guest||'(sans nom)')}</div>
+    <div class="l">${esc(apt?apt.name:'')} · <b>${esc(r.channel)}</b>${exch?' · échange':''}</div>
     <div class="l mono">${fmtD(r.arrival)} → ${fmtD(r.departure)}</div>
-    <div class="l">${nightsBetween(r.arrival,r.departure)} nuit(s) · <b class="mono">${money(r.amount)}</b></div>
+    <div class="l">${nights(r.arrival,r.departure)} nuit(s)${exch?'':' · <b class="mono">'+money(r.amount)+'</b>'}</div>
     <div class="l">${esc(r.status)}</div>`;
   tip.style.display='block';
-  const w=tip.offsetWidth, h=tip.offsetHeight;
+  const w=tip.offsetWidth,h=tip.offsetHeight;
   tip.style.left=Math.min(x+12, window.innerWidth-w-8)+'px';
   tip.style.top=Math.max(8, y-h-12)+'px';
 }
 function hideTip(){ tip.style.display='none'; }
-document.getElementById('calGrid').addEventListener('mouseover', e=>{
-  const bar=e.target.closest('.cal-bar'); if(!bar) return;
-  const r=state.reservations.find(x=>x.id===bar.dataset.id); if(r) showTip(r,e.clientX,e.clientY);
-});
-document.getElementById('calGrid').addEventListener('mousemove', e=>{
-  if(tip.style.display==='block'){ const bar=e.target.closest('.cal-bar'); if(bar){ tip.style.left=Math.min(e.clientX+12, window.innerWidth-tip.offsetWidth-8)+'px'; tip.style.top=Math.max(8,e.clientY-tip.offsetHeight-12)+'px'; } }
-});
-document.getElementById('calGrid').addEventListener('mouseout', e=>{ if(e.target.closest('.cal-bar')) hideTip(); });
-document.getElementById('calGrid').addEventListener('click', e=>{
-  const bar=e.target.closest('.cal-bar'); if(!bar) return;
-  const r=state.reservations.find(x=>x.id===bar.dataset.id);
-  if(r){ const rect=bar.getBoundingClientRect(); showTip(r,rect.left,rect.bottom+rect.height); setTimeout(hideTip,3000); }
-});
-document.getElementById('calGrid').addEventListener('focusin', e=>{
-  const bar=e.target.closest('.cal-bar'); if(!bar) return;
-  const r=state.reservations.find(x=>x.id===bar.dataset.id);
-  if(r){ const rect=bar.getBoundingClientRect(); showTip(r,rect.left,rect.bottom+rect.height); }
-});
-document.getElementById('calGrid').addEventListener('focusout', hideTip);
+const calGrid=document.getElementById('calGrid');
+calGrid.addEventListener('mouseover',e=>{ const b=e.target.closest('.cal-bar'); if(!b)return; const r=reservations().find(x=>x.id===b.dataset.id); if(r)showTip(r,e.clientX,e.clientY); });
+calGrid.addEventListener('mousemove',e=>{ if(tip.style.display==='block'){ const b=e.target.closest('.cal-bar'); if(b){ tip.style.left=Math.min(e.clientX+12,window.innerWidth-tip.offsetWidth-8)+'px'; tip.style.top=Math.max(8,e.clientY-tip.offsetHeight-12)+'px'; } } });
+calGrid.addEventListener('mouseout',e=>{ if(e.target.closest('.cal-bar')) hideTip(); });
+calGrid.addEventListener('click',e=>{ const b=e.target.closest('.cal-bar'); if(!b)return; const r=reservations().find(x=>x.id===b.dataset.id); if(r) resEdit(r.id); });
+calGrid.addEventListener('focusin',e=>{ const b=e.target.closest('.cal-bar'); if(!b)return; const r=reservations().find(x=>x.id===b.dataset.id); if(r){ const rect=b.getBoundingClientRect(); showTip(r,rect.left,rect.bottom+rect.height);} });
+calGrid.addEventListener('focusout',hideTip);
 
-document.getElementById('calPrev').onclick=()=>{ calRef.m--; if(calRef.m<0){calRef.m=11;calRef.y--;} renderCalendar(); };
-document.getElementById('calNext').onclick=()=>{ calRef.m++; if(calRef.m>11){calRef.m=0;calRef.y++;} renderCalendar(); };
+document.getElementById('calPrev').onclick=()=>{ calRef.m-=calMonths; while(calRef.m<0){calRef.m+=12;calRef.y--;} renderCalendar(); };
+document.getElementById('calNext').onclick=()=>{ calRef.m+=calMonths; while(calRef.m>11){calRef.m-=12;calRef.y++;} renderCalendar(); };
 document.getElementById('calToday').onclick=()=>{ const d=new Date(); calRef={y:d.getFullYear(),m:d.getMonth()}; renderCalendar(); };
+document.getElementById('calRange').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; calMonths=+b.dataset.m; renderCalendar(); });
 
-/* ---------- RÉSERVATIONS ---------- */
+/* =====================================================================
+   RÉSERVATIONS
+   ===================================================================== */
+let resFilter='all', resSort={k:'arrival',dir:-1}, resQuery='';
 const resForm=document.getElementById('resForm');
-function resUpdateNights(){ document.getElementById('resNights').textContent = nightsBetween(document.getElementById('resArrival').value, document.getElementById('resDeparture').value)||'—'; }
-document.getElementById('resArrival').addEventListener('change',resUpdateNights);
-document.getElementById('resDeparture').addEventListener('change',resUpdateNights);
-function resReset(){ resForm.reset(); document.getElementById('resId').value=''; document.getElementById('resNights').textContent='—';
-  document.getElementById('resFormTitle').textContent='Nouvelle réservation'; document.getElementById('resCancel').hidden=true; }
-document.getElementById('resCancel').onclick=resReset;
-resForm.addEventListener('submit', e=>{
+function gv(id){ return document.getElementById(id); }
+
+function resUpdateNights(){
+  const n=nights(gv('resArrival').value, gv('resDeparture').value);
+  const amt=parseFloat(gv('resAmount').value)||0;
+  gv('resNights').textContent = n ? `${n} nuit(s)${amt&&n?' · '+money(amt/n)+'/nuit':''}` : '—';
+}
+['resArrival','resDeparture','resAmount'].forEach(id=>gv(id).addEventListener('input',resUpdateNights));
+gv('resChannel').addEventListener('change',()=>{ gv('resExchange').checked=!!CHANNELS[gv('resChannel').value]?.exchange; });
+
+function resReset(){ resForm.reset(); gv('resId').value=''; gv('resNights').textContent='—';
+  gv('resFormTitle').textContent='Nouvelle réservation'; gv('resCancel').hidden=true; }
+gv('resCancel').onclick=resReset;
+
+resForm.addEventListener('submit',e=>{
   e.preventDefault();
-  const id=document.getElementById('resId').value || uid();
-  const rec={ id, aptId:document.getElementById('resApt').value, channel:document.getElementById('resChannel').value,
-    guest:document.getElementById('resGuest').value.trim(), arrival:document.getElementById('resArrival').value,
-    departure:document.getElementById('resDeparture').value, amount:parseFloat(document.getElementById('resAmount').value)||0,
-    status:document.getElementById('resStatus').value, notes:document.getElementById('resNotes').value.trim() };
-  if(nightsBetween(rec.arrival,rec.departure)<=0){ alert('La date de départ doit être après l\'arrivée.'); return; }
-  const i=state.reservations.findIndex(r=>r.id===id);
-  if(i>=0) state.reservations[i]=rec; else state.reservations.push(rec);
-  save(); resReset(); renderAll();
+  const id=gv('resId').value || uid();
+  const rec={ id, aptId:gv('resApt').value, channel:gv('resChannel').value,
+    guest:gv('resGuest').value.trim(), guests:gv('resGuests').value, arrival:gv('resArrival').value,
+    departure:gv('resDeparture').value, amount:parseFloat(gv('resAmount').value)||0,
+    cleaning:parseFloat(gv('resCleaning').value)||0, isExchange:gv('resExchange').checked,
+    status:gv('resStatus').value, notes:gv('resNotes').value.trim() };
+  if(nights(rec.arrival,rec.departure)<=0){ alert('La date de départ doit être après l\'arrivée.'); return; }
+  const i=reservations().findIndex(r=>r.id===id);
+  if(i>=0) Store.data.reservations[i]=rec; else Store.data.reservations.push(rec);
+  Store.save(); resReset(); renderAll();
 });
 function resEdit(id){
-  const r=state.reservations.find(x=>x.id===id); if(!r) return;
-  document.getElementById('resId').value=r.id; document.getElementById('resApt').value=r.aptId;
-  document.getElementById('resChannel').value=r.channel; document.getElementById('resGuest').value=r.guest||'';
-  document.getElementById('resArrival').value=r.arrival; document.getElementById('resDeparture').value=r.departure;
-  document.getElementById('resAmount').value=r.amount||''; document.getElementById('resStatus').value=r.status;
-  document.getElementById('resNotes').value=r.notes||''; resUpdateNights();
-  document.getElementById('resFormTitle').textContent='Éditer la réservation'; document.getElementById('resCancel').hidden=false;
+  const r=reservations().find(x=>x.id===id); if(!r) return;
+  gv('resId').value=r.id; gv('resApt').value=r.aptId; gv('resChannel').value=r.channel;
+  gv('resGuest').value=r.guest||''; gv('resGuests').value=r.guests||''; gv('resArrival').value=r.arrival;
+  gv('resDeparture').value=r.departure; gv('resAmount').value=r.amount||''; gv('resCleaning').value=r.cleaning||'';
+  gv('resExchange').checked=isExchangeRes(r); gv('resStatus').value=r.status; gv('resNotes').value=r.notes||'';
+  resUpdateNights(); gv('resFormTitle').textContent='Éditer la réservation'; gv('resCancel').hidden=false;
   document.querySelector('[data-view=res]').click(); window.scrollTo({top:0,behavior:'smooth'});
 }
-function resDel(id){ if(!confirm('Supprimer cette réservation ?')) return; state.reservations=state.reservations.filter(r=>r.id!==id); save(); renderAll(); }
+function resDel(id){ if(!confirm('Supprimer cette réservation ?'))return; Store.data.reservations=reservations().filter(r=>r.id!==id); Store.save(); renderAll(); }
+
+function renderResFilters(){
+  const wrap=document.getElementById('resFilters');
+  const opts=[{id:'all',name:'Tous'},...apts().filter(a=>a.active!==false)];
+  wrap.innerHTML=opts.map(o=>`<button class="chip" aria-pressed="${resFilter===o.id}" data-f="${o.id}">${esc(o.name)}</button>`).join('');
+  wrap.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{resFilter=c.dataset.f; renderReservations();});
+}
+function resSortVal(r,k){
+  switch(k){ case 'apt':return aptById(r.aptId)?.name||''; case 'nights':return nights(r.arrival,r.departure);
+    case 'amount':return Number(r.amount)||0; default:return (r[k]??'').toString(); }
+}
+document.querySelectorAll('#resTable th[data-k]').forEach(th=>th.onclick=()=>{
+  const k=th.dataset.k; resSort.dir = resSort.k===k? -resSort.dir : 1; resSort.k=k; renderReservations();
+});
+gv('resSearch').addEventListener('input',e=>{ resQuery=e.target.value.toLowerCase(); renderReservations(); });
+
 function renderReservations(){
+  renderResFilters();
   const tb=document.querySelector('#resTable tbody');
-  const rows=[...state.reservations].sort((a,b)=>(a.arrival||'').localeCompare(b.arrival||''));
-  if(!rows.length){ tb.innerHTML='<tr><td colspan="10" class="empty">Aucune réservation</td></tr>'; return; }
-  tb.innerHTML=rows.map(r=>{
-    const apt=APT_BY_ID[r.aptId]; const c=CHANNELS[r.channel]||'#6B7280';
+  let rows=[...reservations()];
+  if(resFilter!=='all') rows=rows.filter(r=>r.aptId===resFilter);
+  if(resQuery) rows=rows.filter(r=>[aptById(r.aptId)?.name,r.channel,r.guest,r.notes].join(' ').toLowerCase().includes(resQuery));
+  rows.sort((a,b)=>{ const va=resSortVal(a,resSort.k),vb=resSortVal(b,resSort.k);
+    return (va>vb?1:va<vb?-1:0)*resSort.dir; });
+  document.querySelectorAll('#resTable th[data-k]').forEach(th=>{
+    th.innerHTML=th.textContent.replace(/ [▲▼]$/,'')+(th.dataset.k===resSort.k?` <span class="arr">${resSort.dir>0?'▲':'▼'}</span>`:'');
+  });
+  let totN=0,totA=0;
+  if(!rows.length){ tb.innerHTML='<tr><td colspan="10" class="empty">Aucune réservation</td></tr>'; }
+  else tb.innerHTML=rows.map(r=>{
+    const apt=aptById(r.aptId); const exch=isExchangeRes(r); const n=nights(r.arrival,r.departure);
+    if(!exch && r.status!=='Annulé'){ totN+=n; totA+=Number(r.amount)||0; }
     return `<tr>
       <td>${esc(apt?apt.name:'?')}</td>
-      <td><span class="pill"><span class="dot" style="background:${c}"></span>${esc(r.channel)}</span></td>
-      <td>${esc(r.guest)}</td>
-      <td class="num">${fmtD(r.arrival)}</td>
-      <td class="num">${fmtD(r.departure)}</td>
-      <td class="num">${nightsBetween(r.arrival,r.departure)}</td>
-      <td class="num">${money(r.amount)}</td>
+      <td><span class="pill"><span class="dot" style="background:${chColor(r.channel)}"></span>${esc(r.channel)}</span></td>
+      <td>${esc(r.guest)}${r.guests?` <span class="muted">·${esc(r.guests)}p</span>`:''}</td>
+      <td class="num">${fmtD(r.arrival)}</td><td class="num">${fmtD(r.departure)}</td><td class="num">${n}</td>
+      <td class="num">${exch?'<span style="color:var(--muted)">échange</span>':money(r.amount)}</td>
       <td class="${STATUS_CLASS[r.status]||''}">${esc(r.status)}</td>
       <td class="notes">${esc(r.notes)}</td>
-      <td><div class="row-actions"><button class="btn sm" onclick="resEdit('${r.id}')">Éditer</button><button class="btn sm danger" onclick="resDel('${r.id}')">✕</button></div></td>
+      <td><div class="row-actions"><button class="btn sm" onclick="resEdit('${r.id}')">✎</button><button class="btn sm danger" onclick="resDel('${r.id}')">✕</button></div></td>
     </tr>`;
   }).join('');
+  gv('resTotN').textContent=totN; gv('resTotA').textContent=money(totA);
 }
 
-/* ---------- INTERVENTIONS ---------- */
+/* =====================================================================
+   INTERVENTIONS
+   ===================================================================== */
+let intFilter='all', intQuery='';
 const intForm=document.getElementById('intForm');
-function intReset(){ intForm.reset(); document.getElementById('intId').value='';
-  document.getElementById('intFormTitle').textContent='Nouvelle intervention'; document.getElementById('intCancel').hidden=true; }
-document.getElementById('intCancel').onclick=intReset;
-intForm.addEventListener('submit', e=>{
+function intReset(){ intForm.reset(); gv('intId').value='';
+  gv('intFormTitle').textContent='Nouvelle intervention'; gv('intCancel').hidden=true; }
+gv('intCancel').onclick=intReset;
+intForm.addEventListener('submit',e=>{
   e.preventDefault();
-  const id=document.getElementById('intId').value || uid();
-  const rec={ id, aptId:document.getElementById('intApt').value, date:document.getElementById('intDate').value,
-    who:document.getElementById('intWho').value.trim(), type:document.getElementById('intType').value,
-    dur:parseFloat(document.getElementById('intDur').value)||0, cost:parseFloat(document.getElementById('intCost').value)||0,
-    payMode:document.getElementById('intPayMode').value, payStatus:document.getElementById('intPayStatus').value,
-    payDate:document.getElementById('intPayDate').value, invoice:document.getElementById('intInvoice').value.trim(),
-    gestion:document.getElementById('intGestion').value.trim(), desc:document.getElementById('intDesc').value.trim(),
-    notes:document.getElementById('intNotes').value.trim() };
-  const i=state.interventions.findIndex(x=>x.id===id);
-  if(i>=0) state.interventions[i]=rec; else state.interventions.push(rec);
-  save(); intReset(); renderAll();
+  const id=gv('intId').value || uid();
+  const rec={ id, aptId:gv('intApt').value, date:gv('intDate').value, who:gv('intWho').value.trim(),
+    type:gv('intType').value, dur:parseFloat(gv('intDur').value)||0, cost:parseFloat(gv('intCost').value)||0,
+    payMode:gv('intPayMode').value, payStatus:gv('intPayStatus').value, payDate:gv('intPayDate').value,
+    invoice:gv('intInvoice').value.trim(), planned:gv('intPlanned').checked,
+    desc:gv('intDesc').value.trim(), notes:gv('intNotes').value.trim() };
+  const i=interventions().findIndex(x=>x.id===id);
+  if(i>=0) Store.data.interventions[i]=rec; else Store.data.interventions.push(rec);
+  Store.save(); intReset(); renderAll();
 });
 function intEdit(id){
-  const r=state.interventions.find(x=>x.id===id); if(!r) return;
-  const g=v=>document.getElementById(v);
-  g('intId').value=r.id; g('intApt').value=r.aptId; g('intDate').value=r.date; g('intWho').value=r.who||'';
-  g('intType').value=r.type; g('intDur').value=r.dur||''; g('intCost').value=r.cost||''; g('intPayMode').value=r.payMode;
-  g('intPayStatus').value=r.payStatus; g('intPayDate').value=r.payDate||''; g('intInvoice').value=r.invoice||'';
-  g('intGestion').value=r.gestion||''; g('intDesc').value=r.desc||''; g('intNotes').value=r.notes||'';
-  g('intFormTitle').textContent='Éditer l\'intervention'; g('intCancel').hidden=false;
+  const r=interventions().find(x=>x.id===id); if(!r)return;
+  gv('intId').value=r.id; gv('intApt').value=r.aptId; gv('intDate').value=r.date; gv('intWho').value=r.who||'';
+  gv('intType').value=r.type; gv('intDur').value=r.dur||''; gv('intCost').value=r.cost||''; gv('intPayMode').value=r.payMode;
+  gv('intPayStatus').value=r.payStatus; gv('intPayDate').value=r.payDate||''; gv('intInvoice').value=r.invoice||'';
+  gv('intPlanned').checked=!!r.planned; gv('intDesc').value=r.desc||''; gv('intNotes').value=r.notes||'';
+  gv('intFormTitle').textContent='Éditer l\'intervention'; gv('intCancel').hidden=false;
   document.querySelector('[data-view=int]').click(); window.scrollTo({top:0,behavior:'smooth'});
 }
-function intDel(id){ if(!confirm('Supprimer cette intervention ?')) return; state.interventions=state.interventions.filter(r=>r.id!==id); save(); renderAll(); }
+function intDel(id){ if(!confirm('Supprimer cette intervention ?'))return; Store.data.interventions=interventions().filter(r=>r.id!==id); Store.save(); renderAll(); }
 function renderIntFilters(){
   const wrap=document.getElementById('intFilters');
-  const opts=[{id:'all',name:'Tous'},...APARTMENTS];
+  const opts=[{id:'all',name:'Tous'},...apts().filter(a=>a.active!==false),{id:'__plan',name:'⏳ À faire'}];
   wrap.innerHTML=opts.map(o=>`<button class="chip" aria-pressed="${intFilter===o.id}" data-f="${o.id}">${esc(o.name)}</button>`).join('');
   wrap.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{intFilter=c.dataset.f; renderInterventions();});
 }
-function payTag(s){ const m={'Payé':'paid','En attente':'wait','Partiel':'part'}; return `<span class="tag ${m[s]||''}">${esc(s)}</span>`; }
+gv('intSearch').addEventListener('input',e=>{ intQuery=e.target.value.toLowerCase(); renderInterventions(); });
+function payTag(s){ const m={'Payé':'paid','En attente':'wait','Partiel':'part'}; return s?`<span class="tag ${m[s]||''}">${esc(s)}</span>`:''; }
 function renderInterventions(){
   renderIntFilters();
   const tb=document.querySelector('#intTable tbody');
-  let rows=[...state.interventions].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  if(intFilter!=='all') rows=rows.filter(r=>r.aptId===intFilter);
+  let rows=[...interventions()].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  if(intFilter==='__plan') rows=rows.filter(r=>r.planned);
+  else if(intFilter!=='all') rows=rows.filter(r=>r.aptId===intFilter);
+  if(intQuery) rows=rows.filter(r=>[aptById(r.aptId)?.name,r.who,r.type,r.desc,r.notes].join(' ').toLowerCase().includes(intQuery));
   let totH=0,totC=0;
-  if(!rows.length){ tb.innerHTML='<tr><td colspan="14" class="empty">Aucune intervention</td></tr>'; }
+  if(!rows.length){ tb.innerHTML='<tr><td colspan="13" class="empty">Aucune intervention</td></tr>'; }
   else tb.innerHTML=rows.map(r=>{
-    totH+=Number(r.dur)||0; totC+=Number(r.cost)||0; const apt=APT_BY_ID[r.aptId];
-    return `<tr>
-      <td>${esc(apt?apt.name:'?')}</td><td class="num">${fmtD(r.date)}</td><td>${esc(r.who)}</td>
-      <td>${esc(r.type)}</td><td class="notes">${esc(r.desc)}</td><td class="num">${r.dur?hours(r.dur):'—'}</td>
+    if(!r.planned){ totH+=Number(r.dur)||0; totC+=Number(r.cost)||0; }
+    const apt=aptById(r.aptId);
+    return `<tr style="${r.planned?'opacity:.75':''}">
+      <td>${esc(apt?apt.name:'?')}${r.planned?' <span class="tag plan">à faire</span>':''}</td>
+      <td class="num">${fmtD(r.date)}</td><td>${esc(r.who)}</td><td>${esc(r.type)}</td>
+      <td class="notes">${esc(r.desc)}</td><td class="num">${r.dur?hours(r.dur):'—'}</td>
       <td class="num">${money(r.cost)}</td><td>${esc(r.payMode)}</td><td>${payTag(r.payStatus)}</td>
-      <td class="num">${fmtD(r.payDate)}</td><td class="mono">${esc(r.invoice)}</td><td>${esc(r.gestion)}</td>
-      <td class="notes">${esc(r.notes)}</td>
-      <td><div class="row-actions"><button class="btn sm" onclick="intEdit('${r.id}')">Éditer</button><button class="btn sm danger" onclick="intDel('${r.id}')">✕</button></div></td>
+      <td class="num">${fmtD(r.payDate)}</td><td class="mono">${esc(r.invoice)}</td><td class="notes">${esc(r.notes)}</td>
+      <td><div class="row-actions"><button class="btn sm" onclick="intEdit('${r.id}')">✎</button><button class="btn sm danger" onclick="intDel('${r.id}')">✕</button></div></td>
     </tr>`;
   }).join('');
-  document.getElementById('intTotH').textContent=hours(totH);
-  document.getElementById('intTotC').textContent=money(totC);
+  gv('intTotH').textContent=hours(totH); gv('intTotC').textContent=money(totC);
 }
 
-/* ---------- SYNTHÈSE ---------- */
-function occupiedNightsStats(){
-  const now=new Date(); const cy=now.getFullYear(), cm=now.getMonth();
-  let month=0, year=0;
-  state.reservations.filter(r=>r.status!=='Annulé').forEach(r=>{
-    const s=parseD(r.arrival), e=parseD(r.departure); if(!s||!e) return;
-    for(let d=new Date(s); d<e; d.setDate(d.getDate()+1)){
-      if(d.getFullYear()===cy){ year++; if(d.getMonth()===cm) month++; }
-    }
-  });
-  return {month,year};
+/* =====================================================================
+   SYNTHÈSE  (occupation %, ADR, net par bien)
+   ===================================================================== */
+let synYear=new Date().getFullYear();
+function yearsAvailable(){
+  const ys=new Set([new Date().getFullYear()]);
+  reservations().forEach(r=>{ if(r.arrival) ys.add(+r.arrival.slice(0,4)); });
+  interventions().forEach(r=>{ if(r.date) ys.add(+r.date.slice(0,4)); });
+  return [...ys].sort((a,b)=>b-a);
+}
+// nuits occupées d'une réservation tombant dans l'année Y, par appartement
+function occupiedNightsInYear(r, Y){
+  const s=parseD(r.arrival), e=parseD(r.departure); if(!s||!e) return 0;
+  let n=0; for(let d=new Date(s); d<e; d.setDate(d.getDate()+1)){ if(d.getFullYear()===Y) n++; }
+  return n;
+}
+function isLeap(y){ return (y%4===0&&y%100!==0)||y%400===0; }
+function daysInYearSoFar(Y){
+  const total=isLeap(Y)?366:365; const now=new Date();
+  if(Y<now.getFullYear()) return total;
+  if(Y>now.getFullYear()) return 0;
+  const startY=new Date(Y,0,1); return Math.round((now-startY)/86400000)+1;
 }
 function barList(container, entries, colorFn){
   const max=Math.max(1,...entries.map(e=>e.val));
   container.innerHTML = entries.length? entries.map(e=>`
-    <div class="bar-row">
-      <span class="lbl">${esc(e.label)}</span>
+    <div class="bar-row"><span class="lbl">${esc(e.label)}</span>
       <span class="bar-track"><span class="bar-fill" style="width:${(e.val/max*100).toFixed(1)}%;background:${colorFn?colorFn(e):'var(--gold)'}"></span></span>
-      <span class="val">${e.fmt||money(e.val)}</span>
-    </div>`).join('') : '<p class="empty">—</p>';
+      <span class="val">${e.fmt||money0(e.val)}</span></div>`).join('') : '<p class="empty">—</p>';
 }
 function renderSynthese(){
-  const active=state.reservations.filter(r=>r.status!=='Annulé');
-  const revTotal=active.reduce((s,r)=>s+(Number(r.amount)||0),0);
-  const intTotal=state.interventions.reduce((s,r)=>s+(Number(r.cost)||0),0);
-  const paid=state.interventions.filter(r=>r.payStatus==='Payé').reduce((s,r)=>s+(Number(r.cost)||0),0);
-  const due=state.interventions.filter(r=>r.payStatus==='En attente'||r.payStatus==='Partiel').reduce((s,r)=>s+(Number(r.cost)||0),0);
-  const occ=occupiedNightsStats();
-  document.getElementById('synKpis').innerHTML=`
-    <div class="kpi"><div class="k">Revenu total</div><div class="v gold">${money(revTotal)}</div></div>
-    <div class="kpi"><div class="k">Nuits occupées (mois)</div><div class="v">${occ.month}</div></div>
-    <div class="kpi"><div class="k">Nuits occupées (année)</div><div class="v">${occ.year}</div></div>
-    <div class="kpi"><div class="k">Coût interventions</div><div class="v">${money(intTotal)}</div></div>
-    <div class="kpi"><div class="k">Déjà réglé</div><div class="v green">${money(paid)}</div></div>
-    <div class="kpi"><div class="k">Reste à régler</div><div class="v red">${money(due)}</div></div>`;
+  // sélecteur année
+  const ys=yearsAvailable();
+  if(!ys.includes(synYear)) synYear=ys[0];
+  gv('synYear').innerHTML=ys.map(y=>`<option ${y===synYear?'selected':''}>${y}</option>`).join('');
+
+  const resY=reservations().filter(r=>r.status!=='Annulé');
+  // agrégats par appartement
+  const activeApts=apts().filter(a=>a.active!==false);
+  let revTotal=0, paidNights=0, occNightsTotal=0, intTotal=0, paid=0, due=0, cleanTotal=0;
+  const perApt={};
+  activeApts.forEach(a=>perApt[a.id]={rev:0,cost:0,occ:0,clean:0});
+
+  resY.forEach(r=>{
+    const occ=occupiedNightsInYear(r,synYear); if(!occ) return;
+    const exch=isExchangeRes(r);
+    occNightsTotal+=occ;
+    if(perApt[r.aptId]) perApt[r.aptId].occ+=occ;
+    if(!exch){
+      const rev=Number(r.amount)||0;
+      revTotal+=rev; paidNights+=occ; cleanTotal+=Number(r.cleaning)||0;
+      if(perApt[r.aptId]){ perApt[r.aptId].rev+=rev; perApt[r.aptId].clean+=Number(r.cleaning)||0; }
+    }
+  });
+  interventions().filter(i=>!i.planned && (i.date||'').slice(0,4)==String(synYear)).forEach(i=>{
+    const c=Number(i.cost)||0; intTotal+=c;
+    if(perApt[i.aptId]) perApt[i.aptId].cost+=c;
+    if(i.payStatus==='Payé') paid+=c; else if(i.payStatus==='En attente'||i.payStatus==='Partiel') due+=c;
+  });
+
+  const availNights=daysInYearSoFar(synYear)*activeApts.length;
+  const occRate=availNights? (occNightsTotal/availNights*100):0;
+  const adr=paidNights? revTotal/paidNights : 0;
+  const net=revTotal-intTotal;
+
+  gv('synKpis').innerHTML=`
+    <div class="kpi"><div class="k">Revenu ${synYear}</div><div class="v gold">${money0(revTotal)}</div><div class="sub2">${money0(cleanTotal)} ménage inclus</div></div>
+    <div class="kpi"><div class="k">Net (rev. − interv.)</div><div class="v ${net>=0?'green':'red'}">${money0(net)}</div></div>
+    <div class="kpi"><div class="k">Taux d'occupation</div><div class="v">${occRate.toFixed(0)}%</div><div class="sub2">${occNightsTotal} / ${availNights} nuits</div></div>
+    <div class="kpi"><div class="k">Prix moyen / nuit</div><div class="v">${money0(adr)}</div><div class="sub2">${paidNights} nuits payantes</div></div>
+    <div class="kpi"><div class="k">Coût interventions</div><div class="v">${money0(intTotal)}</div></div>
+    <div class="kpi"><div class="k">Reste à régler</div><div class="v red">${money0(due)}</div><div class="sub2">${money0(paid)} déjà réglé</div></div>`;
+
+  // cartes par appartement
+  gv('synAptCards').innerHTML=activeApts.map(a=>{
+    const p=perApt[a.id]; const n=p.rev-p.cost;
+    return `<div class="apt-card" style="border-left-color:${a.color||'var(--gold)'}">
+      <h3>${esc(a.name)} <span class="gs">${esc(a.gestion||'')}</span></h3>
+      <div class="line"><span>Revenu</span><b>${money0(p.rev)}</b></div>
+      <div class="line"><span>Nuits occupées</span><b>${p.occ}</b></div>
+      <div class="line"><span>Coût interventions</span><b>${money0(p.cost)}</b></div>
+      <div class="net"><span>Net</span><b class="${n>=0?'pos':'neg'}">${money0(n)}</b></div>
+    </div>`;
+  }).join('');
 
   // revenu par canal
-  const byCh={}; active.forEach(r=>{byCh[r.channel]=(byCh[r.channel]||0)+(Number(r.amount)||0);});
-  barList(document.getElementById('synByChannel'),
-    Object.keys(CHANNELS).filter(c=>byCh[c]).map(c=>({label:c,val:byCh[c]})).sort((a,b)=>b.val-a.val),
-    e=>CHANNELS[e.label]||'var(--gold)');
-  // coût par appartement
-  const byApt={}; state.interventions.forEach(r=>{byApt[r.aptId]=(byApt[r.aptId]||0)+(Number(r.cost)||0);});
-  barList(document.getElementById('synByApt'),
-    APARTMENTS.filter(a=>byApt[a.id]).map(a=>({label:a.name,val:byApt[a.id]})).sort((a,b)=>b.val-a.val));
+  const byCh={}; resY.forEach(r=>{ if(isExchangeRes(r))return; const occ=occupiedNightsInYear(r,synYear); if(!occ)return; byCh[r.channel]=(byCh[r.channel]||0)+(Number(r.amount)||0); });
+  barList(gv('synByChannel'), Object.keys(byCh).map(c=>({label:c,val:byCh[c]})).sort((a,b)=>b.val-a.val), e=>chColor(e.label));
   // coût par type
-  const byType={}; state.interventions.forEach(r=>{byType[r.type]=(byType[r.type]||0)+(Number(r.cost)||0);});
-  barList(document.getElementById('synByType'),
-    Object.keys(byType).map(t=>({label:t,val:byType[t]})).sort((a,b)=>b.val-a.val));
-  // coût par mois
-  const byMonth={}; state.interventions.forEach(r=>{ if(!r.date) return; const k=r.date.slice(0,7); byMonth[k]=(byMonth[k]||0)+(Number(r.cost)||0);});
-  barList(document.getElementById('synByMonth'),
-    Object.keys(byMonth).sort().map(k=>{const [y,m]=k.split('-'); return {label:MONTHS[+m-1]+' '+y,val:byMonth[k]};}));
+  const byType={}; interventions().filter(i=>!i.planned && (i.date||'').slice(0,4)==String(synYear)).forEach(i=>{ byType[i.type]=(byType[i.type]||0)+(Number(i.cost)||0); });
+  barList(gv('synByType'), Object.keys(byType).map(t=>({label:t,val:byType[t]})).sort((a,b)=>b.val-a.val));
+  // revenu par mois
+  const revM=Array(12).fill(0);
+  resY.forEach(r=>{ if(isExchangeRes(r))return; const s=parseD(r.arrival),e=parseD(r.departure); if(!s||!e)return;
+    const amt=Number(r.amount)||0; const tot=nights(r.arrival,r.departure)||1;
+    for(let d=new Date(s); d<e; d.setDate(d.getDate()+1)){ if(d.getFullYear()===synYear) revM[d.getMonth()]+=amt/tot; } });
+  barList(gv('synRevMonth'), revM.map((v,i)=>({label:MONTHS_SH[i],val:v})).filter(e=>e.val>0.5));
+  // coût interv par mois
+  const costM=Array(12).fill(0);
+  interventions().filter(i=>!i.planned && (i.date||'').slice(0,4)==String(synYear)).forEach(i=>{ costM[+i.date.slice(5,7)-1]+=Number(i.cost)||0; });
+  barList(gv('synByMonth'), costM.map((v,i)=>({label:MONTHS_SH[i],val:v})).filter(e=>e.val>0.5));
+}
+gv('synYear').addEventListener('change',e=>{ synYear=+e.target.value; renderSynthese(); });
+
+/* =====================================================================
+   BIENS & CONTACTS (CRUD via modale)
+   ===================================================================== */
+const modalBg=document.getElementById('modalBg'), modal=document.getElementById('modal');
+function openModal(html){ modal.innerHTML=html; modalBg.classList.add('open'); }
+function closeModal(){ modalBg.classList.remove('open'); modal.innerHTML=''; }
+modalBg.addEventListener('click',e=>{ if(e.target===modalBg) closeModal(); });
+
+function renderBiens(){
+  gv('biensList').innerHTML=apts().map(a=>`
+    <div class="apt-card" style="border-left-color:${a.color||'var(--gold)'}">
+      <h3>${esc(a.name)} <span class="gs">${esc(a.gestion||'')}</span></h3>
+      ${a.ref?`<div class="line"><span>Réf</span><b>${esc(a.ref)}</b></div>`:''}
+      ${a.address?`<div class="line"><span>${esc(a.address)}</span></div>`:''}
+      <div class="line"><span>Annonce</span><b>${a.url?`<a href="${esc(a.url)}" target="_blank" rel="noopener">ouvrir ↗</a>`:'—'}</b></div>
+      <div class="net"><span>${a.active===false?'<span style="color:var(--muted)">inactif</span>':''}</span>
+        <span class="row-actions"><button class="btn sm" onclick="aptEdit('${a.id}')">✎</button><button class="btn sm danger" onclick="aptDel('${a.id}')">✕</button></span></div>
+    </div>`).join('');
+}
+function aptEditForm(a){
+  return `<h2 style="margin-bottom:12px">${a?'Éditer le bien':'Nouveau bien'}</h2>
+   <div class="form">
+    <div class="field"><label>Nom</label><input id="m_name" value="${esc(a?.name||'')}"></div>
+    <div class="field"><label>Référence</label><input id="m_ref" value="${esc(a?.ref||'')}"></div>
+    <div class="field"><label>Gestionnaire</label><input id="m_gestion" value="${esc(a?.gestion||'')}"></div>
+    <div class="field"><label>Couleur</label><input type="color" id="m_color" value="${esc(a?.color||'#C9A227')}"></div>
+    <div class="field wide"><label>Adresse</label><input id="m_address" value="${esc(a?.address||'')}"></div>
+    <div class="field wide"><label>Lien annonce</label><input id="m_url" value="${esc(a?.url||'')}"></div>
+    <div class="field check"><input type="checkbox" id="m_active" ${a?.active!==false?'checked':''}><label for="m_active">Actif</label></div>
+   </div>
+   <div class="form-actions"><button class="btn primary" onclick="aptSave('${a?.id||''}')">Enregistrer</button><button class="btn ghost" onclick="closeModal()">Annuler</button></div>`;
+}
+function aptAdd(){ openModal(aptEditForm(null)); }
+function aptEdit(id){ openModal(aptEditForm(aptById(id))); }
+function aptSave(id){
+  const name=gv('m_name').value.trim(); if(!name){ alert('Le nom est requis.'); return; }
+  const rec={ id:id||uid(), name, ref:gv('m_ref').value.trim(), gestion:gv('m_gestion').value.trim(),
+    color:gv('m_color').value, address:gv('m_address').value.trim(), url:gv('m_url').value.trim(), active:gv('m_active').checked };
+  const i=apts().findIndex(a=>a.id===id);
+  if(i>=0) Store.data.apartments[i]=rec; else Store.data.apartments.push(rec);
+  Store.save(); closeModal(); initSelects(); renderAll();
+}
+function aptDel(id){
+  const used=reservations().some(r=>r.aptId===id)||interventions().some(r=>r.aptId===id);
+  if(used){ if(!confirm('Ce bien a des données liées. Le passer en inactif est conseillé. Supprimer quand même ?')) return; }
+  else if(!confirm('Supprimer ce bien ?')) return;
+  Store.data.apartments=apts().filter(a=>a.id!==id); Store.save(); initSelects(); renderAll();
 }
 
-/* ---------- backup ---------- */
-document.getElementById('btnExport').onclick=()=>{
-  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='gites-backup-'+new Date().toISOString().slice(0,10)+'.json'; a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-};
-document.getElementById('btnImport').onclick=()=>document.getElementById('fileImport').click();
-document.getElementById('fileImport').onchange=e=>{
-  const f=e.target.files[0]; if(!f) return; const rd=new FileReader();
+function renderContacts(){
+  const tb=document.querySelector('#contactTable tbody');
+  if(!contacts().length){ tb.innerHTML='<tr><td colspan="6" class="empty">Aucun intervenant</td></tr>'; return; }
+  tb.innerHTML=contacts().map(c=>`<tr>
+    <td>${esc(c.name)}</td><td>${esc(c.role)}</td>
+    <td>${c.phone?`<a href="tel:${esc(c.phone)}">${esc(c.phone)}</a>`:''}</td>
+    <td>${c.email?`<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`:''}</td>
+    <td class="notes">${esc(c.notes)}</td>
+    <td><div class="row-actions"><button class="btn sm" onclick="contactEdit('${c.id}')">✎</button><button class="btn sm danger" onclick="contactDel('${c.id}')">✕</button></div></td>
+  </tr>`).join('');
+}
+function contactForm(c){
+  return `<h2 style="margin-bottom:12px">${c?'Éditer':'Nouvel'} intervenant</h2>
+   <div class="form">
+    <div class="field"><label>Nom</label><input id="c_name" value="${esc(c?.name||'')}"></div>
+    <div class="field"><label>Rôle</label><input id="c_role" value="${esc(c?.role||'')}" placeholder="Électricien, ménage…"></div>
+    <div class="field"><label>Téléphone</label><input id="c_phone" value="${esc(c?.phone||'')}"></div>
+    <div class="field"><label>Email</label><input id="c_email" value="${esc(c?.email||'')}"></div>
+    <div class="field wide"><label>Notes</label><input id="c_notes" value="${esc(c?.notes||'')}"></div>
+   </div>
+   <div class="form-actions"><button class="btn primary" onclick="contactSave('${c?.id||''}')">Enregistrer</button><button class="btn ghost" onclick="closeModal()">Annuler</button></div>`;
+}
+function contactAdd(){ openModal(contactForm(null)); }
+function contactEdit(id){ openModal(contactForm(contacts().find(c=>c.id===id))); }
+function contactSave(id){
+  const name=gv('c_name').value.trim(); if(!name){ alert('Le nom est requis.'); return; }
+  const rec={ id:id||uid(), name, role:gv('c_role').value.trim(), phone:gv('c_phone').value.trim(), email:gv('c_email').value.trim(), notes:gv('c_notes').value.trim() };
+  const i=contacts().findIndex(c=>c.id===id);
+  if(i>=0) Store.data.contacts[i]=rec; else Store.data.contacts.push(rec);
+  Store.save(); closeModal(); initSelects(); renderContacts();
+}
+function contactDel(id){ if(!confirm('Supprimer cet intervenant ?'))return; Store.data.contacts=contacts().filter(c=>c.id!==id); Store.save(); renderContacts(); initSelects(); }
+gv('aptAdd').onclick=aptAdd; gv('contactAdd').onclick=contactAdd;
+
+/* =====================================================================
+   IMPORT iCal (.ics) — par dépôt de fichier
+   ===================================================================== */
+gv('resImportIcal').onclick=()=>openModal(`
+  <h2 style="margin-bottom:12px">Importer un calendrier .ics</h2>
+  <p class="hint" style="margin-bottom:12px">Télécharge l'export iCal de l'annonce (Airbnb/Booking) puis dépose le fichier ici. Les séjours seront ajoutés au bien et canal choisis.</p>
+  <div class="form">
+    <div class="field"><label>Bien</label><select id="ics_apt">${aptOptions().map(o=>`<option value="${o.v}">${esc(o.l)}</option>`).join('')}</select></div>
+    <div class="field"><label>Canal</label><select id="ics_ch">${Object.keys(CHANNELS).map(c=>`<option ${c==='Airbnb'?'selected':''}>${c}</option>`).join('')}</select></div>
+    <div class="field wide"><label>Fichier .ics</label><input type="file" id="ics_file" accept=".ics,text/calendar"></div>
+  </div>
+  <div class="form-actions"><button class="btn primary" onclick="doIcsImport()">Importer</button><button class="btn ghost" onclick="closeModal()">Annuler</button></div>`);
+
+function parseICS(text){
+  const events=[]; const lines=text.replace(/\r\n/g,'\n').replace(/\n[ \t]/g,'').split('\n');
+  let cur=null;
+  for(const line of lines){
+    if(line==='BEGIN:VEVENT'){ cur={}; }
+    else if(line==='END:VEVENT'){ if(cur) events.push(cur); cur=null; }
+    else if(cur){
+      const idx=line.indexOf(':'); if(idx<0) continue;
+      const key=line.slice(0,idx), val=line.slice(idx+1);
+      const name=key.split(';')[0];
+      if(name==='DTSTART') cur.start=val.trim();
+      else if(name==='DTEND') cur.end=val.trim();
+      else if(name==='SUMMARY') cur.summary=val.trim();
+      else if(name==='UID') cur.uid=val.trim();
+    }
+  }
+  return events;
+}
+function icsDate(v){ const m=v.match(/(\d{4})(\d{2})(\d{2})/); return m?`${m[1]}-${m[2]}-${m[3]}`:''; }
+function doIcsImport(){
+  const aptId=gv('ics_apt').value, channel=gv('ics_ch').value, f=gv('ics_file').files[0];
+  if(!f){ alert('Choisis un fichier .ics'); return; }
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const evs=parseICS(rd.result); let added=0,skipped=0;
+      evs.forEach(ev=>{
+        const arrival=icsDate(ev.start||''), departure=icsDate(ev.end||'');
+        if(!arrival||!departure) return;
+        const sum=(ev.summary||'').toLowerCase();
+        if(sum.includes('not available')||sum.includes('blocked')||sum.includes('indisponible')){ skipped++; return; }
+        // anti-doublon : même bien + mêmes dates
+        if(reservations().some(r=>r.aptId===aptId&&r.arrival===arrival&&r.departure===departure)){ skipped++; return; }
+        Store.data.reservations.push({ id:uid(), aptId, channel, guest:ev.summary&&!/reserved|réserv/i.test(ev.summary)?ev.summary:'(iCal)',
+          guests:'', arrival, departure, amount:0, cleaning:0, isExchange:!!CHANNELS[channel]?.exchange,
+          status:'Confirmé', notes:'Importé iCal'+(ev.uid?' · '+ev.uid.slice(0,24):'') });
+        added++;
+      });
+      Store.save(); closeModal(); renderAll();
+      alert(`Import terminé : ${added} séjour(s) ajouté(s), ${skipped} ignoré(s).`);
+    }catch(err){ alert('Fichier .ics illisible.'); }
+  };
+  rd.readAsText(f);
+}
+
+/* =====================================================================
+   EXPORT / IMPORT / RESET
+   ===================================================================== */
+function download(name, content, type){
+  const blob=new Blob([content],{type}); const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+gv('btnExport').onclick=()=>download('gites-backup-'+new Date().toISOString().slice(0,10)+'.json', JSON.stringify(Store.data,null,2), 'application/json');
+gv('btnImport').onclick=()=>gv('fileImport').click();
+gv('fileImport').onchange=e=>{
+  const f=e.target.files[0]; if(!f)return; const rd=new FileReader();
   rd.onload=()=>{ try{ const o=JSON.parse(rd.result);
-    if(!o || (!Array.isArray(o.reservations)&&!Array.isArray(o.interventions))) throw new Error('format');
-    if(!confirm('Remplacer les données actuelles par le fichier importé ?')) return;
-    state.reservations=o.reservations||[]; state.interventions=o.interventions||[]; save(); renderAll();
-    alert('Import réussi.');
+    if(!o||(!Array.isArray(o.reservations)&&!Array.isArray(o.interventions))) throw 0;
+    if(!confirm('Remplacer les données actuelles par le fichier importé ?'))return;
+    Store.data.apartments=o.apartments?.length?o.apartments:structuredCloneSafe(DEFAULT_APARTMENTS);
+    Store.data.reservations=o.reservations||[]; Store.data.interventions=o.interventions||[]; Store.data.contacts=o.contacts||[];
+    Store.save(); initSelects(); renderAll(); alert('Import réussi.');
   }catch(err){ alert('Fichier JSON invalide.'); } };
   rd.readAsText(f); e.target.value='';
 };
-document.getElementById('btnReset').onclick=()=>{
-  if(!confirm('Tout effacer ? Pense à exporter d\'abord. Cette action est irréversible.')) return;
-  state={reservations:[],interventions:[]}; save(); renderAll();
+gv('btnReset').onclick=()=>{
+  if(!confirm('Tout effacer ? Pense à exporter d\'abord. Action irréversible.'))return;
+  Store.data={apartments:structuredCloneSafe(DEFAULT_APARTMENTS),reservations:[],interventions:[],contacts:[]};
+  Store.save(); initSelects(); renderAll();
 };
 
-/* ---------- boot ---------- */
-function renderAll(){ renderCalendar(); renderReservations(); renderInterventions(); renderSynthese(); }
-load(); initSelects(); renderLegend(); renderAll();
+/* CSV (séparateur ; + BOM pour Excel FR) */
+function toCSV(headers, rows){
+  const esc2=v=>{ v=String(v??''); return /[";\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
+  return '﻿'+[headers.join(';'), ...rows.map(r=>r.map(esc2).join(';'))].join('\n');
+}
+gv('btnCsvRes').onclick=()=>{
+  const rows=reservations().map(r=>[aptById(r.aptId)?.name||'', r.channel, r.guest, r.guests, r.arrival, r.departure,
+    nights(r.arrival,r.departure), isExchangeRes(r)?'échange':(r.amount||0), r.cleaning||0, r.status, r.notes]);
+  download('reservations-'+synYear+'.csv', toCSV(['Bien','Canal','Voyageur','Pers.','Arrivée','Départ','Nuits','Montant','Ménage','Statut','Notes'],rows),'text/csv');
+};
+gv('btnCsvInt').onclick=()=>{
+  const rows=interventions().map(r=>[aptById(r.aptId)?.name||'', r.date, r.who, r.type, r.desc, r.dur||0, r.cost||0,
+    r.payMode, r.payStatus, r.payDate, r.invoice, r.planned?'à faire':'fait', r.notes]);
+  download('interventions-'+synYear+'.csv', toCSV(['Bien','Date','Intervenant','Type','Description','Durée(h)','Coût','Mode','Statut','Date règl.','Réf','État','Notes'],rows),'text/csv');
+};
+gv('btnPrint').onclick=()=>window.print();
+
+/* =====================================================================
+   BOOT
+   ===================================================================== */
+function renderAll(){ renderCalendar(); renderReservations(); renderInterventions(); renderSynthese(); renderBiens(); renderContacts(); }
+window.Store = Store;                              // exposé au module de synchro cloud
+Store.load(); initSelects(); renderLegend(); renderAll();
+</script>
+
+<!-- =====================================================================
+     SYNCHRO CLOUD (Supabase) — module ES, chargé après l'app.
+     Si pas de réseau / pas de connexion : l'app reste en mode local.
+     ===================================================================== -->
+<script type="module">
+const SUPA = {
+  url: 'https://rujozrissqjvvhghltix.supabase.co',
+  key: 'sb_publishable_NH1aWfppbPotWDIGazQ7Dw_K_xN37f8'
+};
+const TABLES = ['apartments','reservations','interventions','contacts'];
+
+const $  = id => document.getElementById(id);
+const Store = window.Store;
+
+let sb=null, user=null, cloudIds={}, pushTimer=null, pullTimer=null, suppressUntil=0;
+
+if(SUPA.url && SUPA.key) boot().catch(e=>{ console.warn('cloud boot', e); setDot('local','Local'); });
+
+async function boot(){
+  let createClient;
+  try{ ({ createClient } = await import('https://esm.sh/@supabase/supabase-js@2')); }
+  catch(e){ setDot('local','Hors-ligne'); return; }   // pas de réseau → mode local
+  sb = createClient(SUPA.url, SUPA.key, { auth:{ persistSession:true, autoRefreshToken:true } });
+
+  const { data:{ session } } = await sb.auth.getSession();
+  if(session) await onLogin(session.user);
+  else showLogin();
+
+  sb.auth.onAuthStateChange((_evt, sess)=>{
+    if(sess && !user) onLogin(sess.user);
+    else if(!sess && user){ user=null; setDot('local','Déconnecté'); }
+  });
+}
+
+/* ---- état visuel ---- */
+function setDot(state,label){
+  const d=$('syncDot'); if(!d) return;
+  d.className='sync-dot '+(state==='ok'?'ok':state==='local'?'local':'');
+  d.textContent=label||(state==='ok'?'Sync':'Local'); d.title=label||'';
+}
+function renderBanner(){
+  const b=$('syncBanner'); if(!b||!user) return;
+  b.innerHTML=`✅ Synchro active — connecté : <b>${(window.esc||(s=>s))(user.email)}</b>`
+    +` <button class="btn sm" id="sb_logout" style="margin-left:8px">Se déconnecter</button>`;
+  const lo=$('sb_logout'); if(lo) lo.onclick=async()=>{ await sb.auth.signOut(); location.reload(); };
+}
+
+/* ---- connexion ---- */
+function showLogin(){
+  setDot('local','Connexion');
+  window.openModal(`
+   <h2 style="margin-bottom:6px">Connexion</h2>
+   <p class="hint" style="margin-bottom:12px">Connecte-toi pour synchroniser tes données entre l'iPhone et l'ordinateur.</p>
+   <div class="form">
+    <div class="field wide"><label>Email</label><input id="sb_email" type="email" autocomplete="username"></div>
+    <div class="field wide"><label>Mot de passe</label><input id="sb_pass" type="password" autocomplete="current-password"></div>
+   </div>
+   <div id="sb_msg" class="hint" style="min-height:16px"></div>
+   <div class="form-actions">
+     <button class="btn primary" id="sb_login">Se connecter</button>
+     <button class="btn" id="sb_signup">Créer le compte</button>
+     <button class="btn ghost" id="sb_skip">Plus tard</button>
+   </div>`);
+  $('sb_login').onclick=()=>doAuth(false);
+  $('sb_signup').onclick=()=>doAuth(true);
+  $('sb_skip').onclick=()=>{ window.closeModal(); setDot('local','Local'); };
+  $('sb_pass').addEventListener('keydown',e=>{ if(e.key==='Enter') doAuth(false); });
+}
+async function doAuth(signup){
+  const email=$('sb_email').value.trim(), password=$('sb_pass').value, msg=$('sb_msg');
+  if(!email||!password){ msg.textContent='Email et mot de passe requis.'; return; }
+  msg.textContent='…';
+  try{
+    let res;
+    if(signup){
+      res=await sb.auth.signUp({ email, password });
+      if(res.error) throw res.error;
+      if(!res.data.session){ msg.textContent='Compte créé. Confirme ton email, puis reconnecte-toi (ou désactive « Confirm email » dans Supabase).'; return; }
+    }else{
+      res=await sb.auth.signInWithPassword({ email, password });
+      if(res.error) throw res.error;
+    }
+    window.closeModal();
+    await onLogin(res.data.user);
+  }catch(e){ msg.textContent='Erreur : '+(e.message||e); }
+}
+
+/* ---- connecté : pull, migration, abonnement ---- */
+async function onLogin(u){
+  user=u; setDot('ok','Sync…');
+  let cloud;
+  try{ cloud=await fetchAll(); }catch(e){ console.warn('fetch',e); setDot('ok','Cache local'); Store.cloudSync=schedulePush; subscribe(); renderBanner(); return; }
+  const total=TABLES.reduce((n,t)=>n+cloud[t].length,0);
+  let local={}; try{ local=JSON.parse(localStorage.getItem('gites_v2')||'{}'); }catch(_){}
+  const localTotal=(local.apartments||[]).length+(local.reservations||[]).length+(local.interventions||[]).length+(local.contacts||[]).length;
+  Store.cloudSync=schedulePush;
+  if(total===0 && localTotal>0){ await pushAll(); }   // 1er login : on envoie le local au cloud
+  else Store.applyCloud(cloud);
+  setDot('ok','Sync ✓'); subscribe(); renderBanner();
+}
+
+async function fetchAll(){
+  const out={apartments:[],reservations:[],interventions:[],contacts:[]};
+  for(const t of TABLES){
+    const { data, error }=await sb.from(t).select('id,doc');
+    if(error) throw error;
+    out[t]=(data||[]).map(r=>({ ...r.doc, id:r.id }));
+    cloudIds[t]=new Set((data||[]).map(r=>String(r.id)));
+  }
+  return out;
+}
+
+/* ---- écriture (upsert + suppression différentielle) ---- */
+function schedulePush(){ clearTimeout(pushTimer); pushTimer=setTimeout(()=>pushAll(), 700); }
+async function pushAll(){
+  if(!sb||!user) return;
+  try{
+    suppressUntil=Date.now()+2500;
+    for(const t of TABLES) await syncTable(t, Store.data[t]||[]);
+    setDot('ok','Sync ✓');
+  }catch(e){ console.warn('push',e); setDot('ok','Erreur sync'); }
+}
+async function syncTable(name, items){
+  const rows=items.map(it=>({ id:String(it.id), doc:it, updated_at:new Date().toISOString() }));
+  if(rows.length){ const { error }=await sb.from(name).upsert(rows); if(error) throw error; }
+  const ids=new Set(rows.map(r=>r.id));
+  const del=[...(cloudIds[name]||[])].filter(id=>!ids.has(id));
+  if(del.length){ const { error }=await sb.from(name).delete().in('id', del); if(error) throw error; }
+  cloudIds[name]=ids;
+}
+
+/* ---- temps réel ---- */
+function subscribe(){
+  const ch=sb.channel('gites-sync');
+  TABLES.forEach(t=>ch.on('postgres_changes',{event:'*',schema:'public',table:t},schedulePull));
+  ch.subscribe();
+}
+function schedulePull(){
+  if(Date.now()<suppressUntil) return;            // écho de notre propre écriture
+  clearTimeout(pullTimer);
+  pullTimer=setTimeout(async()=>{
+    try{ Store.applyCloud(await fetchAll()); setDot('ok','Sync ✓'); }catch(e){ console.warn('pull',e); }
+  },400);
+}
 </script>
 </body>
 </html>
