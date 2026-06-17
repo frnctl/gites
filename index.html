@@ -1199,12 +1199,21 @@ async function boot(){
 
   const { data:{ session } } = await sb.auth.getSession();
   if(session) await onLogin(session.user);
-  else showLogin();
+  else { setDot('local','Local'); showActivate(); }   // pas de pop-up : l'app marche en local
 
   sb.auth.onAuthStateChange((_evt, sess)=>{
     if(sess && !user) onLogin(sess.user);
-    else if(!sess && user){ user=null; setDot('local','Déconnecté'); }
+    else if(!sess && user){ user=null; setDot('local','Local'); showActivate(); }
   });
+}
+
+/* bandeau « activer la synchro » (onglet Biens) — sans rien forcer */
+function showActivate(){
+  const b=$('syncBanner'); if(!b) return;
+  b.innerHTML=`☁️ Tes données sont enregistrées <b>sur cet appareil</b>. `
+    +`<button class="btn sm" id="sb_activate" style="margin-left:8px">Activer la synchro entre appareils</button>`;
+  const a=$('sb_activate'); if(a) a.onclick=showLogin;
+  const d=$('syncDot'); if(d){ d.style.cursor='pointer'; d.onclick=showLogin; d.title='Activer la synchro'; }
 }
 
 /* ---- état visuel ---- */
