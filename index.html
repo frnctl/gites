@@ -597,6 +597,18 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); box-shadow:0 0
         </table>
       </div>
     </div>
+    <div class="panel" id="membersPanel" hidden>
+      <div class="panel-h"><h2>Collaborateurs &amp; accès</h2><div class="spacer"></div>
+        <button class="btn sm gold" id="memberAdd">+ Inviter</button></div>
+      <hr class="gold-rule">
+      <p class="hint" style="margin-bottom:12px">Ajoute l'email d'une concierge et coche ses appartements. Elle y aura accès dès qu'elle se connectera avec cet email — elle ne verra que ces biens.</p>
+      <div class="table-wrap">
+        <table id="membersTable" style="min-width:480px">
+          <thead><tr><th>Email</th><th>Rôle</th><th>Appartements</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
     <div class="panel">
       <div class="banner info" id="syncBanner">⚙️ Synchro multi-appareils (Supabase) : prête à brancher. Renseigne tes clés pour activer le partage iPhone ↔ Mac.</div>
       <button class="btn sm" id="btnReset" style="color:#ff8a8a;border-color:rgba(193,18,31,.5)">Réinitialiser toutes les données</button>
@@ -677,7 +689,8 @@ const Store = {
   cloudSync:null,
   // remplace les données locales par celles du cloud puis redessine
   applyCloud(data){
-    this.data.apartments    = data.apartments?.length ? data.apartments : structuredCloneSafe(DEFAULT_APARTMENTS);
+    const admin = (window.isAdmin ? window.isAdmin() : true);
+    this.data.apartments    = data.apartments?.length ? data.apartments : (admin ? structuredCloneSafe(DEFAULT_APARTMENTS) : []);
     this.data.reservations  = data.reservations  || [];
     this.data.interventions = data.interventions || [];
     this.data.contacts      = data.contacts      || [];
@@ -693,6 +706,35 @@ let aptById = id => Store.data.apartments.find(a=>a.id===id);
 let reservations = ()=>Store.data.reservations;
 let interventions = ()=>Store.data.interventions;
 let contacts = ()=>Store.data.contacts;
+
+/* =====================================================================
+   ACCÈS / RÔLES  (l'UI ; la vraie sécurité est côté Supabase via RLS)
+   En local/hors-ligne : admin par défaut (Bruno sur son propre appareil).
+   ===================================================================== */
+let ME = { email:null, role:'admin', apts:null };
+function isAdmin(){ return ME.role==='admin'; }
+function myApts(){ return ME.apts || []; }
+function canApt(id){ return isAdmin() || myApts().includes(id); }
+function setMe(m){
+  ME = { email:m?.email||null, role:m?.role||'concierge', apts:m?.apts||null };
+  applyAccess(); initSelects(); renderAll();
+}
+function applyAccess(){
+  const admin = isAdmin();
+  document.querySelectorAll('.tab[data-view="syn"], .tab[data-view="biens"]')
+    .forEach(t=> t.style.display = admin ? '' : 'none');
+  ['btnExport','btnImport'].forEach(id=>{ const e=document.getElementById(id); if(e) e.style.display = admin?'':'none'; });
+  const active=document.querySelector('.tab[aria-selected="true"]');
+  if(active && active.style.display==='none') activateView('home');
+  let rb=document.getElementById('roleBadge');
+  if(ME.email){
+    if(!rb){ rb=document.createElement('span'); rb.id='roleBadge'; const tb=document.querySelector('.toolbar'); if(tb) tb.prepend(rb); }
+    rb.textContent = admin ? '👑 Admin' : '🔑 Concierge';
+    rb.className = 'badge '+(admin?'busy':'soon'); rb.style.padding='3px 9px';
+  } else if(rb){ rb.remove(); }
+  renderMembers();
+}
+window.setMe=setMe; window.isAdmin=isAdmin;
 
 /* =====================================================================
    UTILITAIRES
@@ -1237,6 +1279,63 @@ function contactDel(id){ if(!confirm('Supprimer cet intervenant ?'))return; Stor
 gv('aptAdd').onclick=aptAdd; gv('contactAdd').onclick=contactAdd;
 
 /* =====================================================================
+   COLLABORATEURS & ACCÈS (admin) — pilote la table Supabase « members »
+   window.MEMBERS / window.bfSaveMember / window.bfDeleteMember : module cloud
+   ===================================================================== */
+function renderMembers(){
+  const panel=gv('membersPanel'); if(!panel) return;
+  panel.hidden = !(isAdmin() && ME.email);
+  if(panel.hidden) return;
+  const tb=panel.querySelector('#membersTable tbody');
+  const list=window.MEMBERS||[];
+  if(!list.length){ tb.innerHTML='<tr><td colspan="4" class="empty">Aucun collaborateur enregistré.</td></tr>'; return; }
+  tb.innerHTML=list.map(m=>{
+    const apt = m.role==='admin' ? '<span class="badge busy">Tous les biens</span>'
+      : ((m.apt_ids||[]).map(id=>esc(aptById(id)?.name||id)).map(n=>`<span class="tag plan">${n}</span>`).join(' ') || '<span style="color:var(--muted)">aucun</span>');
+    const self = m.email===ME.email;
+    return `<tr><td>${esc(m.email)}${self?' <span style="color:var(--muted)">(toi)</span>':''}</td>
+      <td>${m.role==='admin'?'👑 Admin':'🔑 Concierge'}</td>
+      <td style="white-space:normal">${apt}</td>
+      <td><div class="row-actions"><button class="btn sm" onclick="memberEdit('${esc(m.email)}')">✎</button>${self?'':`<button class="btn sm danger" onclick="memberDel('${esc(m.email)}')">✕</button>`}</div></td></tr>`;
+  }).join('');
+}
+function memberForm(m){
+  return `<h2 style="margin-bottom:12px">${m?"Modifier l'accès":'Inviter un collaborateur'}</h2>
+   <div class="form">
+    <div class="field wide"><label>Email</label><input id="mb_email" type="email" value="${esc(m?.email||'')}" ${m?'disabled':''} placeholder="maria@exemple.com"></div>
+    <div class="field"><label>Rôle</label><select id="mb_role">
+      <option value="concierge"${m?.role!=='admin'?' selected':''}>Concierge (un ou + appart)</option>
+      <option value="admin"${m?.role==='admin'?' selected':''}>Admin (voit tout)</option></select></div>
+   </div>
+   <label style="margin-top:10px;display:block">Appartements autorisés</label>
+   <div id="mb_apts" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
+     ${apts().map(a=>`<label class="chip" style="cursor:pointer"><input type="checkbox" value="${a.id}" ${(m?.apt_ids||[]).includes(a.id)?'checked':''} style="width:auto;margin-right:6px">${esc(a.name)}</label>`).join('')}
+   </div>
+   <div id="mb_msg" class="hint" style="min-height:16px;margin-top:6px"></div>
+   <div class="form-actions"><button class="btn primary" onclick="memberSave('${esc(m?.email||'')}')">Enregistrer</button><button class="btn ghost" onclick="closeModal()">Annuler</button></div>`;
+}
+function memberAdd(){ openModal(memberForm(null)); }
+function memberEdit(email){ openModal(memberForm((window.MEMBERS||[]).find(m=>m.email===email))); }
+async function memberSave(orig){
+  const email=(orig||gv('mb_email').value).trim().toLowerCase();
+  const msg=gv('mb_msg'); if(!email){ msg.textContent='Email requis.'; return; }
+  const role=gv('mb_role').value;
+  const apt_ids=[...document.querySelectorAll('#mb_apts input:checked')].map(i=>i.value);
+  if(role==='concierge' && !apt_ids.length){ msg.textContent='Coche au moins un appartement.'; return; }
+  if(!window.bfSaveMember){ msg.textContent='Connecte-toi à la synchro d\'abord.'; return; }
+  msg.textContent='…';
+  try{ await window.bfSaveMember({email, role, apt_ids}); closeModal(); }
+  catch(e){ msg.textContent='Erreur : '+(e.message||e); }
+}
+async function memberDel(email){
+  if(!confirm("Retirer l'accès de "+email+' ?')) return;
+  if(!window.bfDeleteMember) return;
+  try{ await window.bfDeleteMember(email); }catch(e){ alert('Erreur : '+(e.message||e)); }
+}
+{ const ma=gv('memberAdd'); if(ma) ma.onclick=memberAdd; }
+window.renderMembers=renderMembers;
+
+/* =====================================================================
    IMPORT iCal (.ics) — par dépôt de fichier
    ===================================================================== */
 gv('resImportIcal').onclick=()=>openModal(`
@@ -1408,6 +1507,13 @@ function renderHome(){
   const h=now.getHours();
   gv('homeHi').textContent = (h<6?'Bonne nuit':h<12?'Bonjour':h<18?'Bon après-midi':'Bonsoir')+' 👋';
 
+  // concierge connectée mais sans appartement assigné
+  if(ME.email && !isAdmin() && myApts().length===0){
+    gv('homeConflicts').innerHTML = `<div class="banner info">🔑 <div><b>Compte connecté</b><br>Bruno ne t'a pas encore donné accès à un appartement. Préviens-le, il t'ajoutera en quelques secondes.</div></div>`;
+    gv('homeKpis').innerHTML=''; gv('homeLocGrid').innerHTML='<p class="empty">Aucun appartement pour le moment</p>';
+    gv('homeToday').innerHTML=''; gv('homeFeed').innerHTML=''; return;
+  }
+
   const active=apts().filter(a=>a.active!==false);
   const t=todayYMD();
   const arr=reservations().filter(r=>r.status!=='Annulé'&&r.arrival===t&&aptById(r.aptId)?.active!==false).length;
@@ -1568,7 +1674,7 @@ function renderAll(){
 }
 window.Store = Store;                              // exposé au module de synchro cloud
 window.gotoApt=gotoApt; window.resPrefill=resPrefill; window.locBack=locBack;   // accessibles depuis le HTML généré
-Store.load(); initSelects(); renderLegend(); renderAll();
+Store.load(); initSelects(); renderLegend(); applyAccess(); renderAll();
 </script>
 
 <!-- =====================================================================
@@ -1601,7 +1707,7 @@ async function boot(){
 
   sb.auth.onAuthStateChange((_evt, sess)=>{
     if(sess && !user) onLogin(sess.user);
-    else if(!sess && user){ user=null; setDot('local','Local'); showActivate(); }
+    else if(!sess && user){ user=null; setDot('local','Local'); showActivate(); if(window.setMe) window.setMe({email:null,role:'admin',apts:null}); }
   });
 }
 
@@ -1670,16 +1776,49 @@ async function doAuth(signup){
 /* ---- connecté : pull, migration, abonnement ---- */
 async function onLogin(u){
   user=u; setDot('ok','Sync…');
+  // --- rôle & accès (RLS = vraie sécurité ; ceci ne pilote que l'UI) ---
+  let role='admin', apts=null;
+  try{
+    const { data:claimed } = await sb.rpc('bf_claim_admin');     // 1er utilisateur => admin
+    const { data:mem } = await sb.from('members').select('role,apt_ids').eq('email',(u.email||'').toLowerCase()).maybeSingle();
+    if(mem){ role=mem.role; apts = role==='admin' ? null : (mem.apt_ids||[]); }
+    else if(claimed==='admin'){ role='admin'; apts=null; }
+    else { role='concierge'; apts=[]; }                          // connecté mais pas encore d'accès
+  }catch(e){ console.warn('role',e); role='admin'; apts=null; }   // erreur réseau : pas de lock-out (RLS protège quand même)
+  window.setMe && window.setMe({ email:u.email, role, apts });
+
+  // --- données ---
   let cloud;
   try{ cloud=await fetchAll(); }catch(e){ console.warn('fetch',e); setDot('ok','Cache local'); Store.cloudSync=schedulePush; subscribe(); renderBanner(); return; }
   const total=TABLES.reduce((n,t)=>n+cloud[t].length,0);
   let local={}; try{ local=JSON.parse(localStorage.getItem('gites_v2')||'{}'); }catch(_){}
   const localTotal=(local.apartments||[]).length+(local.reservations||[]).length+(local.interventions||[]).length+(local.contacts||[]).length;
   Store.cloudSync=schedulePush;
-  if(total===0 && localTotal>0){ await pushAll(); }   // 1er login : on envoie le local au cloud
+  if(total===0 && localTotal>0 && role==='admin'){ await pushAll(); }   // 1er login admin : on sème le local vers le cloud
   else Store.applyCloud(cloud);
+  await loadMembers();
   setDot('ok','Sync ✓'); subscribe(); renderBanner();
 }
+
+/* ---- collaborateurs (admin) ---- */
+async function loadMembers(){
+  if(!sb) return;
+  try{
+    const { data, error } = await sb.from('members').select('email,role,apt_ids,name').order('role',{ascending:true});
+    if(error) throw error;
+    window.MEMBERS = data||[];
+    if(window.renderMembers) window.renderMembers();
+  }catch(e){ console.warn('members',e); }
+}
+window.bfSaveMember = async (m)=>{
+  const row={ email:(m.email||'').toLowerCase(), role:m.role, apt_ids:m.role==='admin'?[]:(m.apt_ids||[]), updated_at:new Date().toISOString() };
+  const { error } = await sb.from('members').upsert(row); if(error) throw error;
+  await loadMembers();
+};
+window.bfDeleteMember = async (email)=>{
+  const { error } = await sb.from('members').delete().eq('email',(email||'').toLowerCase()); if(error) throw error;
+  await loadMembers();
+};
 
 async function fetchAll(){
   const out={apartments:[],reservations:[],interventions:[],contacts:[]};
@@ -1703,7 +1842,11 @@ async function pushAll(){
   }catch(e){ console.warn('push',e); setDot('ok','Erreur sync'); }
 }
 async function syncTable(name, items){
-  const rows=items.map(it=>({ id:String(it.id), doc:it, updated_at:new Date().toISOString() }));
+  const rows=items.map(it=>{
+    const r={ id:String(it.id), doc:it, updated_at:new Date().toISOString() };
+    if(name==='reservations'||name==='interventions') r.apt_id = it.aptId || null;
+    return r;
+  });
   if(rows.length){ const { error }=await sb.from(name).upsert(rows); if(error) throw error; }
   const ids=new Set(rows.map(r=>r.id));
   const del=[...(cloudIds[name]||[])].filter(id=>!ids.has(id));
@@ -1715,6 +1858,7 @@ async function syncTable(name, items){
 function subscribe(){
   const ch=sb.channel('gites-sync');
   TABLES.forEach(t=>ch.on('postgres_changes',{event:'*',schema:'public',table:t},schedulePull));
+  ch.on('postgres_changes',{event:'*',schema:'public',table:'members'}, loadMembers);
   ch.subscribe();
 }
 function schedulePull(){
