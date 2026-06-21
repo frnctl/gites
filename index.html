@@ -250,6 +250,126 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); outline:none}
   .panel{border-color:#ccc; break-inside:avoid}
   table{min-width:0}
 }
+
+/* =====================================================================
+   BF v3 — REFONTE « Premium SaaS sombre » (surcouche, override)
+   ===================================================================== */
+:root{
+  --bg:#0A0A0C; --panel:#121216; --panel2:#17171c; --panel3:#1f1f26;
+  --text:#F4F2EC; --muted:#9A9AA6; --red:#E23A48; --gold:#E7BE3F;
+  --line:rgba(255,255,255,.08); --line-strong:rgba(231,190,63,.45);
+  --green:#34C26E; --blue:#5B8DEF; --violet:#A78BFA;
+  --glass:rgba(255,255,255,.025); --shadow:0 8px 30px rgba(0,0,0,.45);
+  --r:16px; --r-sm:11px;
+}
+body{background:
+  radial-gradient(1200px 700px at 85% -10%, rgba(231,190,63,.07), transparent 60%),
+  radial-gradient(900px 600px at -5% 0%, rgba(91,141,239,.06), transparent 55%),
+  var(--bg);
+  background-attachment:fixed;
+}
+h1,h2,h3{letter-spacing:.3px}
+
+/* Header / nav */
+header.app{background:rgba(10,10,12,.72); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--line)}
+.brand h1{font-size:26px; background:linear-gradient(180deg,#fff,#cfcad9); -webkit-background-clip:text; background-clip:text; color:transparent}
+.brand .accent{-webkit-text-fill-color:var(--red)}
+.tab{border-radius:9px 9px 0 0; transition:.18s}
+.tab[aria-selected="true"]{color:var(--text); border-bottom-color:var(--gold); background:linear-gradient(180deg,rgba(231,190,63,.08),transparent)}
+
+/* Panels & cards — verre dépoli */
+.panel{background:linear-gradient(180deg,var(--glass),transparent),var(--panel); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); backdrop-filter:blur(6px)}
+.panel-h h2{font-family:'Jost'; font-weight:600; letter-spacing:.2px; font-size:17px}
+.gold-rule{background:linear-gradient(90deg,var(--gold),rgba(231,190,63,0)); opacity:.5}
+
+/* Boutons */
+.btn{border-radius:10px; transition:.16s ease; font-weight:600}
+.btn:hover{transform:translateY(-1px); border-color:var(--gold)}
+.btn.primary{background:linear-gradient(180deg,#ef4a58,#cf2f3c); border-color:transparent; box-shadow:0 4px 16px rgba(226,58,72,.3)}
+.btn.gold{background:linear-gradient(180deg,#f0cb54,#d9a92e); border-color:transparent; color:#1a1606; box-shadow:0 4px 16px rgba(231,190,63,.25)}
+.btn.big{padding:14px 18px; font-size:15px; border-radius:13px}
+
+/* Segmented */
+.seg{border-radius:10px; background:var(--panel2); padding:3px; border-color:var(--line)}
+.seg button{border-radius:7px; background:transparent; transition:.15s}
+.seg button[aria-pressed="true"]{background:linear-gradient(180deg,#f0cb54,#d9a92e); color:#1a1606}
+
+/* KPIs */
+.kpi{background:linear-gradient(180deg,var(--glass),transparent),var(--panel2); border:1px solid var(--line); border-radius:14px; position:relative; overflow:hidden}
+.kpi::before{content:''; position:absolute; inset:0 0 auto 0; height:2px; background:linear-gradient(90deg,var(--gold),transparent)}
+.kpi .v{font-size:26px; letter-spacing:-.5px}
+
+/* Apt / location cards */
+.apt-card{background:linear-gradient(180deg,var(--glass),transparent),var(--panel2); border-radius:14px; border:1px solid var(--line); border-left-width:4px; transition:.18s}
+.apt-card:hover{transform:translateY(-2px); box-shadow:var(--shadow)}
+
+/* Tableaux */
+.table-wrap{border-radius:14px; border-color:var(--line)}
+th{background:rgba(255,255,255,.02); backdrop-filter:blur(4px)}
+tbody tr{transition:background .12s}
+.tag{border:1px solid transparent; backdrop-filter:blur(4px)}
+
+/* Inputs */
+input,select,textarea{background:rgba(255,255,255,.03); border-radius:10px; transition:.15s}
+input:focus,select:focus,textarea:focus{border-color:var(--gold); box-shadow:0 0 0 3px rgba(231,190,63,.12)}
+
+/* Calendar bars */
+.cal-bar{border-radius:7px; box-shadow:0 2px 8px rgba(0,0,0,.35); border:1px solid rgba(0,0,0,.3); font-weight:700}
+.cal-scroll{border-radius:14px}
+
+/* ---------- NOUVEAU : Accueil (dashboard) ---------- */
+.hero{display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap; margin-bottom:18px}
+.hero .hi{font-family:'Anton'; font-size:30px; line-height:1}
+.hero .date{color:var(--muted); font-size:13px; text-transform:capitalize}
+.loc-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px}
+.loc-card{cursor:pointer; background:linear-gradient(180deg,var(--glass),transparent),var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:0; overflow:hidden; transition:.2s; box-shadow:var(--shadow)}
+.loc-card:hover{transform:translateY(-3px); border-color:var(--line-strong)}
+.loc-card .top{height:6px}
+.loc-card .body{padding:16px}
+.loc-card .nm{font-family:'Jost'; font-weight:600; font-size:18px; display:flex; align-items:center; gap:8px}
+.loc-card .mgr{font-size:11px; color:var(--gold); text-transform:uppercase; letter-spacing:.5px; margin-top:2px}
+.loc-card .stat-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px}
+.loc-card .arrow{margin-top:14px; color:var(--muted); font-size:12px; display:flex; align-items:center; gap:6px}
+
+.badge{display:inline-flex; align-items:center; gap:6px; padding:5px 11px; border-radius:20px; font-size:12px; font-weight:600; border:1px solid var(--line)}
+.badge::before{content:''; width:7px; height:7px; border-radius:50%; background:currentColor; opacity:.9}
+.badge.free{color:var(--green); background:rgba(52,194,110,.12)}
+.badge.busy{color:var(--gold); background:rgba(231,190,63,.12)}
+.badge.soon{color:var(--blue); background:rgba(91,141,239,.12)}
+.badge.warn{color:var(--red); background:rgba(226,58,72,.12)}
+.badge.muted{color:var(--muted); background:rgba(255,255,255,.04)}
+
+/* Today list (arrivées / départs) */
+.today-list{display:flex; flex-direction:column; gap:8px}
+.today-row{display:flex; align-items:center; gap:12px; padding:11px 13px; background:var(--panel2); border:1px solid var(--line); border-radius:12px}
+.today-row .ic{width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; flex:none}
+.today-row .ic.in{background:rgba(52,194,110,.15)}
+.today-row .ic.out{background:rgba(226,58,72,.15)}
+.today-row .who{font-weight:600}
+.today-row .meta{color:var(--muted); font-size:12px}
+.today-row .right{margin-left:auto; text-align:right; font-size:12px; color:var(--muted)}
+.today-row .aptdot{width:9px;height:9px;border-radius:3px;display:inline-block}
+
+/* Apartment detail page */
+.apt-hero{display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding:18px; border-radius:var(--r); border:1px solid var(--line); box-shadow:var(--shadow); margin-bottom:16px; position:relative; overflow:hidden}
+.apt-hero .swatch{width:54px; height:54px; border-radius:14px; flex:none}
+.apt-hero h2{font-family:'Anton'; font-size:26px}
+.apt-hero .sub{color:var(--muted); font-size:13px}
+.apt-hero .right{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+.back-link{display:inline-flex; align-items:center; gap:6px; color:var(--muted); cursor:pointer; font-size:13px; margin-bottom:12px; background:none; border:none; font-family:'Jost'}
+.back-link:hover{color:var(--gold)}
+
+/* Activity feed (traçabilité) */
+.feed{display:flex; flex-direction:column; gap:2px}
+.feed-item{display:flex; gap:11px; padding:9px 4px; align-items:flex-start}
+.feed-item .av{width:30px; height:30px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#1a1606}
+.feed-item .txt{font-size:13px}
+.feed-item .when{color:var(--muted); font-size:11px; margin-top:1px}
+
+/* Sub-section title */
+.sub-title{font-family:'Jost'; font-weight:600; font-size:14px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin:0 0 10px}
+.two-col{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+@media (max-width:760px){ .two-col{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
@@ -265,7 +385,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); outline:none}
     </div>
   </div>
   <nav class="tabs" role="tablist" aria-label="Sections">
-    <button class="tab" role="tab" aria-selected="true" data-view="cal">Calendrier</button>
+    <button class="tab" role="tab" aria-selected="true" data-view="home">Accueil</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="loc">Locations</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="cal">Calendrier</button>
     <button class="tab" role="tab" aria-selected="false" data-view="res">Réservations</button>
     <button class="tab" role="tab" aria-selected="false" data-view="int">Interventions</button>
     <button class="tab" role="tab" aria-selected="false" data-view="syn">Synthèse</button>
@@ -274,8 +396,44 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); outline:none}
 </header>
 
 <main>
+  <!-- ============ ACCUEIL (dashboard) ============ -->
+  <section class="view active" id="view-home" role="tabpanel">
+    <div class="hero">
+      <div>
+        <div class="hi" id="homeHi">Bonjour 👋</div>
+        <div class="date" id="homeDate"></div>
+      </div>
+    </div>
+    <div id="homeConflicts"></div>
+    <div class="kpis" id="homeKpis"></div>
+    <div class="panel">
+      <div class="panel-h"><h2>Mes locations</h2><div class="spacer"></div>
+        <span class="hint">Clique une carte pour ouvrir sa page</span>
+      </div>
+      <hr class="gold-rule">
+      <div class="loc-grid" id="homeLocGrid"></div>
+    </div>
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-h"><h2>Aujourd'hui &amp; à venir</h2></div>
+        <hr class="gold-rule">
+        <div class="today-list" id="homeToday"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-h"><h2>Activité récente</h2></div>
+        <hr class="gold-rule">
+        <div class="feed" id="homeFeed"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LOCATIONS (page par bien) ============ -->
+  <section class="view" id="view-loc" role="tabpanel">
+    <div id="locContent"></div>
+  </section>
+
   <!-- ============ CALENDRIER ============ -->
-  <section class="view active" id="view-cal" role="tabpanel">
+  <section class="view" id="view-cal" role="tabpanel">
     <div class="panel">
       <div class="panel-h">
         <h2>Calendrier d'occupation</h2>
@@ -329,10 +487,15 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); outline:none}
     </div>
     <div class="panel">
       <div class="panel-h"><h2>Réservations</h2><div class="spacer"></div>
+        <div class="seg" id="resViewToggle" role="group" aria-label="Affichage">
+          <button data-rv="list" aria-pressed="true">📋 Liste</button>
+          <button data-rv="agenda" aria-pressed="false">📅 Agenda</button>
+        </div>
         <input class="search" id="resSearch" placeholder="Rechercher…" aria-label="Rechercher">
       </div>
       <div class="filters" id="resFilters"></div>
-      <div class="table-wrap">
+      <div id="resAgenda" hidden></div>
+      <div class="table-wrap" id="resListWrap">
         <table id="resTable">
           <thead><tr>
             <th data-k="apt">Appart.</th><th data-k="channel">Canal</th><th data-k="guest">Voyageur</th>
@@ -568,14 +731,22 @@ function initSelects(){
   fillSelect(document.getElementById('intPayStatus'), PAY_STATUS);
   document.getElementById('contactList').innerHTML = contacts().map(c=>`<option value="${esc(c.name)}">`).join('');
 }
+let currentLoc=null;            // bien ouvert dans l'onglet « Locations » (null = grille)
+function activateView(view){
+  document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected', String(x.dataset.view===view)));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id==='view-'+view));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 document.querySelectorAll('.tab').forEach(t=>{
   t.addEventListener('click',()=>{
-    document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected','false'));
-    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-    t.setAttribute('aria-selected','true');
-    document.getElementById('view-'+t.dataset.view).classList.add('active');
+    if(t.dataset.view==='loc') currentLoc=null;     // clic onglet → retour à la grille
+    activateView(t.dataset.view);
+    if(t.dataset.view==='loc') renderLocations();
+    if(t.dataset.view==='home') renderHome();
   });
 });
+/* ouvre la page d'un bien (depuis une carte) */
+function gotoApt(id){ currentLoc=id; activateView('loc'); renderLocations(); }
 
 /* =====================================================================
    CALENDRIER (timeline multi-mois + détection de conflits)
@@ -730,7 +901,7 @@ document.getElementById('calRange').addEventListener('click',e=>{ const b=e.targ
 /* =====================================================================
    RÉSERVATIONS
    ===================================================================== */
-let resFilter='all', resSort={k:'arrival',dir:-1}, resQuery='';
+let resFilter='all', resSort={k:'arrival',dir:-1}, resQuery='', resView='list';
 const resForm=document.getElementById('resForm');
 function gv(id){ return document.getElementById(id); }
 
@@ -813,6 +984,7 @@ function renderReservations(){
     </tr>`;
   }).join('');
   gv('resTotN').textContent=totN; gv('resTotA').textContent=money(totA);
+  if(resView==='agenda') renderResAgenda();
 }
 
 /* =====================================================================
@@ -1168,8 +1340,234 @@ gv('btnPrint').onclick=()=>window.print();
 /* =====================================================================
    BOOT
    ===================================================================== */
-function renderAll(){ renderCalendar(); renderReservations(); renderInterventions(); renderSynthese(); renderBiens(); renderContacts(); }
+/* =====================================================================
+   ACCUEIL (dashboard) & PAGES PAR LOCATION
+   ===================================================================== */
+function todayYMD(){ return ymd(new Date()); }
+function relDay(s){
+  const d=parseD(s), t=new Date(); t.setHours(0,0,0,0); if(!d) return fmtD(s);
+  const diff=Math.round((d-t)/86400000);
+  if(diff===0) return "aujourd'hui"; if(diff===1) return 'demain'; if(diff===-1) return 'hier';
+  if(diff>1 && diff<=7) return 'dans '+diff+' j'; return fmtD(s);
+}
+function initials(name){ return (String(name||'?').trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2)||'?').toUpperCase(); }
+
+/* statut d'un bien à la date du jour */
+function aptStatus(aptId){
+  const t=todayYMD();
+  const rs=reservations().filter(r=>r.aptId===aptId && r.status!=='Annulé' && r.arrival && r.departure);
+  const current=rs.find(r=> r.arrival<=t && t<r.departure);
+  const upcoming=rs.filter(r=> r.arrival>=t).sort((a,b)=>a.arrival.localeCompare(b.arrival));
+  const departsToday=rs.find(r=> r.departure===t);
+  return {current, next:upcoming[0], upcoming, departsToday};
+}
+/* arrivées / départs sur un horizon (tous biens, ou un seul) */
+function upcomingEvents(days, aptId){
+  const t=new Date(); t.setHours(0,0,0,0);
+  const horizon=new Date(t.getTime()+days*86400000); const evs=[];
+  reservations().filter(r=>r.status!=='Annulé').forEach(r=>{
+    const apt=aptById(r.aptId); if(!apt||apt.active===false) return;
+    if(aptId && r.aptId!==aptId) return;
+    const s=parseD(r.arrival), e=parseD(r.departure);
+    if(s && s>=t && s<=horizon) evs.push({type:'in', date:r.arrival, d:s, r, apt});
+    if(e && e>=t && e<=horizon) evs.push({type:'out', date:r.departure, d:e, r, apt});
+  });
+  evs.sort((a,b)=> (a.d-b.d) || (a.type==='out'?-1:1));
+  return evs;
+}
+function statusBadge(st){
+  const t=todayYMD();
+  if(st.current) return `<span class="badge busy">Occupé · ${esc(st.current.guest||st.current.channel)}</span>`;
+  let b=`<span class="badge free">Libre</span>`;
+  if(st.next){ const dd=nights(t, st.next.arrival); if(dd>=0&&dd<=7) b+=` <span class="badge soon">Arrivée ${relDay(st.next.arrival)}</span>`; }
+  return b;
+}
+function locCardHTML(apt){
+  const st=aptStatus(apt.id);
+  return `<div class="loc-card" onclick="gotoApt('${apt.id}')" tabindex="0" role="button">
+    <div class="top" style="background:${apt.color||'var(--gold)'}"></div>
+    <div class="body">
+      <div class="nm"><span class="aptdot" style="background:${apt.color||'var(--gold)'}"></span>${esc(apt.name)}</div>
+      <div class="mgr">${esc(apt.gestion||'—')}</div>
+      <div class="stat-row">${statusBadge(st)}</div>
+      <div class="arrow">Ouvrir la page →</div>
+    </div></div>`;
+}
+function eventRowHTML(ev){
+  const inn=ev.type==='in';
+  return `<div class="today-row">
+    <div class="ic ${inn?'in':'out'}">${inn?'🟢':'🔴'}</div>
+    <div><div class="who">${esc(ev.r.guest||ev.r.channel)}</div>
+      <div class="meta"><span class="aptdot" style="background:${ev.apt.color||'var(--gold)'}"></span> ${esc(ev.apt.name)} · ${inn?'arrivée':'départ'}</div></div>
+    <div class="right"><b style="color:var(--text);text-transform:capitalize">${relDay(ev.date)}</b><br>${fmtD(ev.date)}</div>
+  </div>`;
+}
+function renderHome(){
+  const now=new Date();
+  gv('homeDate').textContent = now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const h=now.getHours();
+  gv('homeHi').textContent = (h<6?'Bonne nuit':h<12?'Bonjour':h<18?'Bon après-midi':'Bonsoir')+' 👋';
+
+  const active=apts().filter(a=>a.active!==false);
+  const t=todayYMD();
+  const arr=reservations().filter(r=>r.status!=='Annulé'&&r.arrival===t&&aptById(r.aptId)?.active!==false).length;
+  const dep=reservations().filter(r=>r.status!=='Annulé'&&r.departure===t&&aptById(r.aptId)?.active!==false).length;
+  const occ=active.filter(a=>aptStatus(a.id).current).length;
+  const todo=interventions().filter(i=>i.planned).length;
+  const mStart=ymd(new Date(now.getFullYear(),now.getMonth(),1)), mEnd=ymd(new Date(now.getFullYear(),now.getMonth()+1,1));
+  let revM=0; reservations().forEach(r=>{ if(isExchangeRes(r)||r.status==='Annulé')return; if(r.arrival>=mStart&&r.arrival<mEnd) revM+=Number(r.amount)||0; });
+
+  gv('homeKpis').innerHTML=`
+    <div class="kpi"><div class="k">Arrivées aujourd'hui</div><div class="v gold">${arr}</div></div>
+    <div class="kpi"><div class="k">Départs aujourd'hui</div><div class="v">${dep}</div></div>
+    <div class="kpi"><div class="k">Occupés maintenant</div><div class="v ${occ?'green':''}">${occ}<span style="font-size:14px;color:var(--muted)"> / ${active.length}</span></div></div>
+    <div class="kpi"><div class="k">Tâches à faire</div><div class="v ${todo?'red':''}">${todo}</div></div>
+    <div class="kpi"><div class="k">Revenu du mois</div><div class="v gold">${money0(revM)}</div></div>`;
+
+  gv('homeLocGrid').innerHTML=active.map(locCardHTML).join('') || '<p class="empty">Aucun bien actif</p>';
+
+  const {list}=detectConflicts();
+  gv('homeConflicts').innerHTML = list.length
+    ? `<div class="banner warn">⚠️<div><b>${list.length} double réservation(s) détectée(s)</b><br>${list.map(esc).join('<br>')}</div></div>` : '';
+
+  const evs=upcomingEvents(10);
+  gv('homeToday').innerHTML = evs.length ? evs.slice(0,12).map(eventRowHTML).join('')
+    : '<p class="empty">Rien de prévu dans les 10 prochains jours 🎉</p>';
+
+  // activité récente : dernières interventions (qui a fait quoi)
+  const acts=[...interventions()].filter(i=>i.date&&!i.planned).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,8);
+  gv('homeFeed').innerHTML = acts.length ? acts.map(i=>{
+    const apt=aptById(i.aptId);
+    return `<div class="feed-item">
+      <div class="av" style="background:${apt?.color||'var(--gold)'}">${initials(i.who||i.type)}</div>
+      <div><div class="txt"><b>${esc(i.who||'Intervenant')}</b> · ${esc(i.type)}${apt?` — ${esc(apt.name)}`:''}</div>
+        <div class="when">${fmtD(i.date)}${i.cost?' · '+money0(i.cost):''}</div></div></div>`;
+  }).join('') : '<p class="empty">Pas encore d\'activité</p>';
+}
+
+function renderLocations(){
+  const cont=gv('locContent');
+  if(!currentLoc){
+    cont.innerHTML=`<div class="panel"><div class="panel-h"><h2>Mes locations</h2></div>
+      <hr class="gold-rule"><div class="loc-grid">${apts().map(locCardHTML).join('')||'<p class="empty">Aucun bien</p>'}</div></div>`;
+    return;
+  }
+  const apt=aptById(currentLoc); if(!apt){ currentLoc=null; return renderLocations(); }
+  const st=aptStatus(apt.id);
+  const Y=new Date().getFullYear();
+  const rsY=reservations().filter(r=>r.aptId===apt.id&&r.status!=='Annulé');
+  let occN=0, rev=0; rsY.forEach(r=>{ const o=occupiedNightsInYear(r,Y); occN+=o; if(!isExchangeRes(r)) rev+=Number(r.amount)||0; });
+  const evs=upcomingEvents(60, apt.id);
+  const upRes=reservations().filter(r=>r.aptId===apt.id&&r.status!=='Annulé'&&r.departure>=todayYMD())
+    .sort((a,b)=>a.arrival.localeCompare(b.arrival)).slice(0,12);
+  const ints=[...interventions()].filter(i=>i.aptId===apt.id).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,10);
+
+  cont.innerHTML=`
+    <button class="back-link" onclick="locBack()">← Toutes les locations</button>
+    <div class="apt-hero" style="background:
+        radial-gradient(600px 200px at 0% 0%, ${apt.color||'#888'}22, transparent 70%), var(--panel)">
+      <div class="swatch" style="background:${apt.color||'var(--gold)'}"></div>
+      <div>
+        <h2>${esc(apt.name)}</h2>
+        <div class="sub">${esc(apt.gestion||'')}${apt.ref?` · réf ${esc(apt.ref)}`:''}${apt.address?` · ${esc(apt.address)}`:''}</div>
+        <div style="margin-top:8px">${statusBadge(st)}</div>
+      </div>
+      <div class="right">
+        ${apt.url?`<a class="btn sm" href="${esc(apt.url)}" target="_blank" rel="noopener">Annonce ↗</a>`:''}
+        <button class="btn sm" onclick="aptEdit('${apt.id}')">✎ Éditer</button>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><div class="k">Statut</div><div class="v" style="font-size:18px">${st.current?'Occupé':'Libre'}</div>
+        <div class="sub2">${st.current?('jusqu\'au '+fmtD(st.current.departure)):(st.next?('prochaine arrivée '+relDay(st.next.arrival)):'aucune résa à venir')}</div></div>
+      <div class="kpi"><div class="k">Nuits occupées ${Y}</div><div class="v">${occN}</div></div>
+      <div class="kpi"><div class="k">Revenu ${Y}</div><div class="v gold">${money0(rev)}</div></div>
+      <div class="kpi"><div class="k">Réservations à venir</div><div class="v">${upRes.length}</div></div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-h"><h2>Arrivées &amp; départs (60 j)</h2></div><hr class="gold-rule">
+        <div class="today-list">${evs.length?evs.map(eventRowHTML).join(''):'<p class="empty">Rien de prévu</p>'}</div>
+      </div>
+      <div class="panel">
+        <div class="panel-h"><h2>Interventions</h2></div><hr class="gold-rule">
+        <div class="feed">${ints.length?ints.map(i=>`<div class="feed-item">
+          <div class="av" style="background:${apt.color||'var(--gold)'}">${initials(i.who||i.type)}</div>
+          <div><div class="txt">${i.planned?'⏳ ':''}<b>${esc(i.type)}</b>${i.who?` · ${esc(i.who)}`:''}</div>
+            <div class="when">${fmtD(i.date)}${i.cost?' · '+money0(i.cost):''}${i.planned?' · à faire':''}</div></div></div>`).join('')
+          :'<p class="empty">Aucune intervention</p>'}</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><h2>Prochaines réservations</h2><div class="spacer"></div>
+        <button class="btn sm gold" onclick="resPrefill('${apt.id}')">+ Réservation</button></div>
+      <hr class="gold-rule">
+      <div class="today-list">${upRes.length?upRes.map(r=>{
+        const exch=isExchangeRes(r);
+        return `<div class="today-row" style="cursor:pointer" onclick="resEdit('${r.id}')">
+          <div class="ic in" style="background:${chColor(r.channel)}33">${esc(r.channel[0])}</div>
+          <div><div class="who">${esc(r.guest||'(sans nom)')}</div>
+            <div class="meta">${esc(r.channel)} · ${nights(r.arrival,r.departure)} nuit(s)${exch?' · échange':''}</div></div>
+          <div class="right"><b style="color:var(--text)">${fmtD(r.arrival)}</b><br>→ ${fmtD(r.departure)}</div>
+        </div>`; }).join(''):'<p class="empty">Aucune réservation à venir</p>'}</div>
+    </div>`;
+}
+/* pré-remplit le formulaire de réservation pour un bien donné */
+function resPrefill(aptId){ resReset(); gv('resApt').value=aptId; activateView('res'); }
+/* retour à la grille des locations */
+function locBack(){ currentLoc=null; renderLocations(); }
+
+/* =====================================================================
+   RÉSERVATIONS — vue agenda
+   ===================================================================== */
+function resFilteredSorted(){
+  let rows=[...reservations()];
+  if(resFilter!=='all') rows=rows.filter(r=>r.aptId===resFilter);
+  if(resQuery) rows=rows.filter(r=>[aptById(r.aptId)?.name,r.channel,r.guest,r.notes].join(' ').toLowerCase().includes(resQuery));
+  return rows;
+}
+function renderResAgenda(){
+  const cont=gv('resAgenda');
+  const rows=resFilteredSorted().filter(r=>r.arrival).sort((a,b)=>a.arrival.localeCompare(b.arrival));
+  if(!rows.length){ cont.innerHTML='<p class="empty">Aucune réservation</p>'; return; }
+  const groups={};
+  rows.forEach(r=>{ const k=r.arrival.slice(0,7); (groups[k]=groups[k]||[]).push(r); });
+  cont.innerHTML=Object.keys(groups).sort().map(k=>{
+    const [y,m]=k.split('-'); const title=MONTHS[+m-1]+' '+y;
+    return `<div style="margin-bottom:18px">
+      <div class="sub-title" style="text-transform:capitalize">${title}</div>
+      <div class="today-list">${groups[k].map(r=>{
+        const apt=aptById(r.aptId); const exch=isExchangeRes(r);
+        return `<div class="today-row" style="cursor:pointer" onclick="resEdit('${r.id}')">
+          <div class="ic in" style="background:${chColor(r.channel)}33">${esc((r.channel||'?')[0])}</div>
+          <div><div class="who">${esc(r.guest||'(sans nom)')} <span class="meta">· ${esc(apt?apt.name:'?')}</span></div>
+            <div class="meta">${esc(r.channel)} · ${nights(r.arrival,r.departure)} nuit(s)${exch?' · échange':' · '+money(r.amount)} · ${esc(r.status)}</div></div>
+          <div class="right"><b style="color:var(--text)">${fmtD(r.arrival)}</b><br>→ ${fmtD(r.departure)}</div>
+        </div>`; }).join('')}</div></div>`;
+  }).join('');
+}
+function applyResView(){
+  const agenda=resView==='agenda';
+  gv('resAgenda').hidden=!agenda;
+  gv('resListWrap').style.display=agenda?'none':'';
+  if(agenda) renderResAgenda();
+}
+gv('resViewToggle').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  resView=b.dataset.rv;
+  gv('resViewToggle').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.rv===resView)));
+  applyResView();
+});
+
+function renderAll(){
+  renderHome(); renderLocations(); renderCalendar(); renderReservations(); applyResView();
+  renderInterventions(); renderSynthese(); renderBiens(); renderContacts();
+}
 window.Store = Store;                              // exposé au module de synchro cloud
+window.gotoApt=gotoApt; window.resPrefill=resPrefill; window.locBack=locBack;   // accessibles depuis le HTML généré
 Store.load(); initSelects(); renderLegend(); renderAll();
 </script>
 
