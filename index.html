@@ -650,7 +650,7 @@ const CHANNELS = {
 };
 const RES_STATUS = ['Confirmé','Option','Terminé','Annulé'];
 const STATUS_CLASS = {'Confirmé':'status-c','Option':'status-o','Terminé':'status-t','Annulé':'status-a'};
-const INT_TYPES = ['Électricité','Plomberie','Ménage','Peinture','Serrurerie','Chauffage/Chaudière','Internet/Box','Électroménager','Jardinage','Clés/Gardiennage','Inspection','Autre'];
+const INT_TYPES = ['Ménage','Linge','Check-in','Électricité','Plomberie','Peinture','Serrurerie','Chauffage/Chaudière','Internet/Box','Électroménager','Jardinage','Clés/Gardiennage','Inspection','Autre'];
 const PAY_MODES = ['Espèces','Virement','Chèque','CB','Non réglé'];
 const PAY_STATUS = ['Payé','En attente','Partiel'];
 
@@ -718,6 +718,8 @@ function canApt(id){ return isAdmin() || myApts().includes(id); }
 function setMe(m){
   ME = { email:m?.email||null, role:m?.role||'concierge', apts:m?.apts||null };
   applyAccess(); initSelects(); renderAll();
+  // concierge avec un seul appart → on l'amène direct sur sa page
+  if(!isAdmin() && myApts().length===1){ currentLoc=myApts()[0]; activateView('loc'); renderLocations(); }
 }
 function applyAccess(){
   const admin = isAdmin();
@@ -1592,6 +1594,21 @@ function renderLocations(){
       <div class="kpi"><div class="k">Réservations à venir</div><div class="v">${upRes.length}</div></div>
     </div>
 
+    <div class="panel">
+      <div class="panel-h"><h2>Actions rapides</h2></div><hr class="gold-rule">
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn big gold" onclick="taskDone('${apt.id}','Ménage','Ménage fait')">🧹 Ménage fait</button>
+        <button class="btn big" onclick="taskDone('${apt.id}','Linge','Linge fait')">🧺 Linge fait</button>
+        <button class="btn big" onclick="taskDone('${apt.id}','Check-in','Check-in client OK')">🔑 Check-in client OK</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+        ${taskChip('🧹','Ménage',apt.id,'Ménage')}
+        ${taskChip('🧺','Linge',apt.id,'Linge')}
+        ${taskChip('🔑','Check-in',apt.id,'Check-in')}
+      </div>
+      <p class="hint" style="margin-top:10px">Un clic = c'est noté avec ton nom, la date et l'heure. Bruno est tenu au courant.</p>
+    </div>
+
     <div class="two-col">
       <div class="panel">
         <div class="panel-h"><h2>Arrivées &amp; départs (60 j)</h2></div><hr class="gold-rule">
@@ -1625,6 +1642,41 @@ function renderLocations(){
 function resPrefill(aptId){ resReset(); gv('resApt').value=aptId; activateView('res'); }
 /* retour à la grille des locations */
 function locBack(){ currentLoc=null; renderLocations(); }
+
+/* =====================================================================
+   ACTIONS RAPIDES CONCIERGE (ménage / linge / check-in) — Phase 3
+   Stockées comme interventions horodatées (kind:'task'), coût 0.
+   ===================================================================== */
+function meName(){
+  if(ME.email){ const m=(window.MEMBERS||[]).find(x=>x.email===ME.email); return (m&&m.name)?m.name:ME.email.split('@')[0]; }
+  return 'Moi';
+}
+function toast(msg){
+  let t=document.getElementById('bfToast');
+  if(!t){ t=document.createElement('div'); t.id='bfToast'; document.body.appendChild(t);
+    t.style.cssText='position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#16161c;border:1px solid var(--line-strong);color:var(--text);padding:11px 16px;border-radius:12px;z-index:200;box-shadow:0 8px 30px rgba(0,0,0,.5);font-size:14px;opacity:0;transition:opacity .25s;max-width:90vw;text-align:center'; }
+  t.textContent=msg; t.style.opacity='1';
+  clearTimeout(t._h); t._h=setTimeout(()=>{ t.style.opacity='0'; },2400);
+}
+function taskDone(aptId, type, label){
+  const now=new Date();
+  const rec={ id:uid(), aptId, date:ymd(now), time:now.toTimeString().slice(0,5),
+    who:meName(), type, desc:label, dur:0, cost:0, payMode:'', payStatus:'', payDate:'',
+    invoice:'', planned:false, kind:'task', notes:'', ts:now.toISOString() };
+  Store.data.interventions.push(rec); Store.save();
+  if(window.bfNotify) try{ window.bfNotify(rec, aptById(aptId)); }catch(_){}   // hook WhatsApp (Phase 4)
+  renderAll(); toast('✅ '+label+' — c\'est noté, merci !');
+}
+/* dernière occurrence d'un type de tâche pour un bien */
+function lastTask(aptId, type){
+  return interventions().filter(i=>i.aptId===aptId && i.kind==='task' && i.type===type)
+    .sort((a,b)=>(b.ts||b.date||'').localeCompare(a.ts||a.date||''))[0];
+}
+function taskChip(icon, label, aptId, type){
+  const l=lastTask(aptId,type);
+  if(!l) return `<span class="badge muted">${icon} ${label} : jamais</span>`;
+  return `<span class="badge free">${icon} ${label} : ${esc(l.who||'?')} · ${relDay(l.date)}${l.time?' '+l.time:''}</span>`;
+}
 
 /* =====================================================================
    RÉSERVATIONS — vue agenda
@@ -1673,7 +1725,7 @@ function renderAll(){
   renderInterventions(); renderSynthese(); renderBiens(); renderContacts();
 }
 window.Store = Store;                              // exposé au module de synchro cloud
-window.gotoApt=gotoApt; window.resPrefill=resPrefill; window.locBack=locBack;   // accessibles depuis le HTML généré
+window.gotoApt=gotoApt; window.resPrefill=resPrefill; window.locBack=locBack; window.taskDone=taskDone;   // accessibles depuis le HTML généré
 Store.load(); initSelects(); renderLegend(); applyAccess(); renderAll();
 </script>
 
