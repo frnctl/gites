@@ -609,6 +609,20 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); box-shadow:0 0
         </table>
       </div>
     </div>
+    <div class="panel" id="waPanel" hidden>
+      <div class="panel-h"><h2>🔔 Notifications WhatsApp (Bruno)</h2></div>
+      <hr class="gold-rule">
+      <p class="hint" style="margin-bottom:12px">Bruno reçoit un message WhatsApp à chaque action des concierges (ménage, linge, check-in). Via <b>CallMeBot</b> (gratuit). Voir <a href="https://github.com/frnctl/gites/blob/main/supabase/GUIDE-WHATSAPP.md" target="_blank" rel="noopener">le guide</a> pour obtenir la clé une fois.</p>
+      <div class="form">
+        <div class="field"><label>N° WhatsApp de Bruno</label><input id="wa_phone" placeholder="+33695710501"></div>
+        <div class="field"><label>Clé API CallMeBot</label><input id="wa_key" placeholder="123456"></div>
+        <div class="field check"><input type="checkbox" id="wa_enabled"><label for="wa_enabled" style="letter-spacing:.3px">Activer les notifications</label></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn primary" id="waSave">Enregistrer</button>
+        <button class="btn" id="waTest">Envoyer un test</button>
+      </div>
+    </div>
     <div class="panel">
       <div class="banner info" id="syncBanner">⚙️ Synchro multi-appareils (Supabase) : prête à brancher. Renseigne tes clés pour activer le partage iPhone ↔ Mac.</div>
       <button class="btn sm" id="btnReset" style="color:#ff8a8a;border-color:rgba(193,18,31,.5)">Réinitialiser toutes les données</button>
@@ -735,6 +749,7 @@ function applyAccess(){
     rb.className = 'badge '+(admin?'busy':'soon'); rb.style.padding='3px 9px';
   } else if(rb){ rb.remove(); }
   renderMembers();
+  if(window.renderWaSettings) renderWaSettings();
 }
 window.setMe=setMe; window.isAdmin=isAdmin;
 
@@ -773,7 +788,7 @@ function initSelects(){
   fillSelect(document.getElementById('intType'), INT_TYPES);
   fillSelect(document.getElementById('intPayMode'), PAY_MODES);
   fillSelect(document.getElementById('intPayStatus'), PAY_STATUS);
-  document.getElementById('contactList').innerHTML = contacts().map(c=>`<option value="${esc(c.name)}">`).join('');
+  document.getElementById('contactList').innerHTML = realContacts().map(c=>`<option value="${esc(c.name)}">`).join('');
 }
 let currentLoc=null;            // bien ouvert dans l'onglet « Locations » (null = grille)
 function activateView(view){
@@ -1248,8 +1263,9 @@ function aptDel(id){
 
 function renderContacts(){
   const tb=document.querySelector('#contactTable tbody');
-  if(!contacts().length){ tb.innerHTML='<tr><td colspan="6" class="empty">Aucun intervenant</td></tr>'; return; }
-  tb.innerHTML=contacts().map(c=>`<tr>
+  const list=realContacts();
+  if(!list.length){ tb.innerHTML='<tr><td colspan="6" class="empty">Aucun intervenant</td></tr>'; return; }
+  tb.innerHTML=list.map(c=>`<tr>
     <td>${esc(c.name)}</td><td>${esc(c.role)}</td>
     <td>${c.phone?`<a href="tel:${esc(c.phone)}">${esc(c.phone)}</a>`:''}</td>
     <td>${c.email?`<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`:''}</td>
@@ -1335,6 +1351,7 @@ async function memberDel(email){
   try{ await window.bfDeleteMember(email); }catch(e){ alert('Erreur : '+(e.message||e)); }
 }
 { const ma=gv('memberAdd'); if(ma) ma.onclick=memberAdd; }
+{ const ws=gv('waSave'); if(ws) ws.onclick=saveWaSettings; const wt=gv('waTest'); if(wt) wt.onclick=testWhatsapp; }
 window.renderMembers=renderMembers;
 
 /* =====================================================================
@@ -1679,6 +1696,53 @@ function taskChip(icon, label, aptId, type){
 }
 
 /* =====================================================================
+   NOTIFICATIONS WHATSAPP (CallMeBot, direct depuis l'app) — Phase 4
+   Réglages stockés dans Supabase comme ligne de contacts id='__bf_settings'
+   (admin écrit, tout le monde lit → les concierges peuvent notifier Bruno).
+   ===================================================================== */
+const SETTINGS_ID='__bf_settings';
+function realContacts(){ return contacts().filter(c=>!String(c.id).startsWith('__')); }
+function bfSettings(){ return contacts().find(c=>String(c.id)===SETTINGS_ID) || {}; }
+function buildNotifMsg(rec, apt){
+  const next = apt ? aptStatus(apt.id).next : null;
+  let m = `🏠 ${apt?apt.name:'Bien'} — ${rec.desc} par ${rec.who} (${fmtD(rec.date)}${rec.time?' '+rec.time:''}).`;
+  if(next) m += ` Prochain client : ${next.guest||next.channel}, arrivée ${relDay(next.arrival)} (${fmtD(next.arrival)}).`;
+  return m;
+}
+function sendWhatsapp(text){
+  const s=bfSettings();
+  if(!s.enabled || !s.whatsappPhone || !s.whatsappKey) return false;
+  const url=`https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(s.whatsappPhone)}&text=${encodeURIComponent(text)}&apikey=${encodeURIComponent(s.whatsappKey)}`;
+  try{ fetch(url,{mode:'no-cors'}).catch(()=>{}); return true; }catch(_){ return false; }
+}
+function bfNotify(rec, apt){ sendWhatsapp(buildNotifMsg(rec, apt)); }
+window.bfNotify=bfNotify;
+
+/* réglages (admin) */
+function renderWaSettings(){
+  const panel=gv('waPanel'); if(!panel) return;
+  panel.hidden = !(isAdmin() && ME.email);
+  if(panel.hidden) return;
+  const s=bfSettings();
+  gv('wa_phone').value = s.whatsappPhone || '+33695710501';
+  gv('wa_key').value   = s.whatsappKey   || '';
+  gv('wa_enabled').checked = !!s.enabled;
+}
+function saveWaSettings(){
+  const rec={ id:SETTINGS_ID, name:'(réglages notifications)', role:'', phone:'', email:'', notes:'',
+    whatsappPhone:gv('wa_phone').value.trim(), whatsappKey:gv('wa_key').value.trim(), enabled:gv('wa_enabled').checked };
+  const i=contacts().findIndex(c=>String(c.id)===SETTINGS_ID);
+  if(i>=0) Store.data.contacts[i]=rec; else Store.data.contacts.push(rec);
+  Store.save(); toast('Réglages WhatsApp enregistrés ✅');
+}
+function testWhatsapp(){
+  saveWaSettings();
+  const ok=sendWhatsapp('✅ Test Best Friend — les notifications WhatsApp fonctionnent !');
+  toast(ok ? 'Message de test envoyé à Bruno 📲' : 'Active d\'abord et renseigne téléphone + clé.');
+}
+window.renderWaSettings=renderWaSettings;
+
+/* =====================================================================
    RÉSERVATIONS — vue agenda
    ===================================================================== */
 function resFilteredSorted(){
@@ -1889,7 +1953,9 @@ async function pushAll(){
   if(!sb||!user) return;
   try{
     suppressUntil=Date.now()+2500;
-    for(const t of TABLES) await syncTable(t, Store.data[t]||[]);
+    const admin = window.isAdmin ? window.isAdmin() : true;
+    const tables = admin ? TABLES : ['reservations','interventions'];   // concierge : seulement ce qu'elle peut écrire
+    for(const t of tables) await syncTable(t, Store.data[t]||[]);
     setDot('ok','Sync ✓');
   }catch(e){ console.warn('push',e); setDot('ok','Erreur sync'); }
 }
