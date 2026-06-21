@@ -614,7 +614,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); box-shadow:0 0
       <hr class="gold-rule">
       <p class="hint" style="margin-bottom:12px">Bruno reçoit un message WhatsApp à chaque action des concierges (ménage, linge, check-in). Via <b>CallMeBot</b> (gratuit). Voir <a href="https://github.com/frnctl/gites/blob/main/supabase/GUIDE-WHATSAPP.md" target="_blank" rel="noopener">le guide</a> pour obtenir la clé une fois.</p>
       <div class="form">
-        <div class="field"><label>N° WhatsApp de Bruno</label><input id="wa_phone" placeholder="+33695710501"></div>
+        <div class="field"><label>N° WhatsApp de Bruno</label><input id="wa_phone" placeholder="33695710501"></div>
         <div class="field"><label>Clé API CallMeBot</label><input id="wa_key" placeholder="123456"></div>
         <div class="field check"><input type="checkbox" id="wa_enabled"><label for="wa_enabled" style="letter-spacing:.3px">Activer les notifications</label></div>
       </div>
@@ -1724,7 +1724,7 @@ function renderWaSettings(){
   panel.hidden = !(isAdmin() && ME.email);
   if(panel.hidden) return;
   const s=bfSettings();
-  gv('wa_phone').value = s.whatsappPhone || '+33695710501';
+  gv('wa_phone').value = s.whatsappPhone || '33695710501';
   gv('wa_key').value   = s.whatsappKey   || '';
   gv('wa_enabled').checked = !!s.enabled;
 }
