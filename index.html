@@ -13,10 +13,10 @@
 
 <!-- Webapp iOS (écran d'accueil iPhone) -->
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Best Friend">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0E0E10">
+<meta name="theme-color" content="#FFFFFF">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -370,6 +370,189 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); box-shadow:0 0
 .sub-title{font-family:'Jost'; font-weight:600; font-size:14px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin:0 0 10px}
 .two-col{display:grid; grid-template-columns:1fr 1fr; gap:16px}
 @media (max-width:760px){ .two-col{grid-template-columns:1fr} }
+
+/* =====================================================================
+   BF v4 — THÈME CLAIR « façon Apple » (surcouche finale, override)
+   ===================================================================== */
+:root{
+  --bg:#F2F2F7; --panel:#FFFFFF; --panel2:#F7F7FA; --panel3:#ECECF1;
+  --text:#1C1C1E; --muted:#6E6E73; --red:#E0303E; --gold:#B8860B;
+  --line:rgba(60,60,67,.13); --line-strong:rgba(224,48,62,.45);
+  --green:#1FA855; --blue:#0A84FF; --violet:#7E5BEF;
+  --glass:rgba(0,0,0,.015); --shadow:0 1px 2px rgba(0,0,0,.06), 0 10px 28px rgba(0,0,0,.05);
+  --r:18px; --r-sm:13px;
+  --font:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+}
+html,body{ -webkit-text-size-adjust:100%; }
+body{
+  font-family:var(--font); font-size:17px; line-height:1.5; color:var(--text);
+  background:
+    radial-gradient(1100px 600px at 90% -8%, rgba(224,48,62,.05), transparent 60%),
+    radial-gradient(900px 500px at -8% 0%, rgba(10,132,255,.05), transparent 55%),
+    var(--bg);
+  background-attachment:fixed;
+}
+h1,h2,h3{ font-family:var(--font); font-weight:700; letter-spacing:-.02em; color:var(--text); }
+.mono,.num{ font-family:var(--font); font-variant-numeric:tabular-nums; }
+a{ color:var(--blue); } a:hover{ text-decoration:none; opacity:.85; }
+:focus-visible{ outline:3px solid rgba(10,132,255,.5); outline-offset:2px; border-radius:8px; }
+
+/* Header */
+header.app{ background:rgba(255,255,255,.82); backdrop-filter:saturate(180%) blur(18px); -webkit-backdrop-filter:saturate(180%) blur(18px); border-bottom:1px solid var(--line); padding:12px 18px 0; }
+.brand h1{ font-size:24px; -webkit-text-fill-color:initial; background:none; color:var(--text); font-weight:800; }
+.brand .accent{ -webkit-text-fill-color:var(--red); color:var(--red); }
+.brand .sub{ color:var(--muted); }
+.sync-dot{ color:var(--muted); }
+
+/* Onglets du haut (desktop) */
+.tabs{ gap:4px; margin-top:14px; }
+.tab{ font-size:15px; font-weight:600; text-transform:none; letter-spacing:0; padding:11px 16px; color:var(--muted); border-radius:11px 11px 0 0; }
+.tab:hover{ color:var(--text); background:rgba(0,0,0,.03); }
+.tab[aria-selected="true"]{ color:var(--red); background:none; border-bottom-color:var(--red); }
+
+main{ font-size:17px; max-width:1180px; padding:20px 18px calc(40px + var(--safe-b)); }
+
+/* Cartes & panneaux */
+.panel{ background:var(--panel); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); padding:20px; backdrop-filter:none; }
+.panel-h h2{ font-size:20px; font-weight:700; color:var(--text); }
+.gold-rule{ background:var(--line); opacity:1; height:1px; }
+.hint{ color:var(--muted); font-size:13.5px; }
+.empty{ color:var(--muted); }
+
+/* Boutons : grands, arrondis, lisibles */
+.btn{ min-height:44px; padding:11px 18px; font-family:var(--font); font-size:15px; font-weight:600;
+  border-radius:13px; border:1px solid var(--line); background:#fff; color:var(--text); box-shadow:0 1px 2px rgba(0,0,0,.05); }
+.btn:hover{ transform:none; background:#fafafa; border-color:var(--line); }
+.btn:active{ transform:scale(.98); }
+.btn.sm{ min-height:38px; padding:8px 13px; font-size:14px; border-radius:11px; }
+.btn.primary{ background:var(--red); border-color:transparent; color:#fff; box-shadow:0 2px 10px rgba(224,48,62,.28); }
+.btn.primary:hover{ background:#cf2a37; filter:none; }
+.btn.gold{ background:var(--gold); border-color:transparent; color:#fff; box-shadow:0 2px 10px rgba(184,134,11,.25); }
+.btn.ghost{ background:transparent; box-shadow:none; }
+.btn.danger{ color:var(--red); border-color:rgba(224,48,62,.35); background:#fff; }
+.btn.danger:hover{ background:rgba(224,48,62,.07); }
+.btn.big{ min-height:56px; padding:16px 20px; font-size:17px; border-radius:16px; }
+
+/* Segmented (iOS) */
+.seg{ background:#EDEDF2; border:none; padding:3px; border-radius:12px; }
+.seg button{ background:transparent; color:var(--muted); font-weight:600; font-size:14px; padding:8px 14px; border-radius:9px; }
+.seg button[aria-pressed="true"]{ background:#fff; color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.14); }
+
+/* Chips / filtres */
+.chip{ background:#fff; border:1px solid var(--line); color:var(--muted); min-height:38px; border-radius:20px; font-size:14px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+.chip[aria-pressed="true"]{ background:var(--red); border-color:transparent; color:#fff; }
+
+/* Inputs (≥16px → pas de zoom iOS) */
+input,select,textarea{ background:#fff; border:1px solid var(--line); color:var(--text); border-radius:12px; padding:12px 14px; font-family:var(--font); font-size:16px; box-shadow:inset 0 1px 2px rgba(0,0,0,.03); }
+input:focus,select:focus,textarea:focus{ border-color:var(--blue); box-shadow:0 0 0 3px rgba(10,132,255,.18); }
+label{ color:var(--muted); font-size:12px; }
+
+/* KPIs */
+.kpis{ gap:14px; }
+.kpi{ background:#fff; border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); padding:16px; }
+.kpi::before{ display:none; }
+.kpi .k{ color:var(--muted); font-size:12px; }
+.kpi .v{ font-size:28px; font-weight:700; color:var(--text); letter-spacing:-.02em; }
+.kpi .v.red{ color:var(--red);} .kpi .v.green{ color:var(--green);} .kpi .v.gold{ color:var(--gold);}
+.kpi .sub2{ color:var(--muted); }
+
+/* Tableaux (desktop) */
+.table-wrap{ border:1px solid var(--line); border-radius:16px; background:#fff; box-shadow:var(--shadow); }
+table{ font-size:15px; }
+th{ background:#FAFAFC; color:var(--muted); font-size:11px; border-bottom:1px solid var(--line); }
+td{ border-bottom:1px solid var(--line); font-size:14.5px; }
+tbody tr:hover{ background:#FAFAFB; }
+tfoot td{ background:#FAFAFC; }
+.tag{ font-size:12px; }
+.tag.paid{ background:rgba(31,168,85,.14); color:#157a3e; }
+.tag.wait{ background:rgba(224,48,62,.13); color:#b51f2b; }
+.tag.part{ background:rgba(184,134,11,.16); color:#8a6608; }
+.tag.plan{ background:rgba(110,110,115,.16); color:#5a5a60; }
+.status-c{ color:#157a3e;} .status-o{ color:#8a6608;} .status-t{ color:var(--muted);} .status-a{ color:var(--red);}
+
+/* Cartes location & biens */
+.apt-card{ background:#fff; border:1px solid var(--line); border-left-width:5px; border-radius:16px; box-shadow:var(--shadow); }
+.loc-card{ background:#fff; border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); }
+.loc-card:hover{ transform:translateY(-2px); border-color:var(--line); box-shadow:0 6px 20px rgba(0,0,0,.09); }
+.loc-card .nm{ font-size:19px; font-weight:700; }
+.loc-card .mgr{ color:var(--gold); }
+.loc-card .arrow{ color:var(--blue); font-weight:600; }
+
+/* Badges */
+.badge{ border:none; font-size:13px; padding:6px 12px; font-weight:600; }
+.badge.free{ color:#157a3e; background:rgba(31,168,85,.14);}
+.badge.busy{ color:#8a6608; background:rgba(184,134,11,.16);}
+.badge.soon{ color:#0a6fd6; background:rgba(10,132,255,.13);}
+.badge.warn{ color:#b51f2b; background:rgba(224,48,62,.13);}
+.badge.muted{ color:var(--muted); background:rgba(110,110,115,.12);}
+
+/* Lignes "aujourd'hui" / feed */
+.today-row{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px 14px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+.today-row .who{ font-size:15.5px; }
+.feed-item .av{ color:#fff; }
+
+/* Hero accueil */
+.hero .hi{ font-size:30px; font-weight:800; letter-spacing:-.02em; }
+.hero .date{ color:var(--muted); font-size:14px; }
+.apt-hero{ background:#fff !important; border:1px solid var(--line); box-shadow:var(--shadow); }
+.apt-hero h2{ font-weight:800; }
+.back-link{ color:var(--blue); font-size:15px; font-weight:600; min-height:40px; }
+.sub-title{ color:var(--muted); }
+
+/* Bannières */
+.banner{ border-radius:14px; font-size:14px; }
+.banner.warn{ background:rgba(224,48,62,.09); border:1px solid rgba(224,48,62,.3); color:#b51f2b; }
+.banner.warn b{ color:#8a151f; }
+.banner.info{ background:rgba(10,132,255,.07); border:1px solid rgba(10,132,255,.25); color:#3a3a40; }
+
+/* Raccourcis géants (accueil) */
+.shortcuts{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:18px; }
+.shortcut{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; text-align:center;
+  background:#fff; border:1px solid var(--line); border-radius:18px; padding:18px 12px; cursor:pointer;
+  box-shadow:var(--shadow); font-weight:600; font-size:15px; color:var(--text); transition:transform .12s; }
+.shortcut:hover{ transform:translateY(-2px); }
+.shortcut .ic{ font-size:28px; }
+.shortcut.accent{ background:var(--red); color:#fff; border-color:transparent; }
+
+/* ---------- Barre de navigation BAS (mobile) ---------- */
+.bottom-nav{ display:none; }
+@media (max-width:760px){
+  header.app .tabs{ display:none; }            /* on remplace les onglets du haut */
+  main{ padding-bottom:calc(96px + env(safe-area-inset-bottom,0px)); }
+  .bottom-nav{ display:flex; position:fixed; left:0; right:0; bottom:0; z-index:60;
+    background:rgba(255,255,255,.92); backdrop-filter:saturate(180%) blur(18px); -webkit-backdrop-filter:saturate(180%) blur(18px);
+    border-top:1px solid var(--line); padding:7px 6px calc(7px + env(safe-area-inset-bottom,0px)); justify-content:space-around; }
+  .bottom-nav button{ flex:1; background:none; border:none; cursor:pointer; font-family:var(--font);
+    display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--muted); font-size:11px; font-weight:600; padding:4px 2px; min-width:0; }
+  .bottom-nav button .ic{ font-size:23px; line-height:1; }
+  .bottom-nav button.active{ color:var(--red); }
+}
+
+/* ---------- Confort mobile : texte plus grand, tableaux en CARTES ---------- */
+@media (max-width:760px){
+  body{ font-size:18px; }
+  .brand h1{ font-size:22px; }
+  .panel{ padding:16px; border-radius:16px; }
+  .panel-h h2{ font-size:18px; }
+  .form{ grid-template-columns:1fr; }
+  .seg button{ padding:9px 12px; }
+
+  table, thead, tbody, tr, td, tfoot{ display:block; width:100%; }
+  table{ min-width:0; }
+  thead{ display:none; }
+  .table-wrap{ border:none; background:none; box-shadow:none; border-radius:0; overflow:visible; }
+  tbody tr{ background:#fff; border:1px solid var(--line); border-radius:16px; margin-bottom:12px; padding:10px 14px; box-shadow:var(--shadow); }
+  tbody tr:hover{ background:#fff; }
+  td{ border:none; padding:7px 0; display:flex; justify-content:space-between; align-items:center; gap:14px; white-space:normal; text-align:right; font-size:15.5px; }
+  td:not(:last-child){ border-bottom:1px solid var(--line); }
+  td::before{ content:attr(data-label); color:var(--muted); font-weight:600; font-size:13px; text-align:left; flex:0 0 42%; }
+  td:empty{ display:none; }
+  td.notes{ max-width:none; }
+  td .row-actions{ justify-content:flex-end; }
+  tfoot tr{ background:#FAFAFC; }
+  .empty{ display:block; text-align:center; padding:24px; }
+  .shortcut{ font-size:16px; }
+}
 </style>
 </head>
 <body>
@@ -404,6 +587,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); box-shadow:0 0
         <div class="date" id="homeDate"></div>
       </div>
     </div>
+    <div class="shortcuts" id="homeShortcuts"></div>
     <div id="homeConflicts"></div>
     <div class="kpis" id="homeKpis"></div>
     <div class="panel">
@@ -632,6 +816,15 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold); box-shadow:0 0
   <p class="note-banner" id="storeNote">Données stockées localement (localStorage). Pense à exporter régulièrement.</p>
 </main>
 
+<!-- Barre de navigation bas (mobile) -->
+<nav class="bottom-nav" id="bottomNav" aria-label="Navigation">
+  <button data-view="home"><span class="ic">🏠</span>Accueil</button>
+  <button data-view="loc"><span class="ic">🏘️</span>Locations</button>
+  <button data-view="cal"><span class="ic">🗓️</span>Agenda</button>
+  <button data-view="res"><span class="ic">📋</span>Résas</button>
+  <button id="navMore"><span class="ic">⋯</span>Plus</button>
+</nav>
+
 <div id="tip" role="tooltip"></div>
 
 <!-- Modal générique (édition biens / contacts / import ics) -->
@@ -794,18 +987,30 @@ let currentLoc=null;            // bien ouvert dans l'onglet « Locations » (nu
 function activateView(view){
   document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected', String(x.dataset.view===view)));
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id==='view-'+view));
+  document.querySelectorAll('.bottom-nav button[data-view]').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
+  const more=document.getElementById('navMore'); if(more) more.classList.toggle('active', ['int','syn','biens'].includes(view));
   window.scrollTo({top:0,behavior:'smooth'});
 }
-document.querySelectorAll('.tab').forEach(t=>{
-  t.addEventListener('click',()=>{
-    if(t.dataset.view==='loc') currentLoc=null;     // clic onglet → retour à la grille
-    activateView(t.dataset.view);
-    if(t.dataset.view==='loc') renderLocations();
-    if(t.dataset.view==='home') renderHome();
-  });
-});
+function navigateTo(view){
+  if(view==='loc') currentLoc=null;               // retour à la grille
+  activateView(view);
+  if(view==='loc') renderLocations();
+  if(view==='home') renderHome();
+}
+document.querySelectorAll('.tab').forEach(t=> t.addEventListener('click',()=>navigateTo(t.dataset.view)));
+/* barre du bas (mobile) */
+document.querySelectorAll('.bottom-nav button[data-view]').forEach(b=> b.addEventListener('click',()=>navigateTo(b.dataset.view)));
+{ const more=document.getElementById('navMore'); if(more) more.onclick=openMoreSheet; }
+function openMoreSheet(){
+  const items=[ {v:'int',i:'🔧',l:'Interventions'} ];
+  if(isAdmin()){ items.push({v:'syn',i:'📊',l:'Synthèse'}); items.push({v:'biens',i:'⚙️',l:'Biens'}); }
+  openModal(`<h2 style="margin-bottom:14px">Plus</h2>
+    <div class="shortcuts">${items.map(it=>`<div class="shortcut" onclick="closeModal();navigateTo('${it.v}')"><span class="ic">${it.i}</span>${it.l}</div>`).join('')}</div>
+    <div class="form-actions"><button class="btn ghost" onclick="closeModal()">Fermer</button></div>`);
+}
 /* ouvre la page d'un bien (depuis une carte) */
 function gotoApt(id){ currentLoc=id; activateView('loc'); renderLocations(); }
+window.navigateTo=navigateTo;
 
 /* =====================================================================
    CALENDRIER (timeline multi-mois + détection de conflits)
@@ -1032,13 +1237,13 @@ function renderReservations(){
     const apt=aptById(r.aptId); const exch=isExchangeRes(r); const n=nights(r.arrival,r.departure);
     if(!exch && r.status!=='Annulé'){ totN+=n; totA+=Number(r.amount)||0; }
     return `<tr>
-      <td>${esc(apt?apt.name:'?')}</td>
-      <td><span class="pill"><span class="dot" style="background:${chColor(r.channel)}"></span>${esc(r.channel)}</span></td>
-      <td>${esc(r.guest)}${r.guests?` <span class="muted">·${esc(r.guests)}p</span>`:''}</td>
-      <td class="num">${fmtD(r.arrival)}</td><td class="num">${fmtD(r.departure)}</td><td class="num">${n}</td>
-      <td class="num">${exch?'<span style="color:var(--muted)">échange</span>':money(r.amount)}</td>
-      <td class="${STATUS_CLASS[r.status]||''}">${esc(r.status)}</td>
-      <td class="notes">${esc(r.notes)}</td>
+      <td data-label="Appart.">${esc(apt?apt.name:'?')}</td>
+      <td data-label="Canal"><span class="pill"><span class="dot" style="background:${chColor(r.channel)}"></span>${esc(r.channel)}</span></td>
+      <td data-label="Voyageur">${esc(r.guest)}${r.guests?` <span class="muted">·${esc(r.guests)}p</span>`:''}</td>
+      <td class="num" data-label="Arrivée">${fmtD(r.arrival)}</td><td class="num" data-label="Départ">${fmtD(r.departure)}</td><td class="num" data-label="Nuits">${n}</td>
+      <td class="num" data-label="Montant">${exch?'<span style="color:var(--muted)">échange</span>':money(r.amount)}</td>
+      <td class="${STATUS_CLASS[r.status]||''}" data-label="Statut">${esc(r.status)}</td>
+      <td class="notes" data-label="Notes">${esc(r.notes)}</td>
       <td><div class="row-actions"><button class="btn sm" onclick="resEdit('${r.id}')">✎</button><button class="btn sm danger" onclick="resDel('${r.id}')">✕</button></div></td>
     </tr>`;
   }).join('');
@@ -1097,11 +1302,11 @@ function renderInterventions(){
     if(!r.planned){ totH+=Number(r.dur)||0; totC+=Number(r.cost)||0; }
     const apt=aptById(r.aptId);
     return `<tr style="${r.planned?'opacity:.75':''}">
-      <td>${esc(apt?apt.name:'?')}${r.planned?' <span class="tag plan">à faire</span>':''}</td>
-      <td class="num">${fmtD(r.date)}</td><td>${esc(r.who)}</td><td>${esc(r.type)}</td>
-      <td class="notes">${esc(r.desc)}</td><td class="num">${r.dur?hours(r.dur):'—'}</td>
-      <td class="num">${money(r.cost)}</td><td>${esc(r.payMode)}</td><td>${payTag(r.payStatus)}</td>
-      <td class="num">${fmtD(r.payDate)}</td><td class="mono">${esc(r.invoice)}</td><td class="notes">${esc(r.notes)}</td>
+      <td data-label="Appart.">${esc(apt?apt.name:'?')}${r.planned?' <span class="tag plan">à faire</span>':''}</td>
+      <td class="num" data-label="Date">${fmtD(r.date)}</td><td data-label="Intervenant">${esc(r.who)}</td><td data-label="Type">${esc(r.type)}</td>
+      <td class="notes" data-label="Description">${esc(r.desc)}</td><td class="num" data-label="Durée">${r.dur?hours(r.dur):'—'}</td>
+      <td class="num" data-label="Coût">${money(r.cost)}</td><td data-label="Règlement">${esc(r.payMode)}</td><td data-label="Statut">${payTag(r.payStatus)}</td>
+      <td class="num" data-label="Date règl.">${fmtD(r.payDate)}</td><td class="mono" data-label="Réf">${esc(r.invoice)}</td><td class="notes" data-label="Notes">${esc(r.notes)}</td>
       <td><div class="row-actions"><button class="btn sm" onclick="intEdit('${r.id}')">✎</button><button class="btn sm danger" onclick="intDel('${r.id}')">✕</button></div></td>
     </tr>`;
   }).join('');
@@ -1530,8 +1735,17 @@ function renderHome(){
   if(ME.email && !isAdmin() && myApts().length===0){
     gv('homeConflicts').innerHTML = `<div class="banner info">🔑 <div><b>Compte connecté</b><br>Bruno ne t'a pas encore donné accès à un appartement. Préviens-le, il t'ajoutera en quelques secondes.</div></div>`;
     gv('homeKpis').innerHTML=''; gv('homeLocGrid').innerHTML='<p class="empty">Aucun appartement pour le moment</p>';
-    gv('homeToday').innerHTML=''; gv('homeFeed').innerHTML=''; return;
+    gv('homeToday').innerHTML=''; gv('homeFeed').innerHTML=''; gv('homeShortcuts').innerHTML=''; return;
   }
+
+  // raccourcis géants
+  const sc=[
+    {cls:'shortcut accent', ic:'➕', l:'Nouvelle réservation', act:"resReset();navigateTo('res')"},
+    {cls:'shortcut', ic:'🗓️', l:'Agenda', act:"navigateTo('cal')"},
+    {cls:'shortcut', ic:'🏘️', l:'Mes locations', act:"navigateTo('loc')"},
+  ];
+  if(isAdmin()) sc.push({cls:'shortcut', ic:'📊', l:'Synthèse', act:"navigateTo('syn')"});
+  gv('homeShortcuts').innerHTML = sc.map(s=>`<div class="${s.cls}" onclick="${s.act}"><span class="ic">${s.ic}</span>${s.l}</div>`).join('');
 
   const active=apts().filter(a=>a.active!==false);
   const t=todayYMD();
