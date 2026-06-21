@@ -562,6 +562,9 @@ tfoot td{ background:#FAFAFC; }
     <span class="sub">Cockpit location saisonnière · 4 appartements</span>
     <div class="toolbar">
       <span class="sync-dot local" id="syncDot" title="Stockage">Local</span>
+      <span id="userChip" class="badge muted" hidden></span>
+      <button class="btn sm primary" id="btnConnect">Se connecter</button>
+      <button class="btn sm ghost" id="btnLogout" hidden>Se déconnecter</button>
       <button class="btn sm" id="btnExport">Export</button>
       <button class="btn sm" id="btnImport">Import</button>
       <input type="file" id="fileImport" accept="application/json" hidden>
@@ -941,10 +944,23 @@ function applyAccess(){
     rb.textContent = admin ? '👑 Admin' : '🔑 Concierge';
     rb.className = 'badge '+(admin?'busy':'soon'); rb.style.padding='3px 9px';
   } else if(rb){ rb.remove(); }
+  // boutons connexion / déconnexion
+  const connBtn=document.getElementById('btnConnect'), outBtn=document.getElementById('btnLogout'), chip=document.getElementById('userChip');
+  if(ME.email){
+    if(connBtn) connBtn.hidden=true;
+    if(outBtn) outBtn.hidden=false;
+    if(chip){ chip.hidden=false; chip.textContent='👤 '+ME.email; }
+  } else {
+    if(connBtn) connBtn.hidden=false;
+    if(outBtn) outBtn.hidden=true;
+    if(chip) chip.hidden=true;
+  }
   renderMembers();
   if(window.renderWaSettings) renderWaSettings();
 }
 window.setMe=setMe; window.isAdmin=isAdmin;
+{ const cb=document.getElementById('btnConnect'); if(cb) cb.onclick=()=> window.bfShowLogin ? window.bfShowLogin() : toast('Connexion indisponible (hors ligne ou pas de réseau).'); }
+{ const lb=document.getElementById('btnLogout'); if(lb) lb.onclick=()=> { if(window.bfLogout) window.bfLogout(); }; }
 
 /* =====================================================================
    UTILITAIRES
@@ -2064,6 +2080,8 @@ function renderBanner(){
 }
 
 /* ---- connexion ---- */
+window.bfShowLogin = showLogin;
+window.bfLogout = async ()=>{ try{ await sb.auth.signOut(); }catch(_){} location.reload(); };
 function showLogin(){
   setDot('local','Connexion');
   window.openModal(`
