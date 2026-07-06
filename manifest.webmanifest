@@ -1,7 +1,7 @@
 {
-  "name": "Best Friend — Gestion locations saisonnières",
-  "short_name": "Best Friend",
-  "description": "Dashboard de gestion des locations saisonnières.",
+  "name": "Maestro — le cerveau des locations",
+  "short_name": "Maestro",
+  "description": "Le cerveau qui orchestre les locations saisonnières : partition du jour, ménages, arrivées, règlements.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

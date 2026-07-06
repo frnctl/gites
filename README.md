@@ -1,9 +1,25 @@
-# Best Friend — Cockpit de gestion (location saisonnière)
+# Maestro — le cerveau des locations (Best Friend)
 
-> « Best Friend » (BF) — en clin d'œil aux initiales de **Bruno Fulda**. Le favicon reprend ces initiales en hébreu (פב).
+> **Maestro** orchestre 4 appartements en location saisonnière. L'héritage « Best Friend » (BF, initiales de **Bruno Fulda**) reste dans le favicon en hébreu (פב).
 
-Tableau de bord autonome pour piloter 4 appartements en location saisonnière.
-**Un seul fichier** (`index.html`) : HTML + CSS + JS vanilla, aucune dépendance, aucun build.
+Application autonome : **un seul fichier** (`index.html`), HTML + CSS + JS vanilla, aucune dépendance, aucun build.
+
+## Le cerveau (accueil « Maestro »)
+
+Un moteur d'analyse (`maestroBrain()`) lit toutes les données — réservations, interventions, tâches concierge, règlements — et compose à l'ouverture :
+
+- **Le briefing** : une phrase qui donne le ton de la journée (calme / chargée / critique).
+- **La partition du jour** : la liste des actions à traiter, priorisées en 4 niveaux —
+  🔥 *Critique* (double réservation, rotation départ+arrivée le même jour sans ménage pointé),
+  📌 *Aujourd'hui* (ménages à faire, départs, arrivées, interventions du jour ou en retard),
+  🔭 *À prévoir* (arrivées de demain, interventions de demain, options à confirmer, règlements en attente),
+  🧾 *Suivi* (réservations sans montant). Chaque action a son bouton : « Ménage fait », WhatsApp voyageur, ouvrir la fiche…
+- **Le pouls** : occupés / arrivées sous 7 jours / revenu du mois / à régler.
+- **Les 7 prochains jours** : départs, arrivées et interventions groupés par journée.
+- **Mes locations** : état de chaque bien (occupé/libre, prochaine arrivée, dernier ménage).
+- **📲 Briefing WhatsApp** : le digest du jour envoyable à Bruno en un clic ; le rappel automatique de la veille (départs, arrivées, interventions de demain) passe aussi par Maestro.
+
+Les concierges voient la même partition, filtrée sur leurs appartements.
 
 ## Les 4 appartements
 
@@ -18,6 +34,7 @@ Tableau de bord autonome pour piloter 4 appartements en location saisonnière.
 
 ## Onglets
 
+- **Maestro** — l'accueil intelligent décrit ci-dessus.
 - **Calendrier** — timeline d'occupation **multi-mois** (1 / 2 / 3 mois), barres colorées par canal, empilement des séjours qui se chevauchent. **Détection automatique des doubles réservations** (liseré rouge + bandeau d'alerte). Trame hachurée = séjour d'échange. Le jour de départ ne compte pas comme nuit.
 - **Réservations** — formulaire (bien, canal, voyageur, nb de personnes, dates, nuits + €/nuit auto, montant, frais de ménage, échange, statut, notes), tableau triable + recherche + filtre par bien. **Import iCal `.ics`** (Airbnb/Booking) par dépôt de fichier.
 - **Interventions** — suivi technique (date, intervenant, type, durée, coût, mode/statut/date de règlement, réf facture), interventions **planifiées / à faire**, recherche + filtres, totaux heures/coût.
