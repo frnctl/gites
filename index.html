@@ -588,6 +588,33 @@ tfoot td{ background:#FAFAFC; }
 .pthumb{ width:54px; height:54px; object-fit:cover; border-radius:10px; cursor:pointer; border:1px solid var(--line); box-shadow:var(--shadow); }
 .pthumb:hover{ filter:brightness(1.05); }
 
+/* ---------- Cockpit ops : santé, messages, checklists ---------- */
+.ops-grid{display:grid; grid-template-columns:1.1fr 1fr; gap:16px; margin-bottom:16px}
+.ops-stack{display:flex; flex-direction:column; gap:10px}
+.issue-row{display:flex; align-items:flex-start; gap:10px; padding:11px 12px; border:1px solid var(--line); border-radius:14px; background:#fff}
+.issue-row .sev{width:30px; height:30px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex:none; font-size:15px}
+.issue-row.danger .sev{background:rgba(224,48,62,.11); color:var(--red)}
+.issue-row.warn .sev{background:rgba(184,134,11,.14); color:#8a6608}
+.issue-row.ok .sev{background:rgba(31,168,85,.13); color:#157a3e}
+.issue-row .title{font-weight:700; font-size:15px}
+.issue-row .detail{color:var(--muted); font-size:13px; margin-top:1px}
+.msg-card{border:1px solid var(--line); border-radius:14px; background:#fff; padding:12px; display:flex; flex-direction:column; gap:8px}
+.msg-card .msg-top{display:flex; gap:8px; align-items:flex-start; justify-content:space-between}
+.msg-card .msg-title{font-weight:700; font-size:15px}
+.msg-card .msg-meta{color:var(--muted); font-size:12.5px}
+.msg-card textarea{min-height:118px; font-size:14px}
+.mini-actions{display:flex; gap:8px; flex-wrap:wrap}
+.checklist{display:flex; flex-direction:column; gap:8px; margin:10px 0}
+.checkline{display:flex; align-items:flex-start; gap:9px; padding:9px 10px; background:var(--panel2); border:1px solid var(--line); border-radius:12px}
+.checkline input{width:auto; margin-top:4px}
+.health-score{display:flex; align-items:baseline; gap:8px; margin-bottom:10px}
+.health-score b{font-size:30px; letter-spacing:-.02em}
+.health-score span{color:var(--muted)}
+.health-score .red{color:var(--red)}
+.health-score .gold{color:var(--gold)}
+.health-score .green{color:var(--green)}
+@media (max-width:900px){.ops-grid{grid-template-columns:1fr}}
+
 @media (max-width:760px){
   .focus-top .fbig{ font-size:30px; }
   .btn.big{ font-size:18px; }
@@ -633,6 +660,7 @@ tfoot td{ background:#FAFAFC; }
     <div class="shortcuts" id="homeShortcuts"></div>
     <div id="homeConflicts"></div>
     <div class="kpis" id="homeKpis"></div>
+    <div id="homeOps"></div>
     <div class="panel">
       <div class="panel-h"><h2>Mes locations</h2><div class="spacer"></div>
         <span class="hint">Clique une carte pour ouvrir sa page</span>
@@ -841,7 +869,7 @@ tfoot td{ background:#FAFAFC; }
     <div class="panel" id="waPanel" hidden>
       <div class="panel-h"><h2>🔔 Notifications WhatsApp (Bruno)</h2></div>
       <hr class="gold-rule">
-      <p class="hint" style="margin-bottom:12px">Bruno reçoit un message WhatsApp à chaque action des concierges (ménage, linge, check-in). Via <b>CallMeBot</b> (gratuit). Voir <a href="https://github.com/frnctl/gites/blob/main/supabase/GUIDE-WHATSAPP.md" target="_blank" rel="noopener">le guide</a> pour obtenir la clé une fois.</p>
+      <p class="hint" style="margin-bottom:12px">Bruno reçoit un message WhatsApp à chaque action des concierges (ménage, linge, check-in). Via <b>CallMeBot</b> (gratuit). Voir <a href="https://github.com/Sashadegit/Location-Paris-BF/blob/main/supabase/GUIDE-WHATSAPP.md" target="_blank" rel="noopener">le guide</a> pour obtenir la clé une fois.</p>
       <div class="form">
         <div class="field"><label>N° WhatsApp de Bruno</label><input id="wa_phone" placeholder="33695710501"></div>
         <div class="field"><label>Clé API CallMeBot</label><input id="wa_key" placeholder="123456"></div>
@@ -905,6 +933,12 @@ const STATUS_CLASS = {'Confirmé':'status-c','Option':'status-o','Terminé':'sta
 const INT_TYPES = ['Ménage','Linge','Check-in','Électricité','Plomberie','Peinture','Serrurerie','Chauffage/Chaudière','Internet/Box','Électroménager','Jardinage','Clés/Gardiennage','Inspection','Autre'];
 const PAY_MODES = ['Espèces','Virement','Chèque','CB','Non réglé'];
 const PAY_STATUS = ['Payé','En attente','Partiel'];
+const FIELD_CHECKLISTS = {
+  'Ménage': ['Lits refaits', 'Serviettes propres', 'Poubelles sorties', 'Cuisine vérifiée', 'Salle de bain vérifiée', 'Sols propres', 'Fenêtres fermées', 'Photos preuve ajoutées si besoin'],
+  'Linge': ['Draps récupérés', 'Serviettes récupérées', 'Stock linge propre vérifié', 'Manquant signalé'],
+  'Check-in': ['Clés disponibles', 'Accès expliqué', 'Wifi transmis', 'Chauffage/clim expliqué', 'État d’entrée rapide vérifié'],
+  'Inspection': ['Lumières éteintes', 'Eau/chauffage OK', 'Fenêtres fermées', 'Objets oubliés vérifiés', 'Problème signalé si besoin']
+};
 
 const Store = {
   data:{apartments:[], reservations:[], interventions:[], contacts:[]},
@@ -1623,13 +1657,21 @@ window.renderMembers=renderMembers;
    ===================================================================== */
 gv('resImportIcal').onclick=()=>openModal(`
   <h2 style="margin-bottom:12px">Importer un calendrier .ics</h2>
-  <p class="hint" style="margin-bottom:12px">Télécharge l'export iCal de l'annonce (Airbnb/Booking) puis dépose le fichier ici. Les séjours seront ajoutés au bien et canal choisis.</p>
+  <p class="hint" style="margin-bottom:12px">Dépose un fichier .ics, ou colle un lien iCal Airbnb/Booking. Le lien sera tenté directement puis via proxy public si le navigateur bloque CORS.</p>
   <div class="form">
     <div class="field"><label>Bien</label><select id="ics_apt">${aptOptions().map(o=>`<option value="${o.v}">${esc(o.l)}</option>`).join('')}</select></div>
     <div class="field"><label>Canal</label><select id="ics_ch">${Object.keys(CHANNELS).map(c=>`<option ${c==='Airbnb'?'selected':''}>${c}</option>`).join('')}</select></div>
+    <div class="field wide"><label>Lien iCal .ics</label><input id="ics_url" placeholder="https://.../calendar.ics"></div>
     <div class="field wide"><label>Fichier .ics</label><input type="file" id="ics_file" accept=".ics,text/calendar"></div>
   </div>
-  <div class="form-actions"><button class="btn primary" onclick="doIcsImport()">Importer</button><button class="btn ghost" onclick="closeModal()">Annuler</button></div>`);
+  <div class="form-actions">
+    <button class="btn primary" onclick="doIcsImport()">Importer</button>
+    <button class="btn" onclick="saveIcalFeed()">Enregistrer le lien</button>
+    <button class="btn ghost" onclick="closeModal()">Annuler</button>
+  </div>
+  <hr class="gold-rule" style="margin-top:14px">
+  <div class="sub-title">Liens enregistrés</div>
+  <div id="ics_saved">${renderSavedIcalFeeds()}</div>`);
 
 function parseICS(text){
   const events=[]; const lines=text.replace(/\r\n/g,'\n').replace(/\n[ \t]/g,'').split('\n');
@@ -1650,27 +1692,90 @@ function parseICS(text){
   return events;
 }
 function icsDate(v){ const m=v.match(/(\d{4})(\d{2})(\d{2})/); return m?`${m[1]}-${m[2]}-${m[3]}`:''; }
+function importIcsEvents(text, aptId, channel, source){
+  const evs=parseICS(text); let added=0,updated=0,skipped=0;
+  evs.forEach(ev=>{
+    const arrival=icsDate(ev.start||''), departure=icsDate(ev.end||'');
+    if(!arrival||!departure) return;
+    const sum=(ev.summary||'').toLowerCase();
+    if(sum.includes('not available')||sum.includes('blocked')||sum.includes('indisponible')){ skipped++; return; }
+    const sourceUid=ev.uid ? `${source||channel}:${ev.uid}` : '';
+    const existing=sourceUid ? reservations().find(r=>r.sourceUid===sourceUid) : reservations().find(r=>r.aptId===aptId&&r.arrival===arrival&&r.departure===departure);
+    const rec={ aptId, channel, guest:ev.summary&&!/reserved|réserv/i.test(ev.summary)?ev.summary:'(iCal)',
+      guests:'', arrival, departure, amount:0, cleaning:0, isExchange:!!CHANNELS[channel]?.exchange,
+      status:'Confirmé', notes:'Importé iCal'+(ev.uid?' · '+ev.uid.slice(0,24):''), sourceUid, sourceChannel:channel,
+      sourceImportedAt:new Date().toISOString() };
+    if(existing){
+      Object.assign(existing, { ...rec, id:existing.id, amount:existing.amount||0, cleaning:existing.cleaning||0, notes:existing.notes||rec.notes });
+      updated++;
+    }else{
+      Store.data.reservations.push({ id:uid(), ...rec });
+      added++;
+    }
+  });
+  Store.save(); renderAll();
+  return {added,updated,skipped};
+}
+async function fetchIcsText(url){
+  const direct=await fetch(url).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); }).catch(()=>null);
+  if(direct) return direct;
+  const proxy='https://api.allorigins.win/raw?url='+encodeURIComponent(url);
+  return fetch(proxy).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); });
+}
+function savedIcalFeeds(){ return Array.isArray(bfSettings().icalFeeds) ? bfSettings().icalFeeds : []; }
+function renderSavedIcalFeeds(){
+  const feeds=savedIcalFeeds();
+  if(!feeds.length) return '<p class="empty" style="padding:12px">Aucun lien enregistré.</p>';
+  return '<div class="ops-stack">'+feeds.map(f=>`<div class="issue-row ok"><div class="sev">🗓️</div><div style="flex:1"><div class="title">${esc(aptById(f.aptId)?.name||'?')} · ${esc(f.channel)}</div><div class="detail">${esc(f.url)}</div></div><button class="btn sm" onclick="refreshIcalFeed('${f.id}')">Rafraîchir</button><button class="btn sm danger" onclick="deleteIcalFeed('${f.id}')">✕</button></div>`).join('')+'</div>';
+}
+function persistSettingsPatch(patch){
+  const current=bfSettings();
+  const rec={...current, id:SETTINGS_ID, name:current.name||'(réglages notifications)', role:current.role||'', phone:current.phone||'', email:current.email||'', notes:current.notes||'', ...patch};
+  const i=contacts().findIndex(c=>String(c.id)===SETTINGS_ID);
+  if(i>=0) Store.data.contacts[i]=rec; else Store.data.contacts.push(rec);
+  Store.save();
+}
+function saveIcalFeed(){
+  const url=gv('ics_url').value.trim(), aptId=gv('ics_apt').value, channel=gv('ics_ch').value;
+  if(!url){ alert('Colle un lien iCal .ics.'); return; }
+  const feeds=savedIcalFeeds().filter(f=>!(f.aptId===aptId && f.channel===channel && f.url===url));
+  feeds.push({id:uid(), aptId, channel, url, createdAt:new Date().toISOString(), lastSync:''});
+  persistSettingsPatch({icalFeeds:feeds});
+  gv('ics_saved').innerHTML=renderSavedIcalFeeds();
+  toast('Lien iCal enregistré');
+}
+function deleteIcalFeed(id){
+  persistSettingsPatch({icalFeeds:savedIcalFeeds().filter(f=>f.id!==id)});
+  const box=gv('ics_saved'); if(box) box.innerHTML=renderSavedIcalFeeds();
+}
+async function refreshIcalFeed(id){
+  const feed=savedIcalFeeds().find(f=>f.id===id); if(!feed) return;
+  toast('Rafraîchissement iCal…');
+  try{
+    const text=await fetchIcsText(feed.url);
+    const res=importIcsEvents(text, feed.aptId, feed.channel, feed.url);
+    const feeds=savedIcalFeeds().map(f=>f.id===id?{...f,lastSync:new Date().toISOString()}:f);
+    persistSettingsPatch({icalFeeds:feeds});
+    const box=gv('ics_saved'); if(box) box.innerHTML=renderSavedIcalFeeds();
+    alert(`iCal rafraîchi : ${res.added} ajouté(s), ${res.updated} mis à jour, ${res.skipped} ignoré(s).`);
+  }catch(e){ alert('Impossible de lire ce lien depuis le navigateur. Garde le fichier .ics en fallback.'); }
+}
 function doIcsImport(){
-  const aptId=gv('ics_apt').value, channel=gv('ics_ch').value, f=gv('ics_file').files[0];
-  if(!f){ alert('Choisis un fichier .ics'); return; }
+  const aptId=gv('ics_apt').value, channel=gv('ics_ch').value, f=gv('ics_file').files[0], url=gv('ics_url').value.trim();
+  if(url && !f){
+    fetchIcsText(url).then(text=>{
+      const res=importIcsEvents(text, aptId, channel, url);
+      closeModal(); alert(`Import terminé : ${res.added} ajouté(s), ${res.updated} mis à jour, ${res.skipped} ignoré(s).`);
+    }).catch(()=>alert('Lien iCal bloqué ou inaccessible. Essaie avec le fichier .ics.'));
+    return;
+  }
+  if(!f){ alert('Choisis un fichier .ics ou colle un lien iCal.'); return; }
   const rd=new FileReader();
   rd.onload=()=>{
     try{
-      const evs=parseICS(rd.result); let added=0,skipped=0;
-      evs.forEach(ev=>{
-        const arrival=icsDate(ev.start||''), departure=icsDate(ev.end||'');
-        if(!arrival||!departure) return;
-        const sum=(ev.summary||'').toLowerCase();
-        if(sum.includes('not available')||sum.includes('blocked')||sum.includes('indisponible')){ skipped++; return; }
-        // anti-doublon : même bien + mêmes dates
-        if(reservations().some(r=>r.aptId===aptId&&r.arrival===arrival&&r.departure===departure)){ skipped++; return; }
-        Store.data.reservations.push({ id:uid(), aptId, channel, guest:ev.summary&&!/reserved|réserv/i.test(ev.summary)?ev.summary:'(iCal)',
-          guests:'', arrival, departure, amount:0, cleaning:0, isExchange:!!CHANNELS[channel]?.exchange,
-          status:'Confirmé', notes:'Importé iCal'+(ev.uid?' · '+ev.uid.slice(0,24):'') });
-        added++;
-      });
-      Store.save(); closeModal(); renderAll();
-      alert(`Import terminé : ${added} séjour(s) ajouté(s), ${skipped} ignoré(s).`);
+      const res=importIcsEvents(rd.result, aptId, channel, f.name);
+      closeModal();
+      alert(`Import terminé : ${res.added} ajouté(s), ${res.updated} mis à jour, ${res.skipped} ignoré(s).`);
     }catch(err){ alert('Fichier .ics illisible.'); }
   };
   rd.readAsText(f);
@@ -1872,6 +1977,93 @@ function renderDueRecap(){
       </div>
     </div></div>`;
 }
+
+function futureReservations(days=21){
+  const t=todayYMD();
+  const end=ymd(new Date(Date.now()+days*86400000));
+  return reservations().filter(r=>r.status!=='Annulé' && r.arrival && r.departure && r.departure>=t && r.arrival<=end)
+    .sort((a,b)=>a.arrival.localeCompare(b.arrival));
+}
+function latestDepartureWithoutCleaning(){
+  const t=todayYMD();
+  const starts=ymd(new Date(Date.now()-7*86400000));
+  const deps=reservations().filter(r=>r.status!=='Annulé' && r.departure && r.departure>=starts && r.departure<=t);
+  return deps.filter(r=>!interventions().some(i=>i.aptId===r.aptId && i.kind==='task' && i.type==='Ménage' && i.date>=r.departure));
+}
+function opsIssues(){
+  const issues=[];
+  const conflicts=detectConflicts().list;
+  if(conflicts.length) issues.push({sev:'danger', icon:'⚠️', title:conflicts.length+' double réservation(s)', detail:conflicts.slice(0,3).join(' · ')});
+  const late=interventions().filter(i=>i.planned && i.date && i.date<todayYMD()).sort((a,b)=>a.date.localeCompare(b.date));
+  if(late.length) issues.push({sev:'danger', icon:'⏳', title:late.length+' tâche(s) en retard', detail:late.slice(0,3).map(i=>(aptById(i.aptId)?.name||'?')+' · '+i.type+' · '+fmtD(i.date)).join(' · ')});
+  const dirty=latestDepartureWithoutCleaning();
+  if(dirty.length) issues.push({sev:'warn', icon:'🧹', title:dirty.length+' départ(s) sans ménage noté', detail:dirty.slice(0,3).map(r=>(aptById(r.aptId)?.name||'?')+' · '+fmtD(r.departure)).join(' · ')});
+  const missingAmount=reservations().filter(r=>r.status!=='Annulé' && !isExchangeRes(r) && r.arrival>=todayYMD() && !Number(r.amount)).slice(0,8);
+  if(missingAmount.length) issues.push({sev:'warn', icon:'€', title:missingAmount.length+' réservation(s) sans montant', detail:missingAmount.slice(0,3).map(r=>(aptById(r.aptId)?.name||'?')+' · '+(r.guest||r.channel)).join(' · ')});
+  const unpaid=interventions().filter(i=>!i.planned && Number(i.cost)>0 && i.payStatus!=='Payé');
+  if(unpaid.length) issues.push({sev:'warn', icon:'💶', title:money0(unpaid.reduce((s,i)=>s+(Number(i.cost)||0),0))+' à régler', detail:unpaid.slice(0,3).map(i=>(i.who||'Intervenant')+' · '+(aptById(i.aptId)?.name||'?')).join(' · ')});
+  if(!issues.length) issues.push({sev:'ok', icon:'✓', title:'Rien de critique', detail:'Aucun conflit, retard ou paiement urgent détecté.'});
+  return issues;
+}
+function guestTemplate(kind, r){
+  const apt=aptById(r.aptId)||{};
+  const hello=r.guest ? `Bonjour ${r.guest},` : 'Bonjour,';
+  const place=apt.name ? ` pour ${apt.name}` : '';
+  const addr=apt.address ? `\nAdresse : ${apt.address}` : '';
+  if(kind==='arrival') return `${hello}\n\nVotre arrivée${place} est prévue le ${fmtD(r.arrival)}.\nJe vous envoie les informations pratiques pour l'accès et reste disponible si besoin.${addr}\n\nÀ très vite,\nBruno`;
+  if(kind==='departure') return `${hello}\n\nJ'espère que votre séjour s'est bien passé. Le départ${place} est prévu le ${fmtD(r.departure)}.\nMerci de bien fermer les fenêtres, éteindre les lumières et remettre les clés comme indiqué.\n\nBonne journée,\nBruno`;
+  return `${hello}\n\nPetit rappel pour votre séjour${place} : arrivée le ${fmtD(r.arrival)}, départ le ${fmtD(r.departure)}.\nSi vous avez une question, vous pouvez me répondre ici.\n\nBruno`;
+}
+function messageId(kind,id){ return 'msg_'+kind+'_'+String(id).replace(/[^a-zA-Z0-9_-]/g,'_'); }
+async function copyMessage(id){
+  const el=gv(id); if(!el) return;
+  try{ await navigator.clipboard.writeText(el.value); toast('Message copié'); }
+  catch(_){ el.select(); document.execCommand('copy'); toast('Message copié'); }
+}
+function sendGuestWhatsApp(id, phone){
+  const el=gv(id), wa=waNumber(phone);
+  if(!el || !wa){ toast('Téléphone voyageur manquant.'); return; }
+  window.open(`https://wa.me/${wa}?text=${encodeURIComponent(el.value)}`,'_blank','noopener');
+}
+function renderGuestMessages(){
+  const rows=futureReservations(14).filter(r=>r.phone || r.arrival<=ymd(new Date(Date.now()+5*86400000))).slice(0,4);
+  if(!rows.length) return '<p class="empty">Aucune réservation proche.</p>';
+  return rows.map(r=>{
+    const kind=r.arrival<=ymd(new Date(Date.now()+3*86400000)) ? 'arrival' : 'reminder';
+    const id=messageId(kind,r.id);
+    const apt=aptById(r.aptId);
+    return `<div class="msg-card">
+      <div class="msg-top"><div><div class="msg-title">${esc(r.guest||'(sans nom)')} · ${esc(apt?.name||'?')}</div>
+        <div class="msg-meta">${fmtD(r.arrival)} → ${fmtD(r.departure)} · ${esc(r.channel)}</div></div>
+        <span class="badge ${r.phone?'free':'warn'}">${r.phone?'WhatsApp prêt':'Tél. manquant'}</span></div>
+      <textarea id="${id}">${esc(guestTemplate(kind,r))}</textarea>
+      <div class="mini-actions">
+        <button class="btn sm" onclick="copyMessage('${id}')">Copier</button>
+        <button class="btn sm gold" onclick="sendGuestWhatsApp('${id}','${esc(r.phone||'')}')">WhatsApp</button>
+        <button class="btn sm ghost" onclick="resEdit('${r.id}')">Ouvrir résa</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function renderOpsPanel(){
+  const box=gv('homeOps'); if(!box) return;
+  const issues=opsIssues();
+  const bad=issues.filter(i=>i.sev==='danger').length, warn=issues.filter(i=>i.sev==='warn').length;
+  const score=Math.max(0, 100 - bad*30 - warn*12);
+  box.innerHTML=`<div class="ops-grid">
+    <div class="panel">
+      <div class="panel-h"><h2>Santé opérationnelle</h2><div class="spacer"></div><button class="btn sm ghost" onclick="navigateTo('int')">Voir tâches</button></div>
+      <hr class="gold-rule">
+      <div class="health-score"><b class="${score<70?'red':score<90?'gold':'green'}">${score}%</b><span>${bad?'urgence':warn?'à surveiller':'stable'}</span></div>
+      <div class="ops-stack">${issues.map(i=>`<div class="issue-row ${i.sev}"><div class="sev">${i.icon}</div><div><div class="title">${esc(i.title)}</div><div class="detail">${esc(i.detail)}</div></div></div>`).join('')}</div>
+    </div>
+    <div class="panel">
+      <div class="panel-h"><h2>Messages voyageurs prêts</h2><div class="spacer"></div><button class="btn sm ghost" onclick="navigateTo('res')">Réservations</button></div>
+      <hr class="gold-rule">
+      <div class="ops-stack">${renderGuestMessages()}</div>
+    </div>
+  </div>`;
+}
 function renderHome(){
   const now=new Date();
   gv('homeDate').textContent = now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
@@ -1882,7 +2074,7 @@ function renderHome(){
   if(ME.email && !isAdmin() && myApts().length===0){
     gv('homeConflicts').innerHTML = `<div class="banner info">🔑 <div><b>Compte connecté</b><br>Bruno ne t'a pas encore donné accès à un appartement. Préviens-le, il t'ajoutera en quelques secondes.</div></div>`;
     gv('homeKpis').innerHTML=''; gv('homeLocGrid').innerHTML='<p class="empty">Aucun appartement pour le moment</p>';
-    gv('homeToday').innerHTML=''; gv('homeFeed').innerHTML=''; gv('homeShortcuts').innerHTML=''; gv('homeFocus').innerHTML=''; return;
+    gv('homeToday').innerHTML=''; gv('homeFeed').innerHTML=''; gv('homeShortcuts').innerHTML=''; gv('homeFocus').innerHTML=''; gv('homeOps').innerHTML=''; return;
   }
 
   renderTodayFocus();
@@ -1913,6 +2105,7 @@ function renderHome(){
     <div class="kpi"><div class="k">Revenu du mois</div><div class="v gold">${money0(revM)}</div></div>`;
 
   gv('homeLocGrid').innerHTML=active.map(locCardHTML).join('') || '<p class="empty">Aucun bien actif</p>';
+  renderOpsPanel();
 
   const {list}=detectConflicts();
   gv('homeConflicts').innerHTML = list.length
@@ -1986,6 +2179,11 @@ function renderLocations(){
         <div class="qa"><button class="btn big" onclick="taskDone('${apt.id}','Check-in','Check-in client OK')">🔑 Check-in client OK</button>
           <button class="btn big photo" title="Ajouter une photo" onclick="taskPhoto('${apt.id}','Check-in','Check-in client OK')">📷</button></div>
       </div>
+      <div class="mini-actions" style="margin-top:14px">
+        <button class="btn sm" onclick="taskChecklist('${apt.id}','Ménage')">Checklist ménage</button>
+        <button class="btn sm" onclick="taskChecklist('${apt.id}','Linge')">Checklist linge</button>
+        <button class="btn sm" onclick="taskChecklist('${apt.id}','Inspection')">Inspection départ</button>
+      </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
         ${taskChip('🧹','Ménage',apt.id,'Ménage')}
         ${taskChip('🧺','Linge',apt.id,'Linge')}
@@ -2043,15 +2241,35 @@ function toast(msg){
   t.textContent=msg; t.style.opacity='1';
   clearTimeout(t._h); t._h=setTimeout(()=>{ t.style.opacity='0'; },2400);
 }
-function taskDone(aptId, type, label, photos){
+function taskDone(aptId, type, label, photos, extra){
   const now=new Date();
   const rec={ id:uid(), aptId, date:ymd(now), time:now.toTimeString().slice(0,5),
     who:meName(), type, desc:label, dur:0, cost:0, payMode:'', payStatus:'', payDate:'',
     invoice:'', planned:false, kind:'task', notes:'', ts:now.toISOString(),
-    photos: Array.isArray(photos)&&photos.length?photos:undefined };
+    photos: Array.isArray(photos)&&photos.length?photos:undefined, ...(extra||{}) };
   Store.data.interventions.push(rec); Store.save();
   if(window.bfNotify) try{ window.bfNotify(rec, aptById(aptId)); }catch(_){}   // hook WhatsApp (Phase 4)
   renderAll(); toast('✅ '+label+(photos&&photos.length?' (avec photo)':'')+' — c\'est noté, merci !');
+}
+function taskChecklist(aptId, type){
+  const apt=aptById(aptId), items=FIELD_CHECKLISTS[type]||FIELD_CHECKLISTS.Inspection;
+  openModal(`<h2 style="margin-bottom:6px">${esc(type)} · ${esc(apt?.name||'')}</h2>
+    <p class="hint" style="margin-bottom:10px">Coche ce qui a été vérifié. L'action sera enregistrée dans l'activité.</p>
+    <div class="checklist">${items.map((it,i)=>`<label class="checkline"><input type="checkbox" id="cl_${i}"><span>${esc(it)}</span></label>`).join('')}</div>
+    <div class="field wide"><label>Note rapide</label><textarea id="cl_note" placeholder="Problème, manque, précision..."></textarea></div>
+    <div class="form-actions">
+      <button class="btn primary" onclick="saveTaskChecklist('${aptId}','${type}')">Valider</button>
+      <button class="btn ghost" onclick="closeModal()">Annuler</button>
+    </div>`);
+}
+function saveTaskChecklist(aptId,type){
+  const items=FIELD_CHECKLISTS[type]||FIELD_CHECKLISTS.Inspection;
+  const checked=items.map((label,i)=>({label, done:!!gv('cl_'+i)?.checked}));
+  const done=checked.filter(x=>x.done).length;
+  const note=gv('cl_note')?.value.trim()||'';
+  const notes=[`${done}/${items.length} points cochés`, ...checked.filter(x=>!x.done).map(x=>'À revoir : '+x.label), note].filter(Boolean).join('\n');
+  closeModal();
+  taskDone(aptId,type,`${type} validé (${done}/${items.length})`, null, { checklist:checked, notes });
 }
 /* compresse une image (max 1000px, JPEG ~0.6) → dataURL léger pour la synchro */
 function compressImage(file){
@@ -2154,11 +2372,12 @@ function renderWaSettings(){
   gv('wa_enabled').checked = !!s.enabled;
 }
 function saveWaSettings(){
-  const rec={ id:SETTINGS_ID, name:'(réglages notifications)', role:'', phone:'', email:'', notes:'',
-    whatsappPhone:gv('wa_phone').value.trim(), whatsappKey:gv('wa_key').value.trim(), enabled:gv('wa_enabled').checked };
-  const i=contacts().findIndex(c=>String(c.id)===SETTINGS_ID);
-  if(i>=0) Store.data.contacts[i]=rec; else Store.data.contacts.push(rec);
-  Store.save(); toast('Réglages WhatsApp enregistrés ✅');
+  persistSettingsPatch({
+    whatsappPhone:gv('wa_phone').value.trim(),
+    whatsappKey:gv('wa_key').value.trim(),
+    enabled:gv('wa_enabled').checked
+  });
+  toast('Réglages WhatsApp enregistrés ✅');
 }
 function testWhatsapp(){
   saveWaSettings();

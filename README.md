@@ -19,8 +19,9 @@ Tableau de bord autonome pour piloter 4 appartements en location saisonnière.
 ## Onglets
 
 - **Calendrier** — timeline d'occupation **multi-mois** (1 / 2 / 3 mois), barres colorées par canal, empilement des séjours qui se chevauchent. **Détection automatique des doubles réservations** (liseré rouge + bandeau d'alerte). Trame hachurée = séjour d'échange. Le jour de départ ne compte pas comme nuit.
-- **Réservations** — formulaire (bien, canal, voyageur, nb de personnes, dates, nuits + €/nuit auto, montant, frais de ménage, échange, statut, notes), tableau triable + recherche + filtre par bien. **Import iCal `.ics`** (Airbnb/Booking) par dépôt de fichier.
-- **Interventions** — suivi technique (date, intervenant, type, durée, coût, mode/statut/date de règlement, réf facture), interventions **planifiées / à faire**, recherche + filtres, totaux heures/coût.
+- **Accueil** — cockpit opérationnel : santé du planning, urgences, tâches en retard, paiements à régler, messages voyageurs prêts à copier/envoyer sur WhatsApp.
+- **Réservations** — formulaire (bien, canal, voyageur, nb de personnes, dates, nuits + €/nuit auto, montant, frais de ménage, échange, statut, notes), tableau triable + recherche + filtre par bien. **Import iCal `.ics`** par fichier, lien iCal enregistré ou rafraîchissement différentiel.
+- **Interventions** — suivi technique (date, intervenant, type, durée, coût, mode/statut/date de règlement, réf facture), interventions **planifiées / à faire**, checklists ménage/linge/inspection, photos de preuve, recherche + filtres, totaux heures/coût.
 - **Synthèse** — par année : **taux d'occupation %**, **prix moyen/nuit (ADR)**, **revenu net par appartement** (revenu − interventions), revenu vs échange, reste à régler. Graphiques par canal / type / mois. Export **CSV** (réservations, interventions) et **impression / PDF**.
 - **Biens** — gestion des appartements + **annuaire des intervenants** (téléphone, email cliquables).
 
