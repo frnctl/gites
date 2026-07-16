@@ -600,6 +600,9 @@ tfoot td{ background:#FAFAFC; }
 .todo-check{width:28px; height:28px; border-radius:50%; border:2px solid #b9bcc6; background:#fff; flex:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; color:transparent; transition:.15s; margin-top:2px}
 .todo-check:hover{border-color:#157a3e; color:rgba(21,122,62,.5); transform:scale(1.08)}
 .todo-check.checked{background:#157a3e; border-color:#157a3e; color:#fff}
+.fold-btn{flex:none; font-size:15px; line-height:1; min-width:38px}
+.panel.folded > :not(.panel-h){display:none !important}
+.panel.folded .panel-h{margin-bottom:0}
 .issue-row .title{font-weight:700; font-size:15px}
 .issue-row .detail{color:var(--muted); font-size:13px; margin-top:1px}
 .msg-card{border:1px solid var(--line); border-radius:14px; background:#fff; padding:12px; display:flex; flex-direction:column; gap:8px}
@@ -1163,8 +1166,8 @@ body.control-mode .bottom-nav{display:none!important}
 
   <!-- ============ INTERVENTIONS ============ -->
   <section class="view" id="view-int" role="tabpanel">
-    <div class="panel">
-      <div class="panel-h"><h2>Tâches à faire</h2><div class="spacer"></div><span class="tag plan" id="todoCount" hidden>0</span></div>
+    <div class="panel" data-fold="todo">
+      <div class="panel-h"><h2>Tâches à faire</h2><div class="spacer"></div><span class="tag plan" id="todoCount" hidden>0</span><button class="btn sm ghost fold-btn" type="button" aria-label="Replier ou déplier ce bloc" onclick="toggleFold('todo')">▾</button></div>
       <hr class="gold-rule">
       <p class="hint" style="margin-bottom:12px">Note ici tout ce qu'il faudra faire, grand ou petit. Le rond vide = à faire : coche-le quand c'est fait, la tâche passe alors dans le journal des interventions.</p>
       <form class="form" id="todoForm">
@@ -1181,11 +1184,12 @@ body.control-mode .bottom-nav{display:none!important}
       <hr class="gold-rule">
       <div class="ops-stack" id="todoList"></div>
     </div>
-    <div class="panel">
+    <div class="panel" data-fold="encours">
       <div class="panel-h">
-        <h2 id="intFormTitle">Nouvelle intervention</h2>
+        <h2 id="intFormTitle">Interventions en cours</h2>
         <div class="spacer"></div>
         <button class="btn ghost sm" id="intCancel" hidden>Annuler l'édition</button>
+        <button class="btn sm ghost fold-btn" type="button" aria-label="Replier ou déplier ce bloc" onclick="toggleFold('encours')">▾</button>
       </div>
       <hr class="gold-rule">
       <form class="form" id="intForm">
@@ -1207,9 +1211,10 @@ body.control-mode .bottom-nav{display:none!important}
         <div class="form-actions"><button type="submit" class="btn primary">Enregistrer</button></div>
       </form>
     </div>
-    <div class="panel">
-      <div class="panel-h"><h2>Interventions</h2><div class="spacer"></div>
+    <div class="panel" data-fold="journal">
+      <div class="panel-h"><h2>Tâches effectuées</h2><div class="spacer"></div>
         <input class="search" id="intSearch" placeholder="Rechercher…" aria-label="Rechercher">
+        <button class="btn sm ghost fold-btn" type="button" aria-label="Replier ou déplier ce bloc" onclick="toggleFold('journal')">▾</button>
       </div>
       <div class="filters" id="intFilters"></div>
       <div class="table-wrap">
@@ -1889,7 +1894,7 @@ function renderReservations(){
 let intFilter='all', intQuery='';
 const intForm=document.getElementById('intForm');
 function intReset(){ intForm.reset(); gv('intId').value='';
-  gv('intFormTitle').textContent='Nouvelle intervention'; gv('intCancel').hidden=true; }
+  gv('intFormTitle').textContent='Interventions en cours'; gv('intCancel').hidden=true; }
 gv('intCancel').onclick=intReset;
 intForm.addEventListener('submit',e=>{
   e.preventDefault();
@@ -2001,6 +2006,26 @@ function renderTodo(){
   }).join('');
 }
 window.todoDone=todoDone; window.todoWhoChange=todoWhoChange;
+
+/* --- Blocs repliables (état mémorisé par appareil) --- */
+const FOLD_KEY='bestfriend:folds';
+function foldState(){ try{ return JSON.parse(localStorage.getItem(FOLD_KEY))||{}; }catch{ return {}; } }
+function applyFolds(){
+  const st=foldState();
+  document.querySelectorAll('.panel[data-fold]').forEach(p=>{
+    const folded=!!st[p.dataset.fold];
+    p.classList.toggle('folded', folded);
+    const b=p.querySelector('.fold-btn');
+    if(b){ b.textContent=folded?'▸':'▾'; b.setAttribute('aria-expanded', String(!folded)); }
+  });
+}
+function toggleFold(name){
+  const st=foldState(); st[name]=!st[name];
+  try{ localStorage.setItem(FOLD_KEY, JSON.stringify(st)); }catch{}
+  applyFolds();
+}
+window.toggleFold=toggleFold;
+applyFolds();
 
 function renderIntFilters(){
   const wrap=document.getElementById('intFilters');
