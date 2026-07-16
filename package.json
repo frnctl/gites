@@ -1,0 +1,42 @@
+{
+  "name": "best-friend",
+  "version": "4.0.0",
+  "private": true,
+  "description": "Cockpit propriétaire-conciergerie multi-tenant",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "guide:build": "node scripts/build-guide.mjs",
+    "onboarding:capture": "node scripts/capture-onboarding.mjs",
+    "onboarding:build": "node scripts/build-onboarding.mjs",
+    "build:legacy-bridge": "node scripts/build-legacy-bridge.mjs",
+    "check": "node tests/check-static.mjs",
+    "lab:start": "bash scripts/start-local-supabase.sh",
+    "lab:stop": "bash scripts/stop-local-supabase.sh",
+    "hosted:preflight": "node scripts/supabase-hosted.mjs preflight",
+    "hosted:plan": "node scripts/supabase-hosted.mjs create",
+    "backend:validate": "node scripts/validate-backend.mjs",
+    "frontend:validate": "node scripts/validate-hosted-frontend.mjs",
+    "tenant:provision": "node scripts/provision-tenant.mjs",
+    "test:backup": "node tests/backup.test.mjs",
+    "test:e2e": "npm run build && playwright test",
+    "test:e2e-auth": "node scripts/test-authenticated.mjs",
+    "test:backend-validator": "node tests/validate-backend.test.mjs",
+    "test:worker": "node tests/worker.test.mjs",
+    "test:provision": "node tests/provision-tenant.test.mjs",
+    "test:supabase-local": "node tests/local-supabase-integration.mjs",
+    "test:schema": "bash tests/test_multitenant_schema.sh",
+    "test": "npm run check && npm run test:backup && npm run test:provision && npm run test:backend-validator && npm run test:worker && npm run test:schema && npm run test:e2e"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "esbuild": "^0.28.1",
+    "wrangler": "4.110.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.110.2"
+  }
+}

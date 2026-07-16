@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Best Friend — Guide rapide</title>
+  <style>
+    @page { size: A4; margin: 0; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: #202024;
+      background: #fff;
+      font: 9.2pt/1.34 Arial, Helvetica, sans-serif;
+    }
+    .page {
+      position: relative;
+      width: 210mm;
+      min-height: 297mm;
+      padding: 13mm 16mm 12mm;
+      page-break-after: always;
+      overflow: hidden;
+    }
+    .page:last-child { page-break-after: auto; }
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 4mm;
+      border-bottom: 1px solid #dedee3;
+    }
+    .logo { font-size: 17pt; font-weight: 800; letter-spacing: -.5px; }
+    .logo i { color: #d9272e; font-style: normal; }
+    .private {
+      padding: 1.5mm 3mm;
+      border-radius: 99px;
+      background: #eef8f1;
+      color: #177e43;
+      font-size: 8pt;
+      font-weight: 700;
+    }
+    h1 { margin: 6mm 0 1.5mm; font-size: 22pt; line-height: 1.08; letter-spacing: -.7px; }
+    .lead { margin: 0 0 4mm; color: #67676f; font-size: 10pt; }
+    .notice {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2.5mm;
+      margin: 0 0 4mm;
+    }
+    .notice div {
+      min-height: 20mm;
+      padding: 3mm;
+      border-radius: 4mm;
+      background: #f4f4f6;
+    }
+    .notice b { display: block; margin-bottom: 1mm; font-size: 9.2pt; }
+    .notice span { color: #696971; font-size: 8pt; }
+    .section {
+      margin: 0 0 3mm;
+      padding: 3.5mm;
+      border: 1px solid #e2e2e7;
+      border-radius: 4mm;
+      break-inside: avoid;
+    }
+    h2 { margin: 0 0 2mm; font-size: 12.5pt; }
+    h3 { margin: 0 0 1mm; font-size: 9.8pt; }
+    p { margin: 0 0 1.5mm; }
+    p:last-child { margin-bottom: 0; }
+    ol, ul { margin: 0; padding-left: 5mm; }
+    li { margin-bottom: 1mm; }
+    li:last-child { margin-bottom: 0; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; }
+    .mini {
+      padding: 3mm;
+      border-radius: 3mm;
+      background: #f7f7f8;
+      break-inside: avoid;
+    }
+    .mini p, .mini li { color: #5f5f67; font-size: 8.5pt; }
+    .tip {
+      margin-top: 2.5mm;
+      padding: 2.5mm 3mm;
+      border-left: 3px solid #1d8f4f;
+      background: #eef8f1;
+      color: #285c3d;
+      border-radius: 0 3mm 3mm 0;
+      font-size: 8.5pt;
+    }
+    .warning {
+      border-left-color: #b57900;
+      background: #fff7e3;
+      color: #6f520d;
+    }
+    .footer {
+      position: absolute;
+      right: 16mm;
+      bottom: 7mm;
+      left: 16mm;
+      display: flex;
+      justify-content: space-between;
+      color: #85858c;
+      font-size: 8pt;
+    }
+    strong { color: #202024; }
+  </style>
+</head>
+<body>
+  <section class="page">
+    <header class="brand">
+      <div class="logo">BEST FRIEND<i>.</i></div>
+      <div class="private">Espace privé</div>
+    </header>
+
+    <h1>Guide rapide</h1>
+    <p class="lead">Piloter les locations, les réservations et les interventions sans réglage technique.</p>
+
+    <div class="notice">
+      <div><b>Accès nominatif</b><span>Ton adresse email doit avoir été autorisée avant la première connexion.</span></div>
+      <div><b>Sans mot de passe</b><span>Un lien sécurisé reçu par email ouvre directement ton espace.</span></div>
+      <div><b>Données synchronisées</b><span>Les changements validés en ligne sont partagés avec les personnes autorisées.</span></div>
+    </div>
+
+    <div class="section">
+      <h2>1. Se connecter</h2>
+      <ol>
+        <li>Ouvre l’adresse privée qui t’a été communiquée, puis choisis <strong>Se connecter</strong>.</li>
+        <li>Saisis ton adresse email autorisée et demande le lien de connexion.</li>
+        <li>Ouvre l’email reçu sur le même appareil. Aucun mot de passe n’est demandé.</li>
+        <li>Si l’accès n’est pas attribué ou si l’email n’arrive pas, contacte le responsable de l’espace.</li>
+      </ol>
+      <div class="tip warning">Ne transfère jamais un lien de connexion. Utilise <strong>Se déconnecter</strong> sur un appareil partagé.</div>
+    </div>
+
+    <div class="section">
+      <h2>2. Lire l’accueil</h2>
+      <div class="grid">
+        <div class="mini">
+          <h3>Priorités du jour</h3>
+          <p>Les arrivées, départs, logements occupés et tâches à faire sont visibles immédiatement.</p>
+        </div>
+        <div class="mini">
+          <h3>Santé opérationnelle</h3>
+          <p>Les conflits, retards ou informations manquantes apparaissent dans les alertes.</p>
+        </div>
+        <div class="mini">
+          <h3>Messages voyageurs</h3>
+          <p>Les textes prêts à copier reprennent les dates et le logement de la réservation.</p>
+        </div>
+        <div class="mini">
+          <h3>Activité récente</h3>
+          <p>Les prestations terminées et leurs preuves sont regroupées dans le fil d’activité.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>3. Gérer une réservation</h2>
+      <ol>
+        <li>Ouvre <strong>Réservations</strong>, puis <strong>Nouvelle réservation</strong>.</li>
+        <li>Choisis le bien, les dates, le canal, le voyageur et le statut.</li>
+        <li>Enregistre : l’agenda et les indicateurs se mettent à jour automatiquement.</li>
+        <li>Pour un calendrier externe, utilise l’import iCal depuis l’écran des réservations.</li>
+      </ol>
+      <div class="tip">Un avertissement apparaît si deux séjours se chevauchent sur le même bien.</div>
+    </div>
+
+    <footer class="footer"><span>Best Friend — Guide utilisateur</span><span>1 / 2</span></footer>
+  </section>
+
+  <section class="page">
+    <header class="brand">
+      <div class="logo">BEST FRIEND<i>.</i></div>
+      <div class="private">Guide rapide</div>
+    </header>
+
+    <h1>Agir au quotidien</h1>
+    <p class="lead">Chaque rôle voit uniquement les fonctions et les biens qui lui sont attribués.</p>
+
+    <div class="section">
+      <h2>4. Valider une intervention</h2>
+      <div class="grid">
+        <div class="mini">
+          <h3>Action rapide</h3>
+          <p>Dans <strong>Locations</strong>, ouvre le bien puis choisis Ménage, Linge ou Check-in. Le nom, la date et l’heure sont enregistrés.</p>
+        </div>
+        <div class="mini">
+          <h3>Checklist</h3>
+          <p>Utilise une checklist pour signaler précisément les points vérifiés et ceux qui restent à revoir.</p>
+        </div>
+        <div class="mini">
+          <h3>Preuve photo</h3>
+          <p>Le bouton appareil photo compresse l’image avant son envoi dans un stockage privé.</p>
+        </div>
+        <div class="mini">
+          <h3>Correction</h3>
+          <p>Une intervention peut être modifiée ou supprimée depuis l’onglet <strong>Interventions</strong>.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>5. Fonctions du propriétaire</h2>
+      <ul>
+        <li><strong>Biens :</strong> ajouter, corriger ou désactiver un logement.</li>
+        <li><strong>Accès :</strong> autoriser une personne, choisir son rôle et cocher uniquement ses biens.</li>
+        <li><strong>Synthèse :</strong> consulter l’occupation, les revenus et les coûts par période.</li>
+        <li><strong>Centre de pilotage :</strong> vérifier le nombre de biens, d’accès et d’invitations ainsi que l’état de synchronisation.</li>
+      </ul>
+      <div class="tip">Une personne sans espace attribué ne peut ni créer son propre espace ni voir des données.</div>
+    </div>
+
+    <div class="section">
+      <h2>6. Sauvegarde et restauration</h2>
+      <ol>
+        <li>Ouvre <strong>Biens → Assistance et sauvegarde</strong>.</li>
+        <li>Télécharge une sauvegarde avant une reprise ou une modification importante.</li>
+        <li>Lors d’une restauration, vérifie le résumé affiché avant de confirmer.</li>
+        <li>L’application conserve un état de sécurité permettant d’annuler la dernière restauration.</li>
+      </ol>
+    </div>
+
+    <div class="section">
+      <h2>7. Connexion, confidentialité et assistance</h2>
+      <div class="grid">
+        <div class="mini">
+          <h3>Hors connexion</h3>
+          <p>Les dernières informations restent consultables. Reconnecte-toi avant d’ajouter ou de modifier une donnée.</p>
+        </div>
+        <div class="mini">
+          <h3>Données privées</h3>
+          <p>Les rôles limitent les données visibles. Les liens des photos sont temporaires et réservés aux comptes autorisés.</p>
+        </div>
+      </div>
+      <div class="tip warning">En cas de problème, note le message exact affiché puis utilise <strong>Assistance</strong> en bas de l’application. Ne communique aucune clé ni aucun lien de connexion.</div>
+    </div>
+
+    <footer class="footer"><span>Best Friend — Guide utilisateur</span><span>2 / 2</span></footer>
+  </section>
+</body>
+</html>

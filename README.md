@@ -1,59 +1,136 @@
-# Best Friend — Cockpit de gestion (location saisonnière)
+# Best Friend
 
-> « Best Friend » (BF) — en clin d'œil aux initiales de **Bruno Fulda**. Le favicon reprend ces initiales en hébreu (פב).
+Best Friend est un cockpit propriétaire–conciergerie pour piloter des locations
+saisonnières sans exposer la technique aux utilisateurs métier. Le produit est
+livré comme un espace privé à accès provisionné, pas comme un service ouvert à
+l'inscription publique.
 
-Tableau de bord autonome pour piloter 4 appartements en location saisonnière.
-**Un seul fichier** (`index.html`) : HTML + CSS + JS vanilla, aucune dépendance, aucun build.
+## État de la branche v4
 
-## Les 4 appartements
+- PWA installable, responsive et consultable hors ligne en lecture seule ;
+- connexion Supabase par lien email, sans mot de passe à retenir ;
+- auto-inscription désactivée : comptes et espaces préparés par l'opérateur ;
+- organisations séparées par `org_id` ;
+- rôles propriétaire, administrateur, gestionnaire, concierge et lecture ;
+- RLS testée entre plusieurs organisations ;
+- clés fournisseurs absentes du navigateur ;
+- build reproductible pour Cloudflare Pages ;
+- centre de pilotage propriétaire disponible sur /control ;
+- client Supabase embarqué dans le build, sans dépendance CDN au démarrage ;
+- sauvegardes versionnées avec contrôle SHA-256 et récupération serveur ;
+- invitations transmises par le Worker privé, sans clé d'administration dans le navigateur ;
+- calendriers iCal récupérés par un proxy authentifié à liste blanche ;
+- preuves photo stockées dans un bucket privé, avec URL temporaires ;
+- pont historique à un clic préparé séparément, mais non déployé sur l'ancien site ;
+- provisionnement opérateur idempotent : compte et espace prêts avant la première connexion ;
+- backend Supabase de validation isolé et preview Cloudflare reliée, sans donnée réelle ;
+- recette navigateur hébergée : lien magique, écriture cloud, rechargement et déconnexion ;
+- ancien prototype et anciennes tables laissés intacts.
 
-| Appartement | Réf | Gestion | Annonce |
-|---|---|---|---|
-| RDJ | `49 RV RDJ` | Propriétaire | [Airbnb](https://www.airbnb.fr/rooms/1666841556768571133) |
-| 1er étage | `RV 1er` | Propriétaire | [Airbnb](https://www.airbnb.fr/rooms/1556406620212142683) |
-| Studio | — | Maria | — |
-| Atelier (SST) | `SST` | Anabela | [Airbnb](https://www.airbnb.com/h/eiffeltower_headtotoe) |
+Le code est prêt pour une livraison privée. Le déploiement actuellement relié
+au backend de validation ne contient aucune donnée réelle ; la bascule de cible
+reste une opération séparée et contrôlée.
 
-> Les biens sont **configurables** dans l'onglet *Biens* (ajout, renommage, couleur, lien, gestionnaire, actif/inactif).
+## Démarrage
 
-## Onglets
+```bash
+npm install
+npm run build
+node scripts/serve.mjs
+```
 
-- **Calendrier** — timeline d'occupation **multi-mois** (1 / 2 / 3 mois), barres colorées par canal, empilement des séjours qui se chevauchent. **Détection automatique des doubles réservations** (liseré rouge + bandeau d'alerte). Trame hachurée = séjour d'échange. Le jour de départ ne compte pas comme nuit.
-- **Accueil** — cockpit opérationnel : santé du planning, urgences, tâches en retard, paiements à régler, messages voyageurs prêts à copier/envoyer sur WhatsApp.
-- **Réservations** — formulaire (bien, canal, voyageur, nb de personnes, dates, nuits + €/nuit auto, montant, frais de ménage, échange, statut, notes), tableau triable + recherche + filtre par bien. **Import iCal `.ics`** par fichier, lien iCal enregistré ou rafraîchissement différentiel.
-- **Interventions** — suivi technique (date, intervenant, type, durée, coût, mode/statut/date de règlement, réf facture), interventions **planifiées / à faire**, checklists ménage/linge/inspection, photos de preuve, recherche + filtres, totaux heures/coût.
-- **Synthèse** — par année : **taux d'occupation %**, **prix moyen/nuit (ADR)**, **revenu net par appartement** (revenu − interventions), revenu vs échange, reste à régler. Graphiques par canal / type / mois. Export **CSV** (réservations, interventions) et **impression / PDF**.
-- **Biens** — gestion des appartements + **annuaire des intervenants** (téléphone, email cliquables).
+Ouvrir ensuite :
 
-## Canaux
+- `http://127.0.0.1:4173/` pour la façade non connectée ;
+- `http://127.0.0.1:4173/?demo=1` pour des données fictives.
+- `http://127.0.0.1:4173/control?demo=1` pour le centre de pilotage fictif.
 
-Airbnb · Booking.com · HomeExchange · SabbaticalHomes · Direct · Autre.
-HomeExchange et SabbaticalHomes sont traités comme **échanges** (comptés en occupation mais **pas en chiffre d'affaires**).
+## Tests
 
-## Données & sauvegarde
+```bash
+npm test
+```
 
-Stockage **localStorage** (clé `gites_v2`, cache hors-ligne), migration automatique depuis `gites_v1`.
+La suite vérifie la syntaxe, la PWA, les parcours bureau/mobile, la migration
+PostgreSQL relançable, les sauvegardes signées, la récupération et l'isolation
+RLS. Les tests SQL utilisent uniquement un conteneur PostgreSQL jetable.
 
-**Synchro multi-appareils (Supabase)** — module `<script type="module">` en bas d'`index.html` :
-connexion email + mot de passe, données protégées par **RLS** (chacun ne voit que les siennes),
-**temps réel** iPhone ↔ ordinateur. Si pas de réseau / pas de connexion, l'app fonctionne en local.
-Configuration : renseigner `SUPA = { url, key }` (clé *publishable*) et exécuter une fois
-[`supabase/schema.sql`](supabase/schema.sql) dans le *SQL Editor* de Supabase.
+Avec le labo Supabase local démarré, les parcours Auth/API et le navigateur
+authentifié se testent séparément :
 
-- **Export / Import JSON** : sauvegarde / restauration complète.
-- **Export CSV** : réservations et interventions (compatibles Excel FR).
-- **Réinitialiser** : efface tout (onglet *Biens*).
+```bash
+npm run lab:start
+npm run test:supabase-local
+npm run test:e2e-auth
+npm run lab:stop
+```
 
-> Tant que la synchro cloud n'est pas activée, les données restent sur **ce navigateur**. Pense à exporter régulièrement.
+Le validateur du backend hébergé possède un dry-run, une garde
+anti-production et un nettoyage systématique :
 
-## Webapp iPhone
+```bash
+npm run backend:validate
+npm run frontend:validate
+```
 
-Ouvre le site dans **Safari** → *Partager* → *Sur l'écran d'accueil*. L'icône (initiales « BF » en hébreu, פב) et le mode plein écran sont configurés (`apple-touch-icon`, manifest).
+La procédure complète est dans
+[`docs/VALIDATION-HEBERGEE.md`](docs/VALIDATION-HEBERGEE.md).
 
-## Utilisation locale
+Le démarrage bloque les ports Docker de test depuis l'extérieur. L'arrêt
+sauvegarde le volume local puis retire ces règles temporaires.
 
-Ouvre `index.html` dans un navigateur. Aucun serveur requis.
+## Configuration cloud
 
-## Déploiement
+Le build accepte uniquement les valeurs publiques Supabase :
 
-Publié via **GitHub Pages** depuis la branche `main` (racine). Le fichier `.nojekyll` désactive Jekyll.
+```bash
+BF_ENVIRONMENT=preview \
+BF_RELEASE_REVISION=$(git rev-parse --short HEAD) \
+BF_SUPABASE_URL=https://example.supabase.co \
+BF_SUPABASE_ANON_KEY=public-key \
+npm run build
+```
+
+Les clés privées de notification, d'administration et de déploiement restent
+dans Sanctum ou dans les secrets de la plateforme. Elles ne sont jamais écrites
+dans `config.js`. En production, le Worker Pages exige le secret serveur
+`BF_SUPABASE_SERVICE_ROLE_KEY` pour envoyer les invitations.
+
+## Base de données
+
+Le schéma courant est défini par :
+
+- [`supabase/migrations/20260710_001_multitenant_foundation.sql`](supabase/migrations/20260710_001_multitenant_foundation.sql)
+- [`supabase/migrations/20260711_002_harden_function_privileges.sql`](supabase/migrations/20260711_002_harden_function_privileges.sql)
+- [`supabase/migrations/20260715_003_private_delivery_and_proofs.sql`](supabase/migrations/20260715_003_private_delivery_and_proofs.sql)
+
+Ils créent des tables `bf_*` sans toucher aux tables du prototype. Aucune migration
+de données réelles ne doit être exécutée sans export, sauvegarde et comptage
+avant/après.
+
+La procédure de reprise locale est décrite dans
+[`docs/MIGRATION-HISTORIQUE.md`](docs/MIGRATION-HISTORIQUE.md).
+Le parcours de création d’un espace sans manipulation technique est décrit dans
+[`docs/PROVISIONNEMENT-ESPACE.md`](docs/PROVISIONNEMENT-ESPACE.md).
+
+## Cloudflare Pages
+
+Le dossier `dist/` est directement publiable avec Wrangler :
+
+```bash
+CLOUDFLARE_API_TOKEN="$(sanctum get cloudflare.best_friend_pages_token)" \
+npx wrangler pages deploy dist \
+  --project-name best-friend-app \
+  --branch main
+```
+
+La cible de validation est un projet Pages distinct du futur domaine de
+production. Une URL de branche ou de déploiement est utilisée pour les essais.
+
+Le choix d'hébergement et ses limites sont documentés dans
+[`docs/ADR-001-HEBERGEMENT.md`](docs/ADR-001-HEBERGEMENT.md).
+La checklist de livraison est dans
+[`docs/MISE-EN-PRODUCTION.md`](docs/MISE-EN-PRODUCTION.md).
+Le PDF livré dans l’application est généré depuis
+[`docs/GUIDE-UTILISATEUR.html`](docs/GUIDE-UTILISATEUR.html) avec
+`npm run guide:build`.

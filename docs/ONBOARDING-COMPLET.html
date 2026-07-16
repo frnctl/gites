@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Best Friend — Onboarding complet</title>
+  <style>
+    @page{size:A4;margin:0}
+    *{box-sizing:border-box}
+    :root{--ink:#202024;--muted:#67676f;--line:#dedee4;--soft:#f5f5f7;--red:#d9272e;--green:#197a43;--gold:#9a7000;--blue:#1768d5}
+    html,body{margin:0;background:#fff;color:var(--ink);font:8.8pt/1.38 Arial,Helvetica,sans-serif}
+    body{counter-reset:page}
+    .page{counter-increment:page;position:relative;width:210mm;height:297mm;padding:11mm 15mm 14mm;overflow:hidden;page-break-after:always;background:#fff}
+    .page:last-child{page-break-after:auto}
+    .top{display:flex;align-items:center;justify-content:space-between;height:10mm;padding-bottom:3mm;border-bottom:1px solid var(--line)}
+    .brand{font-size:15pt;font-weight:900;letter-spacing:-.55px}.brand i{color:var(--red);font-style:normal}
+    .chapter{color:var(--muted);font-size:7.6pt;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+    .footer{position:absolute;right:15mm;bottom:6mm;left:15mm;display:flex;justify-content:space-between;color:#8b8b92;font-size:7.4pt}
+    .footer .num:after{content:counter(page) " / 16"}
+    h1{margin:6mm 0 2mm;font-size:25pt;line-height:1.05;letter-spacing:-.9px}
+    h2{margin:5mm 0 2mm;font-size:17pt;line-height:1.1;letter-spacing:-.45px}
+    h3{margin:0 0 1mm;font-size:10pt;line-height:1.18}
+    p{margin:0 0 2mm}.lead{max-width:166mm;color:var(--muted);font-size:10.5pt;line-height:1.42}
+    .eyebrow{margin-top:6mm;color:var(--red);font-size:8pt;font-weight:800;letter-spacing:.8px;text-transform:uppercase}
+    .screen{display:block;width:100%;height:auto;border:1px solid #d2d2d7;border-radius:4mm;box-shadow:0 3mm 10mm rgba(0,0,0,.08)}
+    .screen.wide{height:108mm;object-fit:cover;object-position:top}
+    .screen.medium{height:91mm;object-fit:cover;object-position:top}
+    .screen.short{height:69mm;object-fit:cover;object-position:top}
+    .screen.modal{height:94mm;object-fit:contain;background:var(--soft);padding:4mm;box-shadow:none}
+    .caption{margin:2mm 0 0;color:var(--muted);font-size:7.6pt;text-align:center}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:3mm}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:2.5mm}
+    .card{padding:3.2mm;border:1px solid var(--line);border-radius:3.5mm;background:#fff;break-inside:avoid}
+    .card.soft{border:0;background:var(--soft)}
+    .card p,.card li{color:var(--muted);font-size:8.1pt}
+    .card p:last-child{margin-bottom:0}
+    .step{display:grid;grid-template-columns:7mm 1fr;gap:2mm;align-items:start}
+    .n{display:grid;place-items:center;width:6mm;height:6mm;border-radius:50%;background:var(--ink);color:#fff;font-size:7.5pt;font-weight:800}
+    .steps{display:grid;gap:2.5mm}.steps.compact{gap:1.6mm}
+    .tip{margin-top:3mm;padding:2.7mm 3.2mm;border-left:3px solid var(--green);border-radius:0 3mm 3mm 0;background:#edf8f1;color:#285f3e;font-size:8.2pt}
+    .tip.warn{border-color:#b67c00;background:#fff7e3;color:#70520d}.tip.info{border-color:var(--blue);background:#eef5ff;color:#204e87}
+    .tag{display:inline-block;margin:0 1mm 1mm 0;padding:1mm 2mm;border-radius:99px;background:var(--soft);font-size:7.4pt;font-weight:700}
+    .role{padding:3mm;border-top:3px solid var(--ink);border-radius:3mm;background:var(--soft)}
+    .role.owner{border-color:var(--gold)}.role.concierge{border-color:var(--green)}.role.viewer{border-color:var(--blue)}
+    .role b{display:block;margin-bottom:1mm}.role span{color:var(--muted);font-size:7.8pt}
+    ol,ul{margin:0;padding-left:5mm}li{margin-bottom:1.15mm}li:last-child{margin-bottom:0}
+    strong{color:var(--ink)}
+    .callouts{display:grid;grid-template-columns:repeat(2,1fr);gap:2.5mm;margin-top:3mm}
+    .callout{display:grid;grid-template-columns:7mm 1fr;gap:2mm;padding:2.5mm;border-radius:3mm;background:var(--soft)}
+    .callout b:first-child{display:grid;place-items:center;width:6mm;height:6mm;border-radius:50%;background:var(--red);color:#fff;font-size:7.5pt}
+    .callout div{font-size:8.1pt}.callout span{display:block;color:var(--muted);font-size:7.7pt}
+    .flow{display:grid;grid-template-columns:1fr 8mm 1fr 8mm 1fr;align-items:center;gap:1mm;margin:4mm 0}
+    .flow .box{min-height:20mm;padding:3mm;border-radius:3mm;background:var(--soft);text-align:center}.flow .arrow{text-align:center;color:var(--red);font-size:16pt;font-weight:900}
+    .phone-layout{display:grid;grid-template-columns:74mm 1fr;gap:8mm;align-items:start;margin-top:4mm}
+    .phone{display:block;width:70mm;height:151mm;object-fit:cover;object-position:top;border:2mm solid #202024;border-radius:9mm;box-shadow:0 3mm 10mm rgba(0,0,0,.12)}
+    .check{display:grid;grid-template-columns:6mm 1fr;gap:2mm;align-items:start;margin-bottom:2.2mm}.check .tick{display:grid;place-items:center;width:5mm;height:5mm;border-radius:50%;background:#e7f6ec;color:var(--green);font-weight:900}
+    .split-shot{display:grid;grid-template-columns:1fr 1fr;gap:3mm}.split-shot img{width:100%;height:68mm;object-fit:contain;background:var(--soft);border:1px solid var(--line);border-radius:3mm;padding:2mm}
+    .table{width:100%;border-collapse:collapse;margin-top:3mm}.table th,.table td{padding:2.2mm;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}.table th{font-size:7.5pt;text-transform:uppercase;color:var(--muted)}
+    .cover{background:linear-gradient(150deg,#fff 0%,#fff 62%,#f4f4f6 100%)}
+    .cover h1{max-width:165mm;margin-top:9mm;font-size:34pt}.cover .lead{max-width:145mm;font-size:12pt}
+    .cover-shot{position:relative;margin-top:8mm}.cover-shot:before{content:"GUIDE UTILISATEUR";position:absolute;z-index:2;right:-4mm;top:-5mm;padding:2mm 4mm;border-radius:99px;background:var(--red);color:#fff;font-size:7.3pt;font-weight:800;letter-spacing:.6px}
+    .cover-shot img{height:124mm;object-fit:cover;object-position:top}
+    .version{display:flex;gap:3mm;margin-top:5mm;color:var(--muted);font-size:8pt}.version span{padding:1.5mm 2.5mm;border:1px solid var(--line);border-radius:99px;background:#fff}
+    .toc{display:grid;grid-template-columns:1fr 1fr;gap:2mm 8mm;margin-top:4mm}.toc div{display:flex;justify-content:space-between;padding:1.8mm 0;border-bottom:1px solid var(--line)}
+    .toc b{color:var(--red)}
+    .small{font-size:7.8pt;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <section class="page cover">
+    <header class="top"><div class="brand">BEST FRIEND<i>.</i></div><div class="chapter">Onboarding complet</div></header>
+    <div class="eyebrow">Piloter les locations simplement</div>
+    <h1>Le guide complet pour prendre Best Friend en main</h1>
+    <p class="lead">Connexion, réservations, planning, missions terrain, accès, finances et sauvegardes — expliqué écran par écran.</p>
+    <div class="cover-shot"><img class="screen" src="onboarding-assets/03-tableau-de-bord.png" alt="Tableau de bord Best Friend"></div>
+    <div class="version"><span>Responsable &amp; équipe terrain</span><span>Ordinateur &amp; mobile</span><span>Espace privé</span></div>
+    <footer class="footer"><span>Best Friend — Guide d’onboarding</span><span class="num"></span></footer>
+  </section>
+
+  <section class="page">
+    <header class="top"><div class="brand">BEST FRIEND<i>.</i></div><div class="chapter">01 · Comprendre l’espace</div></header>
+    <h2>Un cockpit privé, avec une vue adaptée à chaque rôle</h2>
+    <p class="lead">L’adresse du site ouvre un portail sécurisé. Les données ne sont affichées qu’après identification d’une adresse autorisée.</p>
+    <img class="screen medium" src="onboarding-assets/01-acces-prive.png" alt="Portail privé Best Friend">
+    <div class="grid4" style="margin-top:4mm">
+      <div class="role owner"><b>Propriétaire / Admin</b><span>Tous les biens, les accès, les sauvegardes et les chiffres.</span></div>
+      <div class="role owner"><b>Gestionnaire</b><span>Tous les biens et le pilotage quotidien, avec gestion limitée des accès.</span></div>
+      <div class="role concierge"><b>Concierge</b><span>Seulement les biens attribués et les actions utiles sur le terrain.</span></div>
+      <div class="role viewer"><b>Lecture seule</b><span>Consulte les informations autorisées sans pouvoir les modifier.</span></div>
+    </div>
+    <div class="tip info"><strong>Principe clé :</strong> une personne ne crée pas elle-même son espace. Le responsable ajoute son email, choisit son rôle et lui attribue les biens nécessaires.</div>
+    <h3 style="margin-top:4mm">Parcours normal</h3>
+    <div class="flow"><div class="box"><b>1. Accès ajouté</b><br><span class="small">Par le responsable</span></div><div class="arrow">›</div><div class="box"><b>2. Lien reçu</b><br><span class="small">Par email</span></div><div class="arrow">›</div><div class="box"><b>3. Espace ouvert</b><br><span class="small">Selon le rôle</span></div></div>
+    <footer class="footer"><span>Accès et rôles</span><span class="num"></span></footer>
+  </section>
+
+  <section class="page">
+    <header class="top"><div class="brand">BEST FRIEND<i>.</i></div><div class="chapter">02 · Première connexion</div></header>
+    <h2>Se connecter sans mot de passe</h2>
+    <div class="grid2" style="grid-template-columns:1.05fr .95fr;align-items:start">
+      <img class="screen modal" src="onboarding-assets/02-connexion.png" alt="Fenêtre de connexion">
+      <div class="steps">
+        <div class="step"><span class="n">1</span><div><h3>Ouvrir l’espace privé</h3><p>Choisis <strong>Ouvrir mon espace</strong> ou <strong>Se connecter</strong>.</p></div></div>
+        <div class="step"><span class="n">2</span><div><h3>Saisir l’email autorisé</h3><p>Utilise exactement l’adresse ajoutée par le responsable.</p></div></div>
+        <div class="step"><span class="n">3</span><div><h3>Demander le lien</h3><p>Appuie sur <strong>Recevoir mon lien</strong>. Le message reste volontairement neutre pour protéger les comptes.</p></div></div>
+        <div class="step"><span class="n">4</span><div><h3>Ouvrir l’email</h3><p>Clique le lien sécurisé reçu. Il ouvre directement le bon espace ; aucun mot de passe n’est à mémoriser.</p></div></div>
+        <div class="tip warn"><strong>Email absent ?</strong> Vérifie les indésirables, l’orthographe de l’adresse et que l’accès a bien été ajouté. Puis demande un nouveau lien.</div>
+      </div>
+    </div>
+    <h3 style="margin-top:5mm">Règles de sécurité</h3>
+    <div class="grid3" style="margin-top:2mm">
+      <div class="card soft"><h3>Lien personnel</h3><p>Ne transfère jamais l’email de connexion à une autre personne.</p></div>
+      <div class="card soft"><h3>Appareil partagé</h3><p>Utilise <strong>Se déconnecter</strong> dès que tu as fini.</p></div>
+      <div class="card soft"><h3>Accès perdu</h3><p>Le responsable peut retirer l’accès immédiatement depuis <strong>Biens</strong>.</p></div>
+    </div>
+    <div class="tip"><strong>Bon réflexe :</strong> ajoute le site à l’écran d’accueil après la première connexion. L’ouverture suivante ressemble à celle d’une application.</div>
+    <footer class="footer"><span>Connexion sécurisée</span><span class="num"></span></footer>
+  </section>
+
+  <section class="page">
+    <header class="top"><div class="brand">BEST FRIEND<i>.</i></div><div class="chapter">03 · Tableau de bord</div></header>
+    <h2>Commencer chaque journée par l’Accueil</h2>
+    <img class="screen wide" src="onboarding-assets/03-tableau-de-bord.png" alt="Accueil Best Friend">
+    <div class="callouts">
+      <div class="callout"><b>1</b><div><strong>Focus du jour</strong><span>Départs, arrivées et ménages à faire immédiatement.</span></div></div>
+      <div class="callout"><b>2</b><div><strong>Raccourcis</strong><span>Créer une réservation, ouvrir l’agenda ou une location.</span></div></div>
+      <div class="callout"><b>3</b><div><strong>Santé opérationnelle</strong><span>Conflits, retards, montants manquants et règlements à surveiller.</span></div></div>
+      <div class="callout"><b>4</b><div><strong>Messages prêts</strong><span>Copier un message voyageur ou l’ouvrir dans WhatsApp.</span></div></div>
+    </div>
+    <div class="tip warn"><strong>À traiter en priorité :</strong> les blocs rouges signalent une urgence ; les blocs orange une donnée ou une action à vérifier. Une santé à 100 % signifie qu’aucune anomalie connue n’est détectée.</div>
+    <footer class="footer"><span>Accueil et priorités</span><span class="num"></span></footer>
+  </section>
+
+  <section class="page">
+    <header class="top"><div class="brand">BEST FRIEND<i>.</i></div><div class="chapter">04 · Mobile et installation</div></header>
+    <h2>Utiliser Best Friend comme une application mobile</h2>
+    <div class="phone-layout">
+      <img class="phone" src="onboarding-assets/04-mobile.png" alt="Best Friend sur mobile">
+      <div>
+        <div class="card soft"><h3>Navigation du bas</h3><p><strong>Accueil</strong>, <strong>Locations</strong>, <strong>Agenda</strong> et <strong>Résas</strong> restent accessibles au pouce. <strong>Plus</strong> ouvre Interventions, Synthèse ou Biens selon le rôle.</p></div>
+        <h3 style="margin-top:5mm">Installer sur iPhone / iPad</h3>
+        <ol><li>Ouvre le site dans <strong>Safari</strong>.</li><li>Touche <strong>Partager</strong>.</li><li>Choisis <strong>Sur l’écran d’accueil</strong>, puis confirme.</li></ol>
+        <h3 style="margin-top:5mm">Installer sur Android</h3>
+        <ol><li>Ouvre le site dans <strong>Chrome</strong>.</li><li>Ouvre le menu du navigateur.</li><li>Choisis <strong>Installer l’application</strong> ou <strong>Ajouter à l’écran d’accueil</strong>.</li></ol>
+        <div class="tip info"><strong>Pas de bouton d’installation ?</strong> Utilise le site normalement, puis réessaie après une première connexion. Les intitulés peuvent varier selon le téléphone.</div>
+        <div class="tip"><strong>Conseil terrain :</strong> autorise l’appareil photo lorsque Best Friend le demande ; il sert uniquement à joindre une preuve à une intervention.</div>
+      </div>
+    </div>
+    <footer class="footer"><span>Mobile et raccourci d’écran</span><span class="num"></span></footer>
+  </section>
+
+  <section class="page">
+    <header class="top"><div class="brand">BEST FRIEND<i>.</i></div><div class="chapter">05 · Locations</div></header>
+    <h2>Voir l’état de tous les biens en un coup d’œil</h2>
+    <img class="screen medium" src="onboarding-assets/05-locations.png" alt="Grille des locations">
+    <div class="grid3" style="margin-top:4mm">
+      <div class="card"><h3>Libre / occupé</h3><p>Le statut est calculé à partir des réservations. Une arrivée proche apparaît directement sur la carte.</p></div>
+      <div class="card"><h3>Gestionnaire</h3><p>Le sous-titre rappelle l’équipe ou la personne chargée du bien.</p></div>
+      <div class="card"><h3>Ouvrir la fiche</h3><p>Clique une carte pour voir les prochaines dates, les actions rapides et l’historique du logement.</p></div>
+    </div>
+    <h3 style="margin-top:4mm">Ce que voit chaque personne</h3>
+    <table class="table"><thead><tr><th>Rôle</th><th>Vue Locations</th><th>Peut agir ?</th></tr></thead><tbody><tr><td>Responsable / gestionnaire</td><td>Tous les biens actifs</td><td>Oui, sur tous les biens</td></tr><tr><td>Concierge</td><td>Uniquement les biens attribués</td><td>Oui, sur ses biens</td></tr><tr><td>Lecture seule</td><td>Uniquement les biens attribués</td><td>Non</td></tr></tbody></table>
+    <div class="tip warn"><strong>Un bien n’est plus exploité ?</strong> Désactive-le au lieu de supprimer son historique. S’il possède déjà des réservations ou interventions, Best Friend l’archive automatiquement.</div>
+    <footer class="footer"><span>Vue des locations</span><span class="num"></span></footer>
+  </section>
+
+  <section class="page">
+    <header class="top"><div class="brand">BEST FRIEND<i>.</i></div><div class="chapter">06 · Fiche d’un bien</div></header>
+    <h2>Agir depuis la fiche de la location</h2>
+    <img class="screen wide" src="onboarding-assets/06-fiche-location.png" alt="Fiche d’une location">
+    <div class="grid3" style="margin-top:4mm">
+      <div class="card soft"><h3>1. Vérifier le contexte</h3><p>Adresse, statut actuel, prochain séjour, revenu annuel et réservations à venir.</p></div>
+      <div class="card soft"><h3>2. Enregistrer une action</h3><p><strong>Ménage fait</strong>, <strong>Linge fait</strong> ou <strong>Check-in OK</strong> ajoute automatiquement le nom, la date et l’heure.</p></div>
+      <div class="card soft"><h3>3. Suivre l’historique</h3><p>Les interventions, arrivées, départs et prochaines réservations restent regroupés sur la même page.</p></div>
+    </div>
+    <div class="tip info"><strong>Bouton appareil photo :</strong> utilise-le à la place du bouton simple si une preuve est demandée. Jusqu’à trois images peuvent accompagner l’action.</div>
+    <footer class="footer"><span>Actions par location</span><span class="num"></span></footer>
+  </section>
+
+  <section class="page">
+    <header class="top"><div class="brand">BEST FRIEND<i>.</i></div><div class="chapter">07 · Checklist et preuves</div></header>
+    <h2>Valider le travail terrain de façon traçable</h2>
+    <div class="grid2" style="grid-template-columns:.95fr 1.05fr;align-items:start">
+      <img class="screen modal" src="onboarding-assets/07-checklist.png" alt="Checklist ménage">
+      <div>
+        <div class="steps compact">
+          <div class="step"><span class="n">1</span><div><h3>Choisir la bonne checklist</h3><p>Ménage, linge, check-in ou inspection de départ.</p></div></div>
+          <div class="step"><span class="n">2</span><div><h3>Cocher uniquement le vérifié</h3><p>Les points non cochés sont conservés comme éléments à revoir.</p></div></div>
+          <div class="step"><span class="n">3</span><div><h3>Ajouter une note utile</h3><p>Décris un manque, un dégât ou une action restante, sans information superflue.</p></div></div>
+          <div class="step"><span class="n">4</span><div><h3>Valider</h3><p>L’action rejoint l’activité et la fiche du bien avec l’auteur et l’horodatage.</p></div></div>
+        </div>
+        <div class="tip warn"><strong>Ne valide pas “tout est fait” si un point reste à traiter.</strong> Laisse-le décoché et précise la situation dans la note.</div>
+      </div>
+    </div>
+    <h3 style="margin-top:5mm">Preuves photo : la bonne pratique</h3>
+    <div class="grid3" style="margin-top:2mm">
+      <div class="card soft"><h3>Photographier l’essentiel</h3><p>Une vue nette et utile vaut mieux qu’une série d’images identiques.</p></div>
+      <div class="card soft"><h3>Éviter les données sensibles</h3><p>Ne cadre pas de document d’identité, code d’accès ou objet personnel du voyageur.</p></div>
+      <div class="card soft"><h3>Connexion nécessaire</h3><p>Attends la confirmation d’enregistrement avant de fermer l’écran.</p></div>
+    </div>
+    <div class="tip"><strong>Confidentialité :</strong> l’image est compressée avant l’envoi et stockée dans un espace privé. Son accès est réservé aux comptes autorisés.</div>
+    <footer class="footer"><span>Checklists et photos</span><span class="num"></span></footer>
+  </section>
+
+  <section class="page">
+    <header class="top"><div class="brand">BEST FRIEND<i>.</i></div><div class="chapter">08 · Réservations</div></header>
+    <h2>Créer, corriger et retrouver une réservation</h2>
+    <img class="screen medium" src="onboarding-assets/08-reservations.png" alt="Écran des réservations">
+    <div class="grid2" style="margin-top:4mm">
+      <div class="card"><h3>Créer</h3><ol><li>Choisis le bien et le canal.</li><li>Ajoute voyageur, téléphone, dates et nombre de personnes.</li><li>Renseigne le montant, les frais de ménage et le statut.</li><li>Active <strong>Séjour d’échange</strong> si aucun revenu ne doit être compté.</li><li>Enregistre.</li></ol></div>
+      <div class="card"><h3>Corriger ou retrouver</h3><ol><li>Utilise les filtres par bien ou la recherche.</li><li>Clique la ligne concernée pour la modifier.</li><li>Choisis <strong>Agenda</strong> pour une lecture chronologique.</li><li>Annule une réservation avec le statut <strong>Annulé</strong> afin de conserver la trace.</li></ol></div>
+    </div>
+    <div class="tip warn"><strong>Chevauchement détecté :</strong> vérifie les dates, le bien et le statut. Le calendrier affiche un liseré rouge tant que deux séjours occupent les mêmes nuits.</div>
+    <div class="tip info"><strong>Messages voyageurs :</strong> le tableau de bord prépare des textes à partir du nom, des dates et de l’adresse. Relis toujours le message avant de l’envoyer.</div>
+    <footer class="footer"><span>Gestion des réservations</span><span class="num"></span></footer>
+  </section>
+
+  <section class="page">
+    <header class="top"><div class="brand">BEST FRIEND<i>.</i></div><div class="chapter">09 · Calendrier et iCal</div></header>
+    <h2>Lire l’occupation et importer les calendriers externes</h2>
+    <div class="split-shot"><div><img src="onboarding-assets/09-calendrier.png" alt="Calendrier d’occupation"><p class="caption">Calendrier d’occupation</p></div><div><img src="onboarding-assets/10-ical.png" alt="Import iCal"><p class="caption">Import et lien iCal</p></div></div>
+    <div class="grid2" style="margin-top:4mm">
+      <div class="card"><h3>Lire le calendrier</h3><ul><li>Chaque couleur correspond à un canal.</li><li>Une trame hachurée indique un échange.</li><li>Le jour de départ n’est pas compté comme une nuit.</li><li>Choisis 1, 2 ou 3 mois et utilise les flèches pour naviguer.</li></ul></div>
+      <div class="card"><h3>Importer un calendrier</h3><ol><li>Dans <strong>Réservations</strong>, ouvre <strong>Importer .ics</strong>.</li><li>Choisis le bien et le canal.</li><li>Dépose le fichier .ics, ou colle son lien privé HTTPS.</li><li><strong>Importer</strong> lit maintenant ; <strong>Enregistrer le lien</strong> permet les rafraîchissements suivants.</li></ol></div>
+    </div>
+    <div class="tip warn"><strong>Le lien iCal est confidentiel.</strong> Ne le publie pas et ne le colle dans aucun outil public. Best Friend le lit via son service privé.</div>
+    <div class="tip"><strong>Après un import :</strong> contrôle le nombre d’éléments ajoutés, ouvre le calendrier et vérifie au moins une arrivée et un départ. Les événements déjà connus sont mis à jour au lieu d’être dupliqués.</div>
+    <footer class="footer"><span>Planning et synchronisation iCal</span><span class="num"></span></footer>
+  </section>
+
+  <section class="page">
+    <header class="top"><div class="brand">BEST FRIEND<i>.</i></div><div class="chapter">10 · Interventions</div></header>
+    <h2>Planifier les missions et suivre les règlements</h2>
+    <img class="screen medium" src="onboarding-assets/11-interventions.png" alt="Écran des interventions">
+    <div class="grid3" style="margin-top:4mm">
+      <div class="card soft"><h3>À faire</h3><p>Coche <strong>À faire / planifié</strong>. La tâche remonte dans les priorités et reste ouverte jusqu’à sa mise à jour.</p></div>
+      <div class="card soft"><h3>Fait</h3><p>Décoche la planification, confirme la date, l’intervenant, la durée et la description.</p></div>
+      <div class="card soft"><h3>À régler</h3><p>Renseigne le coût, le mode, le statut, la date et la référence de facture. Le reste dû apparaît à l’accueil et en synthèse.</p></div>
+    </div>
+    <h3 style="margin-top:4mm">Informations minimales recommandées</h3>
+    <div><span class="tag">Bien</span><span class="tag">Date</span><span class="tag">Intervenant</span><span class="tag">Type</span><span class="tag">Description</span><span class="tag">État</span><span class="tag">Coût si applicable</span><span class="tag">Statut de règlement</span></div>
+    <div class="tip info"><strong>Action rapide ou intervention ?</strong> Utilise la fiche du bien pour un ménage, un linge ou un check-in simple. Utilise <strong>Interventions</strong> pour planifier, détailler, chiffrer ou facturer une mission.</div>
+    <div class="tip warn"><strong>Avant suppression :</strong> préfère corriger la ligne si l’intervention a réellement eu lieu. La trace opérationnelle et financière reste ainsi cohérente.</div>
+    <footer class="footer"><span>Missions et paiements</span><span class="num"></span></footer>
+  </section>
+
+  <section class="page">
+    <header class="top"><div class="brand">BEST FRIEND<i>.</i></div><div class="chapter">11 · Synthèse</div></header>
+    <h2>Lire les performances sans refaire les calculs</h2>
+    <img class="screen wide" src="onboarding-assets/12-synthese.png" alt="Synthèse financière et d’occupation">
+    <div class="callouts">
+      <div class="callout"><b>1</b><div><strong>Revenu et net</strong><span>Revenus de réservation moins coûts d’intervention.</span></div></div>
+      <div class="callout"><b>2</b><div><strong>Occupation et prix moyen</strong><span>Nuits occupées et revenu moyen par nuit payante.</span></div></div>
+      <div class="callout"><b>3</b><div><strong>Reste à régler</strong><span>Interventions payantes encore en attente ou partielles.</span></div></div>
+      <div class="callout"><b>4</b><div><strong>Détail par bien</strong><span>Revenu, occupation, coûts et net pour chaque location.</span></div></div>
+    </div>
+    <div class="tip info"><strong>Exports :</strong> les boutons CSV ouvrent les réservations ou interventions dans un tableur. <strong>Imprimer / PDF</strong> produit une synthèse lisible à partager en interne.</div>
+    <div class="tip warn"><strong>Les chiffres dépendent des saisies.</strong> Vérifie les montants, les statuts annulés, les séjours d’échange et les coûts avant une clôture mensuelle.</div>
+    <footer class="footer"><span>Indicateurs et rentabilité</span><span class="num"></span></footer>
+  </section>
+
+  <section class="page">
+    <header class="top"><div class="brand">BEST FRIEND<i>.</i></div><div class="chapter">12 · Biens, contacts et accès</div></header>
+    <h2>Administrer l’espace sans réglage technique</h2>
+    <img class="screen medium" src="onboarding-assets/13-biens-acces.png" alt="Gestion des biens et accès">
+    <div class="grid3" style="margin-top:4mm">
+      <div class="card"><h3>Les biens</h3><p>Ajoute ou corrige le nom, la référence, le gestionnaire, l’adresse, l’annonce, la couleur et l’état actif.</p></div>
+      <div class="card"><h3>Annuaire</h3><p>Centralise intervenant, rôle, téléphone, email et notes. Les boutons appel, WhatsApp et email évitent la ressaisie.</p></div>
+      <div class="card"><h3>Collaborateurs</h3><p>Ajoute une adresse nominative, choisis son rôle et attribue uniquement les biens nécessaires.</p></div>
+    </div>
+    <h3 style="margin-top:4mm">Règle d’attribution recommandée</h3>
+    <div class="flow"><div class="box"><b>Besoin réel</b><br><span class="small">Que doit faire la personne ?</span></div><div class="arrow">›</div><div class="box"><b>Rôle minimal</b><br><span class="small">Concierge ou lecture si possible</span></div><div class="arrow">›</div><div class="box"><b>Biens nécessaires</b><br><span class="small">Pas d’accès inutile</span></div></div>
+    <div class="tip warn"><strong>Départ d’un collaborateur :</strong> retire son accès immédiatement. Ne réutilise jamais son adresse pour une autre personne.</div>
+    <footer class="footer"><span>Administration de l’espace</span><span class="num"></span></footer>
+  </section>
+
+  <section class="page">
+    <header class="top"><div class="brand">BEST FRIEND<i>.</i></div><div class="chapter">13 · Ajouter et attribuer</div></header>
+    <h2>Deux formulaires à connaître</h2>
+    <div class="split-shot" style="margin-top:4mm"><div><img src="onboarding-assets/14-ajouter-bien.png" alt="Ajouter un bien"><p class="caption">Ajouter un bien</p></div><div><img src="onboarding-assets/15-ajouter-acces.png" alt="Ajouter un accès"><p class="caption">Ajouter un accès</p></div></div>
+    <div class="grid2" style="margin-top:5mm">
+      <div class="card"><h3>Nouveau bien</h3><ol><li>Donne un nom reconnaissable.</li><li>Ajoute une référence interne courte.</li><li>Indique le gestionnaire et l’adresse.</li><li>Colle le lien de l’annonce si utile.</li><li>Choisis une couleur distincte pour le calendrier.</li><li>Laisse <strong>Actif</strong> coché, puis enregistre.</li></ol></div>
+      <div class="card"><h3>Nouvel accès</h3><ol><li>Saisis le nom et l’email exacts.</li><li>Choisis le rôle minimal nécessaire.</li><li>Pour concierge ou lecture, coche les biens autorisés.</li><li>Enregistre : l’adresse devient autorisée et l’invitation peut être envoyée.</li><li>Vérifie ensuite son statut dans la liste.</li></ol></div>
+    </div>
+    <div class="tip info"><strong>Gestionnaire, admin et propriétaire :</strong> ces rôles ont accès à tous les biens. Les cases de biens servent surtout aux rôles concierge et lecture seule.</div>
+    <div class="tip warn"><strong>Avant d’inviter :</strong> relis l’adresse email. Une faute crée un accès inutilisable et peut envoyer l’invitation au mauvais destinataire.</div>
+    <footer class="footer"><span>Création des biens et des accès</span><span class="num"></span></footer>
+  </section>
+
+  <section class="page">
+    <header class="top"><div class="brand">BEST FRIEND<i>.</i></div><div class="chapter">14 · Sauvegarde et continuité</div></header>
+    <h2>Protéger les données et travailler sans mauvaise surprise</h2>
+    <img class="screen short" src="onboarding-assets/16-sauvegarde.png" alt="Assistance et sauvegarde">
+    <div class="grid2" style="margin-top:4mm">
+      <div class="card"><h3>Télécharger une sauvegarde</h3><ol><li>Ouvre <strong>Biens → Assistance et sauvegarde</strong>.</li><li>Choisis <strong>Télécharger une sauvegarde</strong>.</li><li>Conserve le fichier dans un emplacement privé.</li></ol><p style="margin-top:2mm">À faire avant une reprise massive ou une modification importante.</p></div>
+      <div class="card"><h3>Restaurer proprement</h3><ol><li>Choisis <strong>Restaurer une sauvegarde</strong>.</li><li>Lis le résumé des éléments détectés.</li><li>Confirme seulement si l’espace et les volumes sont corrects.</li><li>Utilise <strong>Annuler la dernière restauration</strong> si nécessaire.</li></ol></div>
+    </div>
+    <h3 style="margin-top:4mm">Mode hors ligne</h3>
+    <div class="flow"><div class="box"><b>Connexion perdue</b><br><span class="small">Le statut affiche Hors-ligne</span></div><div class="arrow">›</div><div class="box"><b>Lecture disponible</b><br><span class="small">Dernières données connues</span></div><div class="arrow">›</div><div class="box"><b>Retour en ligne</b><br><span class="small">Resynchronisation automatique</span></div></div>
+    <div class="tip warn"><strong>Hors ligne = lecture seule.</strong> Reconnecte-toi avant toute création ou modification. Best Friend annule les écritures hors ligne pour éviter les divergences silencieuses.</div>
+    <div class="tip"><strong>Réinitialiser les données</strong> est une action exceptionnelle et destructrice. Télécharge d’abord une sauvegarde et lis la confirmation complète.</div>
+    <footer class="footer"><span>Sauvegardes et mode hors ligne</span><span class="num"></span></footer>
+  </section>
+
+  <section class="page">
+    <header class="top"><div class="brand">BEST FRIEND<i>.</i></div><div class="chapter">15 · Mise en route</div></header>
+    <h2>Checklist du premier jour</h2>
+    <div class="grid2" style="grid-template-columns:1.08fr .92fr;align-items:start">
+      <div>
+        <div class="check"><span class="tick">✓</span><div><strong>1. Créer les biens</strong><br><span class="small">Nom, référence, gestionnaire, adresse, lien et couleur.</span></div></div>
+        <div class="check"><span class="tick">✓</span><div><strong>2. Ajouter les intervenants</strong><br><span class="small">Coordonnées et rôle opérationnel.</span></div></div>
+        <div class="check"><span class="tick">✓</span><div><strong>3. Importer ou saisir les réservations</strong><br><span class="small">Puis contrôler les dates dans le calendrier.</span></div></div>
+        <div class="check"><span class="tick">✓</span><div><strong>4. Créer les accès nominatifs</strong><br><span class="small">Rôle minimal et biens strictement nécessaires.</span></div></div>
+        <div class="check"><span class="tick">✓</span><div><strong>5. Faire un test terrain</strong><br><span class="small">Connexion concierge, fiche du bien, checklist et preuve photo.</span></div></div>
+        <div class="check"><span class="tick">✓</span><div><strong>6. Vérifier les chiffres</strong><br><span class="small">Montants, échanges, coûts et reste à régler.</span></div></div>
+        <div class="check"><span class="tick">✓</span><div><strong>7. Télécharger une sauvegarde initiale</strong><br><span class="small">Point de référence avant l’exploitation courante.</span></div></div>
+      </div>
+      <img class="screen" style="height:115mm;object-fit:cover;object-position:top" src="onboarding-assets/17-centre-pilotage.png" alt="Centre de pilotage">
+    </div>
+    <h3 style="margin-top:5mm">Dépannage express</h3>
+    <table class="table"><thead><tr><th>Situation</th><th>Action</th></tr></thead><tbody><tr><td>Lien de connexion absent</td><td>Indésirables → email exact → accès présent → nouveau lien.</td></tr><tr><td>Aucun bien visible</td><td>Le responsable vérifie les biens attribués à cette adresse.</td></tr><tr><td>Écran “Hors-ligne”</td><td>Rétablir le réseau, attendre “À jour”, puis recommencer l’action.</td></tr><tr><td>Chiffre incohérent</td><td>Contrôler dates, statut, échange, montant et coûts associés.</td></tr><tr><td>Problème persistant</td><td>Noter le message exact et le moment, puis ouvrir <strong>Assistance</strong>.</td></tr></tbody></table>
+    <div class="tip info"><strong>Pour demander de l’aide :</strong> indique l’écran, l’action, le message exact et l’heure. Ne transmets ni lien de connexion, ni calendrier iCal privé, ni donnée sensible.</div>
+    <footer class="footer"><span>Prêt à exploiter</span><span class="num"></span></footer>
+  </section>
+</body>
+</html>

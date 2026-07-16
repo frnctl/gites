@@ -1,0 +1,11 @@
+dist/
+dist-legacy-bridge/
+node_modules/
+playwright-report/
+test-results/
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+.wrangler/
