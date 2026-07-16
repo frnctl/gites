@@ -597,6 +597,9 @@ tfoot td{ background:#FAFAFC; }
 .issue-row.danger .sev{background:rgba(224,48,62,.11); color:var(--red)}
 .issue-row.warn .sev{background:rgba(184,134,11,.14); color:#8a6608}
 .issue-row.ok .sev{background:rgba(31,168,85,.13); color:#157a3e}
+.todo-check{width:28px; height:28px; border-radius:50%; border:2px solid #b9bcc6; background:#fff; flex:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; color:transparent; transition:.15s; margin-top:2px}
+.todo-check:hover{border-color:#157a3e; color:rgba(21,122,62,.5); transform:scale(1.08)}
+.todo-check.checked{background:#157a3e; border-color:#157a3e; color:#fff}
 .issue-row .title{font-weight:700; font-size:15px}
 .issue-row .detail{color:var(--muted); font-size:13px; margin-top:1px}
 .msg-card{border:1px solid var(--line); border-radius:14px; background:#fff; padding:12px; display:flex; flex-direction:column; gap:8px}
@@ -1163,7 +1166,7 @@ body.control-mode .bottom-nav{display:none!important}
     <div class="panel">
       <div class="panel-h"><h2>Tâches à faire</h2><div class="spacer"></div><span class="tag plan" id="todoCount" hidden>0</span></div>
       <hr class="gold-rule">
-      <p class="hint" style="margin-bottom:12px">Note ici tout ce qu'il faudra faire, grand ou petit. Quand c'est fait, un clic sur « ✓ Fait » et la tâche passe dans le journal des interventions.</p>
+      <p class="hint" style="margin-bottom:12px">Note ici tout ce qu'il faudra faire, grand ou petit. Le rond vide = à faire : coche-le quand c'est fait, la tâche passe alors dans le journal des interventions.</p>
       <form class="form" id="todoForm">
         <div class="field"><label for="todoApt">Bien</label><select id="todoApt" required></select></div>
         <div class="field wide"><label for="todoDesc">Quoi faire</label><input id="todoDesc" required placeholder="Ex : fuite sous l'évier, ampoule du couloir…"></div>
@@ -1968,11 +1971,14 @@ todoForm.addEventListener('submit',e=>{
   todoForm.reset(); gv('todoType').value='Autre'; todoWhoChange();
   renderAll(); toast('Tâche ajoutée à la liste');
 });
-function todoDone(id){
+function todoDone(id, btn){
   const r=interventions().find(x=>x.id===id); if(!r) return;
-  r.planned=false; if(!r.date) r.date=ymd(new Date());
-  if(!Store.save()) return;
-  renderAll(); toast('✅ '+(r.desc||r.type)+' — c\'est fait !');
+  if(btn){ btn.classList.add('checked'); btn.textContent='✓'; btn.disabled=true; }
+  setTimeout(()=>{
+    r.planned=false; if(!r.date) r.date=ymd(new Date());
+    if(!Store.save()) return;
+    renderAll(); toast('✅ '+(r.desc||r.type)+' — c\'est fait !');
+  }, 450);
 }
 function renderTodo(){
   const box=gv('todoList'); if(!box) return;
@@ -1987,10 +1993,11 @@ function renderTodo(){
     const apt=aptById(r.aptId);
     const late=r.date&&r.date<today;
     const when=r.date?(late?`⚠️ prévu le ${fmtD(r.date)} — en retard`:`pour le ${fmtD(r.date)}`):'dès que possible';
-    return `<div class="issue-row ${late?'danger':'warn'}"><div class="sev">${late?'⏰':'🔧'}</div>
+    return `<div class="issue-row ${late?'danger':'warn'}">
+      <button class="todo-check" title="À faire — coche quand c'est fait" aria-label="À faire : ${esc(r.desc||r.type)} — cocher quand c'est fait" onclick="todoDone('${jsq(r.id)}', this)">✓</button>
       <div style="flex:1"><div class="title">${esc(r.desc||r.type)} · <span style="color:${safeColor(apt?.color||'#888888')}">${esc(apt?.name||'?')}</span></div>
-      <div class="detail">${esc(r.who||'à attribuer')} · ${esc(r.type)} · ${when}</div></div>
-      <div class="row-actions"><button class="btn sm" style="color:#157a3e" aria-label="Marquer comme fait" onclick="todoDone('${jsq(r.id)}')">✓ Fait</button><button class="btn sm" aria-label="Modifier la tâche" onclick="intEdit('${jsq(r.id)}')">✎</button><button class="btn sm danger" aria-label="Supprimer la tâche" onclick="intDel('${jsq(r.id)}')">✕</button></div></div>`;
+      <div class="detail">${esc(r.who||'à attribuer')} · ${esc(r.type)} · ${late?`<span style="color:var(--red);font-weight:600">${when}</span>`:when}</div></div>
+      <div class="row-actions"><button class="btn sm" aria-label="Modifier la tâche" onclick="intEdit('${jsq(r.id)}')">✎</button><button class="btn sm danger" aria-label="Supprimer la tâche" onclick="intDel('${jsq(r.id)}')">✕</button></div></div>`;
   }).join('');
 }
 window.todoDone=todoDone; window.todoWhoChange=todoWhoChange;
