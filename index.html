@@ -1994,15 +1994,18 @@ function renderTodo(){
   const badge=gv('todoCount');
   if(badge){ badge.hidden=!list.length; badge.textContent=list.length>1?list.length+' tâches':'1 tâche'; }
   if(!list.length){ box.innerHTML='<p class="empty" style="padding:12px">Rien en attente. Ajoute une tâche ci-dessus pour anticiper.</p>'; return; }
+  const canDelete=isAdmin();
   box.innerHTML=list.map(r=>{
     const apt=aptById(r.aptId);
     const late=r.date&&r.date<today;
     const when=r.date?(late?`⚠️ prévu le ${fmtD(r.date)} — en retard`:`pour le ${fmtD(r.date)}`):'dès que possible';
+    const assignee=r.who?realContacts().find(c=>c.name.trim().toLowerCase()===String(r.who).trim().toLowerCase()):null;
+    const reach=assignee?contactBtns(assignee.phone,assignee.email):'';
     return `<div class="issue-row ${late?'danger':'warn'}">
       <button class="todo-check" title="À faire — coche quand c'est fait" aria-label="À faire : ${esc(r.desc||r.type)} — cocher quand c'est fait" onclick="todoDone('${jsq(r.id)}', this)">✓</button>
       <div style="flex:1"><div class="title">${esc(r.desc||r.type)} · <span style="color:${safeColor(apt?.color||'#888888')}">${esc(apt?.name||'?')}</span></div>
-      <div class="detail">${esc(r.who||'à attribuer')} · ${esc(r.type)} · ${late?`<span style="color:var(--red);font-weight:600">${when}</span>`:when}</div></div>
-      <div class="row-actions"><button class="btn sm" aria-label="Modifier la tâche" onclick="intEdit('${jsq(r.id)}')">✎</button><button class="btn sm danger" aria-label="Supprimer la tâche" onclick="intDel('${jsq(r.id)}')">✕</button></div></div>`;
+      <div class="detail">${esc(r.who||'à attribuer')}${reach?' '+reach:''} · ${esc(r.type)} · ${late?`<span style="color:var(--red);font-weight:600">${when}</span>`:when}</div></div>
+      <div class="row-actions"><button class="btn sm" aria-label="Modifier la tâche" onclick="intEdit('${jsq(r.id)}')">✎</button>${canDelete?`<button class="btn sm danger" aria-label="Supprimer la tâche" onclick="intDel('${jsq(r.id)}')">✕</button>`:''}</div></div>`;
   }).join('');
 }
 window.todoDone=todoDone; window.todoWhoChange=todoWhoChange;
@@ -2054,7 +2057,7 @@ function renderInterventions(){
       <td class="notes" data-label="Description">${esc(r.desc)}</td><td class="num" data-label="Durée">${r.dur?hours(r.dur):'—'}</td>
       <td class="num" data-label="Coût">${money(r.cost)}</td><td data-label="Règlement">${esc(r.payMode)}</td><td data-label="Statut">${payTag(r.payStatus)}</td>
       <td class="num" data-label="Date règl.">${fmtD(r.payDate)}</td><td class="mono" data-label="Réf">${esc(r.invoice)}</td><td class="notes" data-label="Notes">${esc(r.notes)}</td>
-      <td><div class="row-actions"><button class="btn sm" aria-label="Modifier l’intervention" onclick="intEdit('${jsq(r.id)}')">✎</button><button class="btn sm danger" aria-label="Supprimer l’intervention" onclick="intDel('${jsq(r.id)}')">✕</button></div></td>
+      <td><div class="row-actions"><button class="btn sm" aria-label="Modifier l’intervention" onclick="intEdit('${jsq(r.id)}')">✎</button>${isAdmin()?`<button class="btn sm danger" aria-label="Supprimer l’intervention" onclick="intDel('${jsq(r.id)}')">✕</button>`:''}</div></td>
     </tr>`;
   }).join('');
   gv('intTotH').textContent=hours(totH); gv('intTotC').textContent=money(totC);
