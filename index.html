@@ -1161,6 +1161,24 @@ body.control-mode .bottom-nav{display:none!important}
   <!-- ============ INTERVENTIONS ============ -->
   <section class="view" id="view-int" role="tabpanel">
     <div class="panel">
+      <div class="panel-h"><h2>Tâches à faire</h2><div class="spacer"></div><span class="tag plan" id="todoCount" hidden>0</span></div>
+      <hr class="gold-rule">
+      <p class="hint" style="margin-bottom:12px">Note ici tout ce qu'il faudra faire, grand ou petit. Quand c'est fait, un clic sur « ✓ Fait » et la tâche passe dans le journal des interventions.</p>
+      <form class="form" id="todoForm">
+        <div class="field"><label for="todoApt">Bien</label><select id="todoApt" required></select></div>
+        <div class="field wide"><label for="todoDesc">Quoi faire</label><input id="todoDesc" required placeholder="Ex : fuite sous l'évier, ampoule du couloir…"></div>
+        <div class="field"><label for="todoType">Type</label><select id="todoType"></select></div>
+        <div class="field"><label for="todoWho">Intervenant</label>
+          <select id="todoWho" onchange="todoWhoChange()"></select>
+          <input id="todoWhoOther" aria-label="Autre intervenant" placeholder="Saisir un autre nom" style="margin-top:8px;display:none">
+        </div>
+        <div class="field"><label for="todoDate">Pour le (optionnel)</label><input type="date" id="todoDate"></div>
+        <div class="form-actions"><button type="submit" class="btn primary">+ Ajouter la tâche</button></div>
+      </form>
+      <hr class="gold-rule">
+      <div class="ops-stack" id="todoList"></div>
+    </div>
+    <div class="panel">
       <div class="panel-h">
         <h2 id="intFormTitle">Nouvelle intervention</h2>
         <div class="spacer"></div>
@@ -1584,6 +1602,9 @@ function initSelects(){
   fillSelect(document.getElementById('intPayMode'), PAY_MODES);
   fillSelect(document.getElementById('intPayStatus'), PAY_STATUS);
   document.getElementById('contactList').innerHTML = realContacts().map(c=>`<option value="${esc(c.name)}">`).join('');
+  fillSelect(document.getElementById('todoApt'), aptOptions());
+  fillSelect(document.getElementById('todoType'), INT_TYPES);
+  const todoType=document.getElementById('todoType'); if(todoType) todoType.value='Autre';
 }
 let currentLoc=null;            // bien ouvert dans l'onglet « Locations » (null = grille)
 function activateView(view){
@@ -1905,6 +1926,75 @@ async function intDel(id){
   if(!Store.save()) return;
   renderAll();
 }
+
+/* =====================================================================
+   TÂCHES À FAIRE — interventions planifiées (planned:true)
+   ===================================================================== */
+function todoWhoChoices(){
+  const seen=new Set(); const out=[];
+  const add=(name,label)=>{ const v=String(name||'').trim(); const k=v.toLowerCase();
+    if(!v||seen.has(k)) return; seen.add(k); out.push({value:v,label:label||v}); };
+  realContacts().forEach(c=>add(c.name, c.role?`${c.name} · ${c.role}`:c.name));
+  const roleLabels={owner:'Propriétaire',admin:'Administrateur',manager:'Gestionnaire',concierge:'Concierge',viewer:'Lecture seule'};
+  (window.MEMBERS||[]).forEach(m=>add(m.name||m.display_name||m.email,
+    `${m.name||m.display_name||m.email} · ${roleLabels[m.role]||m.role||''}`.replace(/ · $/,'')));
+  const self=meName(); if(self) add(self, `${self} · moi`);
+  return out;
+}
+function todoWhoOptions(){
+  const sel=gv('todoWho'); if(!sel) return;
+  const keep=sel.value;
+  sel.innerHTML='<option value="">Qui s\'en charge ?</option>'
+    +todoWhoChoices().map(c=>`<option value="${esc(c.value)}">${esc(c.label)}</option>`).join('')
+    +'<option value="__other__">Autre nom…</option>';
+  if([...sel.options].some(o=>o.value===keep)) sel.value=keep;
+  todoWhoChange();
+}
+function todoWhoChange(){
+  const sel=gv('todoWho'), other=gv('todoWhoOther'); if(!sel||!other) return;
+  other.style.display=sel.value==='__other__'?'block':'none';
+}
+const todoForm=document.getElementById('todoForm');
+todoForm.addEventListener('submit',e=>{
+  e.preventDefault();
+  const desc=gv('todoDesc').value.trim(); if(!desc){ alert('Décris la tâche à faire.'); return; }
+  const whoSel=gv('todoWho').value;
+  const who=whoSel==='__other__'?gv('todoWhoOther').value.trim():whoSel;
+  const rec={ id:uid(), aptId:gv('todoApt').value, date:gv('todoDate').value||'', who,
+    type:gv('todoType').value, dur:0, cost:0, payMode:'', payStatus:'', payDate:'',
+    invoice:'', planned:true, desc, notes:'' };
+  Store.data.interventions.push(rec);
+  if(!Store.save()) return;
+  todoForm.reset(); gv('todoType').value='Autre'; todoWhoChange();
+  renderAll(); toast('Tâche ajoutée à la liste');
+});
+function todoDone(id){
+  const r=interventions().find(x=>x.id===id); if(!r) return;
+  r.planned=false; if(!r.date) r.date=ymd(new Date());
+  if(!Store.save()) return;
+  renderAll(); toast('✅ '+(r.desc||r.type)+' — c\'est fait !');
+}
+function renderTodo(){
+  const box=gv('todoList'); if(!box) return;
+  todoWhoOptions();
+  const today=ymd(new Date());
+  const list=interventions().filter(r=>r.planned)
+    .slice().sort((a,b)=>String(a.date||'9999')<String(b.date||'9999')?-1:1);
+  const badge=gv('todoCount');
+  if(badge){ badge.hidden=!list.length; badge.textContent=list.length>1?list.length+' tâches':'1 tâche'; }
+  if(!list.length){ box.innerHTML='<p class="empty" style="padding:12px">Rien en attente. Ajoute une tâche ci-dessus pour anticiper.</p>'; return; }
+  box.innerHTML=list.map(r=>{
+    const apt=aptById(r.aptId);
+    const late=r.date&&r.date<today;
+    const when=r.date?(late?`⚠️ prévu le ${fmtD(r.date)} — en retard`:`pour le ${fmtD(r.date)}`):'dès que possible';
+    return `<div class="issue-row ${late?'danger':'warn'}"><div class="sev">${late?'⏰':'🔧'}</div>
+      <div style="flex:1"><div class="title">${esc(r.desc||r.type)} · <span style="color:${safeColor(apt?.color||'#888888')}">${esc(apt?.name||'?')}</span></div>
+      <div class="detail">${esc(r.who||'à attribuer')} · ${esc(r.type)} · ${when}</div></div>
+      <div class="row-actions"><button class="btn sm" style="color:#157a3e" aria-label="Marquer comme fait" onclick="todoDone('${jsq(r.id)}')">✓ Fait</button><button class="btn sm" aria-label="Modifier la tâche" onclick="intEdit('${jsq(r.id)}')">✎</button><button class="btn sm danger" aria-label="Supprimer la tâche" onclick="intDel('${jsq(r.id)}')">✕</button></div></div>`;
+  }).join('');
+}
+window.todoDone=todoDone; window.todoWhoChange=todoWhoChange;
+
 function renderIntFilters(){
   const wrap=document.getElementById('intFilters');
   const opts=[{id:'all',name:'Tous'},...apts().filter(a=>a.active!==false),{id:'__plan',name:'⏳ À faire'}];
@@ -1914,6 +2004,7 @@ function renderIntFilters(){
 gv('intSearch').addEventListener('input',e=>{ intQuery=e.target.value.toLowerCase(); renderInterventions(); });
 function payTag(s){ const m={'Payé':'paid','En attente':'wait','Partiel':'part'}; return s?`<span class="tag ${m[s]||''}">${esc(s)}</span>`:''; }
 function renderInterventions(){
+  renderTodo();
   renderIntFilters();
   const tb=document.querySelector('#intTable tbody');
   let rows=[...interventions()].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
