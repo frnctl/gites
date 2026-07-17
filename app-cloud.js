@@ -594,7 +594,28 @@ function showLogin(){
   }
 
   window.openModal?.(`
-    <h2 style="margin-bottom:4px">Bienvenue</h2>
+    <h2 style="margin-bottom:8px">Connexion</h2>
+    <p class="hint" style="margin-bottom:14px">Saisissez votre adresse email : vous recevrez un lien de connexion sécurisé. Aucun mot de passe à retenir.</p>
+    <div class="form">
+      <div class="field wide"><label for="bf_login_email">Email</label><input id="bf_login_email" type="email" autocomplete="email" placeholder="vous@exemple.fr"></div>
+    </div>
+    <div id="bf_login_message" class="hint" style="min-height:20px"></div>
+    <div class="form-actions">
+      <button class="btn primary" id="bf_send_link">Recevoir mon lien</button>
+      <button class="btn ghost" onclick="closeModal()">Annuler</button>
+    </div>
+    <p class="hint" style="margin-top:12px">Nouveau sur Best Friend ? <a href="#" id="bf_goto_signup" style="color:var(--gold)">Créez votre compte</a></p>
+  `);
+  $('bf_send_link')?.addEventListener('click', ()=>sendMagicLink(null));
+  $('bf_login_email')?.addEventListener('keydown', event=>{
+    if(event.key==='Enter') sendMagicLink(null);
+  });
+  $('bf_goto_signup')?.addEventListener('click', event=>{ event.preventDefault(); showSignup(); });
+}
+
+function showSignup(){
+  window.openModal?.(`
+    <h2 style="margin-bottom:4px">Créer votre compte</h2>
     <p class="hint" style="margin-bottom:14px">Choisissez votre accès.</p>
     <div class="entry-cards">
       <button type="button" class="entry-card" data-entry="owner">
@@ -613,10 +634,12 @@ function showLogin(){
         <span>Proposez vos services</span>
       </button>
     </div>
+    <p class="hint" style="margin-top:14px">Déjà membre ? <a href="#" id="bf_goto_login" style="color:var(--gold)">Se connecter</a></p>
   `);
   document.querySelectorAll('.entry-card').forEach(card=>{
     card.addEventListener('click', ()=>showLoginEmail(card.dataset.entry));
   });
+  $('bf_goto_login')?.addEventListener('click', event=>{ event.preventDefault(); showLogin(); });
 }
 
 function showLoginEmail(entry){
@@ -633,14 +656,16 @@ function showLoginEmail(entry){
       <button class="btn ghost" id="bf_entry_back">Retour</button>
     </div>
   `);
-  $('bf_entry_back')?.addEventListener('click', showLogin);
+  $('bf_entry_back')?.addEventListener('click', showSignup);
   $('bf_send_link')?.addEventListener('click', ()=>sendMagicLink(entry));
   $('bf_login_email')?.addEventListener('keydown', event=>{
     if(event.key==='Enter') sendMagicLink(entry);
   });
 }
 
-async function sendMagicLink(entry='owner'){
+async function sendMagicLink(entry){
+  // Connexion simple (entry null) : conserver l'accès déjà mémorisé.
+  if(!entry) entry=localStorage.getItem(ENTRY_KEY) || 'owner';
   const email = $('bf_login_email')?.value.trim().toLowerCase();
   const message = $('bf_login_message');
   if(!email || !email.includes('@')){
