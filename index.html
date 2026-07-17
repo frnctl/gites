@@ -991,6 +991,25 @@ body.guest-mode header.app{padding-bottom:14px}
 body.guest-mode header.app .tabs,
 body.guest-mode main,
 body.guest-mode .bottom-nav{display:none!important}
+
+/* Bugbox : coccinelle flottante */
+#bugFab{
+  position:fixed; right:18px; bottom:calc(20px + var(--safe-b)); z-index:70;
+  width:56px; height:56px; border-radius:50%; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(180deg,var(--panel3),var(--panel));
+  border:1px solid var(--line-strong);
+  box-shadow:0 6px 24px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+  transition:transform .18s ease, box-shadow .18s ease;
+}
+#bugFab svg{transform:rotate(14deg); transition:transform .25s ease}
+#bugFab:hover{transform:translateY(-2px); box-shadow:0 10px 30px rgba(0,0,0,.55), 0 0 0 1px var(--line-strong)}
+#bugFab:hover svg{transform:rotate(-8deg) scale(1.08)}
+#bugFab:active{transform:translateY(0) scale(.96)}
+body.guest-mode #bugFab, body.control-mode #bugFab{display:none!important}
+@media (max-width:760px){ #bugFab{ right:14px; bottom:calc(92px + env(safe-area-inset-bottom,0px)); width:52px; height:52px } }
+.bugbox-head{display:flex; align-items:center; gap:10px; margin-bottom:6px}
+.bugbox-head svg{flex:none}
 body.control-mode .bottom-nav{display:none!important}
 .control-intro{background:linear-gradient(135deg,#1d1d1f,#343438);color:#fff;padding:24px;border-radius:24px;align-items:center}
 .control-intro>div:first-child{flex:1;min-width:min(100%,280px)}
@@ -1335,6 +1354,35 @@ body.control-mode .bottom-nav{display:none!important}
 </nav>
 
 <div id="tip" role="tooltip"></div>
+
+<!-- Bugbox : coccinelle flottante de signalement de bug -->
+<button type="button" id="bugFab" title="Signaler un bug" aria-label="Signaler un bug">
+  <svg viewBox="0 0 64 64" width="32" height="32" aria-hidden="true">
+    <defs>
+      <radialGradient id="ccShell" cx="38%" cy="30%" r="80%">
+        <stop offset="0%" stop-color="#ff6b5e"/>
+        <stop offset="55%" stop-color="#e63a3a"/>
+        <stop offset="100%" stop-color="#a3121c"/>
+      </radialGradient>
+    </defs>
+    <path d="M25 14 Q20 7 14.5 6" stroke="#23232a" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    <path d="M39 14 Q44 7 49.5 6" stroke="#23232a" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    <circle cx="13.5" cy="5.5" r="3" fill="#23232a"/>
+    <circle cx="50.5" cy="5.5" r="3" fill="#23232a"/>
+    <circle cx="32" cy="20" r="10.5" fill="#23232a"/>
+    <circle cx="27.6" cy="17.6" r="2.1" fill="#fff"/>
+    <circle cx="36.4" cy="17.6" r="2.1" fill="#fff"/>
+    <ellipse cx="32" cy="40" rx="21.5" ry="20" fill="url(#ccShell)"/>
+    <path d="M32 21.5 V60" stroke="#23232a" stroke-width="2.4"/>
+    <circle cx="22" cy="33" r="3.4" fill="#23232a"/>
+    <circle cx="42" cy="33" r="3.4" fill="#23232a"/>
+    <circle cx="17.5" cy="44" r="3" fill="#23232a"/>
+    <circle cx="46.5" cy="44" r="3" fill="#23232a"/>
+    <circle cx="26" cy="51" r="2.6" fill="#23232a"/>
+    <circle cx="38" cy="51" r="2.6" fill="#23232a"/>
+    <ellipse cx="24.5" cy="29.5" rx="6" ry="3.4" fill="rgba(255,255,255,.32)" transform="rotate(-24 24.5 29.5)"/>
+  </svg>
+</button>
 
 <!-- Modal générique (édition biens / contacts / import ics) -->
 <div class="modal-bg" id="modalBg"><div class="modal" id="modal" role="dialog" aria-modal="true" aria-live="polite"></div></div>
@@ -3348,6 +3396,37 @@ function toast(msg){
   t.textContent=msg; t.style.opacity='1';
   clearTimeout(t._h); t._h=setTimeout(()=>{ t.style.opacity='0'; },2400);
 }
+
+/* ============================ BUGBOX ============================ */
+function bugboxOpen(){
+  const cocci=document.getElementById('bugFab')?.querySelector('svg')?.outerHTML||'';
+  openModal(`
+    <div class="bugbox-head">${cocci}<h2 style="margin:0">Signaler un bug</h2></div>
+    <p class="hint" style="margin-bottom:10px">Décris ce qui cloche (ce que tu faisais, ce que tu attendais, ce qui s'est passé). La coccinelle transmet directement à l'équipe.</p>
+    <label>Description du problème
+      <textarea id="bugboxText" rows="5" maxlength="4000" placeholder="Ex. : sur la page Interventions, quand je coche une tâche…" style="width:100%;resize:vertical"></textarea>
+    </label>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+      <button class="btn ghost" type="button" onclick="closeModal()">Annuler</button>
+      <button class="btn primary" type="button" id="bugboxSend">Envoyer</button>
+    </div>
+  `);
+  document.getElementById('bugboxSend').addEventListener('click', async function(){
+    const text=(document.getElementById('bugboxText')?.value||'').trim();
+    if(text.length<3){ toast('Décris le bug en quelques mots d\'abord.'); return; }
+    this.disabled=true; this.textContent='Envoi…';
+    try{
+      await window.bfReportBug(text);
+      closeModal();
+      toast('Merci, c\'est envoyé ! La coccinelle s\'en occupe.');
+    }catch(err){
+      console.warn('bugbox', err);
+      this.disabled=false; this.textContent='Envoyer';
+      toast('Envoi impossible pour le moment. Réessaie dans un instant.');
+    }
+  });
+}
+document.getElementById('bugFab')?.addEventListener('click', bugboxOpen);
 function taskDone(aptId, type, label, photos, extra){
   const now=new Date();
   const rec={ id:uid(), aptId, date:ymd(now), time:now.toTimeString().slice(0,5),

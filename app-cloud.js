@@ -267,6 +267,26 @@ window.bfShowLogin = showLogin;
 window.bfLogout = logout;
 window.bfShowOrganizations = showOrganizationPicker;
 
+// Bugbox : dépôt d'un rapport de bug (table bf_bugs, insert-only via RLS).
+window.bfReportBug = async function(message){
+  if(!sb || !user) throw new Error('Connecte-toi pour signaler un bug.');
+  const view=document.querySelector('.view.active')?.id?.replace(/^view-/,'') || '';
+  const {error}=await sb.from('bf_bugs').insert({
+    org_id: activeOrg?.org_id || null,
+    email: user.email || null,
+    page: view,
+    message: String(message).slice(0, 4000),
+    meta: {
+      revision: CONFIG.revision || null,
+      role: activeRole || null,
+      url: location.href,
+      screen: `${window.innerWidth}x${window.innerHeight}`,
+      userAgent: navigator.userAgent
+    }
+  });
+  if(error) throw error;
+};
+
 async function initialize(){
   if(window.BF_DEMO_MODE){
     setDot('ok', 'Démo');
