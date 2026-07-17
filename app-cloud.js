@@ -119,7 +119,7 @@ function showUnavailable(){
 function showActivate(){
   setDot('local', 'Non connecté');
   setSyncBanner(
-    'Tes données sont protégées par ton compte. '
+    'Vos données sont protégées par votre compte. '
     + '<button class="btn sm" id="bf_activate" style="margin-left:8px">Se connecter</button>'
   );
   $('bf_activate')?.addEventListener('click', showLogin);
@@ -152,13 +152,13 @@ function showAccessUnavailable(){
   window.BF_RECOVERY_SNAPSHOTS=[];
   window.setMe?.({email:user?.email || null, role:'guest', apts:[], orgId:null});
   setDot('local', 'Bienvenue');
-  setSyncBanner('Bienvenue ! Crée ton espace pour commencer à gérer tes biens.');
-  setStoreNote('Ton espace est privé : toi seul et les personnes que tu invites y ont accès.');
+  setSyncBanner('Bienvenue ! Créez votre espace pour commencer à gérer vos biens.');
+  setStoreNote('Votre espace est privé : vous seul et les personnes que vous invitez y ont accès.');
   window.openModal?.(`
     <h2 style="margin-bottom:8px">Bienvenue sur Best Friend</h2>
-    <p class="hint" style="margin-bottom:14px">Crée ton espace privé pour gérer tes biens, tes réservations et tes interventions. Toi seul y as accès — tu pourras ensuite inviter qui tu veux (concierge, gestionnaire…).</p>
+    <p class="hint" style="margin-bottom:14px">Créez votre espace privé pour gérer vos biens, vos réservations et vos interventions. Vous seul y avez accès — vous pourrez ensuite inviter qui vous voudrez (concierge, gestionnaire…).</p>
     <div class="form">
-      <div class="field wide"><label for="bf_org_name">Nom de ton espace</label><input id="bf_org_name" type="text" maxlength="120" placeholder="Ex. : Appartements de Sophie"></div>
+      <div class="field wide"><label for="bf_org_name">Nom de votre espace</label><input id="bf_org_name" type="text" maxlength="120" placeholder="Ex. : Appartements de Sophie"></div>
     </div>
     <div id="bf_org_message" class="hint" style="min-height:20px"></div>
     <div class="form-actions">
@@ -171,7 +171,7 @@ function showAccessUnavailable(){
     const name=($('bf_org_name')?.value||'').trim();
     const message=$('bf_org_message');
     if(name.length<2){
-      if(message) message.textContent='Donne un nom à ton espace (2 caractères minimum).';
+      if(message) message.textContent='Donnez un nom à votre espace (2 caractères minimum).';
       return;
     }
     const button=$('bf_org_create');
@@ -181,7 +181,7 @@ function showAccessUnavailable(){
     if(error){
       console.warn('create organization', error);
       if(button){ button.disabled=false; button.textContent='Créer mon espace'; }
-      if(message) message.textContent='Création impossible pour le moment. Réessaie dans un instant.';
+      if(message) message.textContent='Création impossible pour le moment. Réessayez dans un instant.';
       return;
     }
     window.closeModal?.();
@@ -197,10 +197,10 @@ function showAccessUnavailable(){
 function showConciergeWaiting(){
   setDot('local', 'En attente d’invitation');
   setSyncBanner('Accès concierge — en attente d’une invitation.');
-  setStoreNote('Demande au propriétaire de t’inviter dans « Biens & gens ».');
+  setStoreNote('Demandez au propriétaire de vous inviter dans « Biens & gens ».');
   window.openModal?.(`
     <div class="entry-head">${ENTRY_SVGS.concierge}<h2 style="margin:0">Les clés arrivent</h2></div>
-    <p class="hint" style="margin-bottom:12px">Aucune invitation trouvée pour <strong>${escapeHtml(user?.email||'')}</strong>. Demande au propriétaire de t’ajouter dans « Biens &amp; gens » avec cette adresse exacte, puis reviens vérifier ici.</p>
+    <p class="hint" style="margin-bottom:12px">Aucune invitation trouvée pour <strong>${escapeHtml(user?.email||'')}</strong>. Demandez au propriétaire de vous ajouter dans « Biens &amp; gens » avec cette adresse exacte, puis revenez vérifier ici.</p>
     <div class="form-actions">
       <button class="btn primary" id="bf_cw_refresh">J’ai été invité·e — vérifier</button>
       <button class="btn ghost" id="bf_cw_logout">Se déconnecter</button>
@@ -218,7 +218,7 @@ async function showProviderFlow(){
   window.setMe?.({email:user?.email||null, role:'guest', apts:[], orgId:null});
   setDot('ok', 'Prestataire');
   setSyncBanner('Espace prestataire — annuaire des artisans Best Friend.');
-  setStoreNote('Ta fiche est privée : seule notre équipe la consulte pour la validation.');
+  setStoreNote('Votre fiche est privée : seule notre équipe la consulte pour la validation.');
   let row=null;
   try{
     const {data, error}=await sb.from('bf_providers').select('*').eq('user_id', user.id).maybeSingle();
@@ -228,7 +228,7 @@ async function showProviderFlow(){
     console.warn('provider', error);
     window.openModal?.(`
       <h2 style="margin-bottom:8px">Petit contretemps</h2>
-      <p class="hint">Impossible de charger ton dossier prestataire pour le moment.</p>
+      <p class="hint">Impossible de charger votre dossier prestataire pour le moment.</p>
       <div class="form-actions"><button class="btn primary" id="bf_pr_retry">Réessayer</button></div>
     `);
     $('bf_pr_retry')?.addEventListener('click', showProviderFlow);
@@ -238,7 +238,7 @@ async function showProviderFlow(){
   if(row.status==='approved'){
     window.openModal?.(`
       <div class="entry-head">${ENTRY_SVGS.provider}<h2 style="margin:0">Référencé !</h2></div>
-      <p class="hint" style="margin-bottom:12px">Bienvenue parmi les artisans recommandés Best Friend, <strong>${escapeHtml(row.company)}</strong>. Ta fiche est désormais proposée à nos propriétaires. La qualité de chaque intervention entretient ta place dans l’annuaire.</p>
+      <p class="hint" style="margin-bottom:12px">Bienvenue parmi les artisans recommandés Best Friend, <strong>${escapeHtml(row.company)}</strong>. Votre fiche est désormais proposée à nos propriétaires. La qualité de chaque intervention entretient votre place dans l’annuaire.</p>
       <div class="form-actions">
         <button class="btn ghost" id="bf_pr_switch">J’ai aussi un espace propriétaire ou concierge</button>
         <button class="btn ghost" id="bf_pr_logout2">Se déconnecter</button>
@@ -247,7 +247,7 @@ async function showProviderFlow(){
   }else if(row.status==='rejected'){
     window.openModal?.(`
       <div class="entry-head">${ENTRY_SVGS.provider}<h2 style="margin:0">Candidature non retenue</h2></div>
-      <p class="hint" style="margin-bottom:12px">Ta candidature n’a pas été retenue pour le moment. Tu peux mettre ta fiche à jour : chaque dossier retravaillé est réexaminé.</p>
+      <p class="hint" style="margin-bottom:12px">Votre candidature n’a pas été retenue pour le moment. Vous pouvez mettre votre fiche à jour : chaque dossier retravaillé est réexaminé.</p>
       <div class="form-actions">
         <button class="btn primary" id="bf_pr_edit">Retravailler ma fiche</button>
         <button class="btn ghost" id="bf_pr_logout2">Se déconnecter</button>
@@ -256,8 +256,8 @@ async function showProviderFlow(){
   }else{
     window.openModal?.(`
       <div class="entry-head">${ENTRY_SVGS.provider}<h2 style="margin:0">Candidature à l’étude</h2></div>
-      <p class="hint" style="margin-bottom:8px">Ta fiche <strong>${escapeHtml(row.company)}</strong> est entre nos mains. Nous te contactons personnellement pour confirmer les derniers détails avant ton entrée dans l’annuaire.</p>
-      <p class="hint" style="margin-bottom:12px">Les meilleurs dossiers sont recommandés en priorité à nos propriétaires : soigne ta fiche, c’est ta vitrine.</p>
+      <p class="hint" style="margin-bottom:8px">Votre fiche <strong>${escapeHtml(row.company)}</strong> est entre nos mains. Nous vous contactons personnellement pour confirmer les derniers détails avant votre entrée dans l’annuaire.</p>
+      <p class="hint" style="margin-bottom:12px">Les meilleurs dossiers sont recommandés en priorité à nos propriétaires : soignez votre fiche, c’est votre vitrine.</p>
       <div class="form-actions">
         <button class="btn primary" id="bf_pr_edit">Modifier ma fiche</button>
         <button class="btn ghost" id="bf_pr_switch">J’ai aussi un espace propriétaire ou concierge</button>
@@ -274,11 +274,11 @@ function renderProviderForm(existing){
   const v=key=>escapeHtml(existing?.[key]||'');
   window.openModal?.(`
     <div class="entry-head">${ENTRY_SVGS.provider}<h2 style="margin:0">${existing?'Ma fiche prestataire':'Rejoindre l’annuaire'}</h2></div>
-    <p class="hint" style="margin-bottom:12px">L’annuaire Best Friend est une sélection, pas une liste : chaque fiche est validée personnellement avant d’être recommandée à nos propriétaires. Présente-toi sous ton meilleur jour.</p>
+    <p class="hint" style="margin-bottom:12px">L’annuaire Best Friend est une sélection, pas une liste : chaque fiche est validée personnellement avant d’être recommandée à nos propriétaires. Présentez-vous sous votre meilleur jour.</p>
     <div class="form">
       <div class="field wide"><label for="bf_pr_company">Entreprise / nom professionnel *</label><input id="bf_pr_company" maxlength="120" value="${v('company')}" placeholder="Ex. : Fayçal Rénovation"></div>
       <div class="field wide"><label for="bf_pr_trades">Métiers / services *</label><input id="bf_pr_trades" maxlength="200" value="${v('trades')}" placeholder="Plomberie, électricité, ménage, peinture…"></div>
-      <div class="field wide"><label for="bf_pr_presentation">Présentez-vous *</label><textarea id="bf_pr_presentation" rows="4" maxlength="2000" placeholder="Ton parcours, tes spécialités, ce qui fait la différence…">${v('presentation')}</textarea></div>
+      <div class="field wide"><label for="bf_pr_presentation">Présentez-vous *</label><textarea id="bf_pr_presentation" rows="4" maxlength="2000" placeholder="Votre parcours, vos spécialités, ce qui fait la différence…">${v('presentation')}</textarea></div>
       <div class="field"><label for="bf_pr_phone">Téléphone *</label><input id="bf_pr_phone" maxlength="30" value="${v('phone')}" placeholder="06…"></div>
       <div class="field"><label for="bf_pr_zone">Secteur d’intervention</label><input id="bf_pr_zone" maxlength="120" value="${v('zone')}" placeholder="Paris et petite couronne"></div>
       <div class="field wide"><label for="bf_pr_website">Site web</label><input id="bf_pr_website" maxlength="200" value="${v('website')}" placeholder="https://…"></div>
@@ -312,7 +312,7 @@ async function submitProviderForm(existing){
   const zone=($('bf_pr_zone')?.value||'').trim();
   const website=($('bf_pr_website')?.value||'').trim();
   if(company.length<2 || !trades || presentation.length<10 || !phone){
-    if(message) message.textContent='Remplis les champs marqués d’une étoile (présentation : 10 caractères minimum).';
+    if(message) message.textContent='Remplissez les champs marqués d’une étoile (présentation : 10 caractères minimum).';
     return;
   }
   if(!$('bf_pr_charte')?.checked){
@@ -343,7 +343,7 @@ async function submitProviderForm(existing){
   }catch(error){
     console.warn('provider submit', error);
     if(button){ button.disabled=false; button.textContent=existing?'Mettre à jour ma fiche':'Envoyer ma candidature'; }
-    if(message) message.textContent='Envoi impossible pour le moment. Vérifie les fichiers (10 Mo max) et réessaie.';
+    if(message) message.textContent='Envoi impossible pour le moment. Vérifiez les fichiers (10 Mo max) et réessayez.';
     return;
   }
   window.toast?.('Candidature bien reçue !');
@@ -401,7 +401,7 @@ function showOrganizationPicker(){
   }).join('');
   window.openModal?.(`
     <h2 style="margin-bottom:8px">Mes espaces</h2>
-    <p class="hint">Choisis le propriétaire ou l’activité à ouvrir. Les données restent totalement séparées.</p>
+    <p class="hint">Choisissez le propriétaire ou l’activité à ouvrir. Les données restent totalement séparées.</p>
     <div style="margin:14px 0">${cards}</div>
     <div id="bf_org_switch_message" class="hint" style="min-height:20px"></div>
     <div class="form-actions">
@@ -440,7 +440,7 @@ async function switchOrganization(orgId){
     })
     .catch(error=>{
       console.warn('switch organization', error);
-      if(message) message.textContent='Impossible de changer d’espace. Tes données actuelles restent ouvertes.';
+      if(message) message.textContent='Impossible de changer d’espace. Vos données actuelles restent ouvertes.';
       document.querySelectorAll('.bf-org-choice').forEach(button=>{
         button.disabled=button.dataset.orgId===activeOrg?.org_id;
       });
@@ -455,7 +455,7 @@ window.bfShowOrganizations = showOrganizationPicker;
 
 // Bugbox : dépôt d'un rapport de bug (table bf_bugs, insert-only via RLS).
 window.bfReportBug = async function(message){
-  if(!sb || !user) throw new Error('Connecte-toi pour signaler un bug.');
+  if(!sb || !user) throw new Error('Connectez-vous pour signaler un bug.');
   const view=document.querySelector('.view.active')?.id?.replace(/^view-/,'') || '';
   const {error}=await sb.from('bf_bugs').insert({
     org_id: activeOrg?.org_id || null,
@@ -567,11 +567,11 @@ const ENTRY_SVGS={
 const ENTRY_COPY={
   owner:{
     title:'Connexion propriétaire',
-    text:'Ton espace privé : biens, réservations, finances, équipe. Nouveau ? Le lien de connexion crée ton compte et tu ouvres ton espace dans la foulée.'
+    text:'Votre espace privé : biens, réservations, finances, équipe. Nouveau ? Le lien de connexion crée votre compte et vous ouvrez votre espace dans la foulée.'
   },
   concierge:{
     title:'Accès concierge',
-    text:'Les doubles clés d\'or : accède aux biens dont on t\'a confié la gestion. Connecte-toi avec l\'adresse que ton propriétaire a invitée.'
+    text:'Les doubles clés d\'or : accédez aux biens dont on vous a confié la gestion. Connectez-vous avec l\'adresse que votre propriétaire a invitée.'
   },
   provider:{
     title:'Espace prestataire',
@@ -595,22 +595,22 @@ function showLogin(){
 
   window.openModal?.(`
     <h2 style="margin-bottom:4px">Bienvenue</h2>
-    <p class="hint" style="margin-bottom:14px">Choisis ton accès.</p>
+    <p class="hint" style="margin-bottom:14px">Choisissez votre accès.</p>
     <div class="entry-cards">
       <button type="button" class="entry-card" data-entry="owner">
         ${ENTRY_SVGS.owner}
         <strong>Propriétaire</strong>
-        <span>Gère tes biens et ton équipe</span>
+        <span>Gérez vos biens et votre équipe</span>
       </button>
       <button type="button" class="entry-card" data-entry="concierge">
         ${ENTRY_SVGS.concierge}
         <strong>Concierge</strong>
-        <span>Les clés qu'on t'a confiées</span>
+        <span>Les clés qu'on vous a confiées</span>
       </button>
       <button type="button" class="entry-card" data-entry="provider">
         ${ENTRY_SVGS.provider}
         <strong>Prestataire</strong>
-        <span>Propose tes services</span>
+        <span>Proposez vos services</span>
       </button>
     </div>
   `);
@@ -625,7 +625,7 @@ function showLoginEmail(entry){
     <div class="entry-head">${ENTRY_SVGS[entry]||''}<h2 style="margin:0">${copy.title}</h2></div>
     <p class="hint" style="margin-bottom:14px">${copy.text}</p>
     <div class="form">
-      <div class="field wide"><label for="bf_login_email">Email</label><input id="bf_login_email" type="email" autocomplete="email" placeholder="toi@exemple.fr"></div>
+      <div class="field wide"><label for="bf_login_email">Email</label><input id="bf_login_email" type="email" autocomplete="email" placeholder="vous@exemple.fr"></div>
     </div>
     <div id="bf_login_message" class="hint" style="min-height:20px"></div>
     <div class="form-actions">
@@ -644,7 +644,7 @@ async function sendMagicLink(entry='owner'){
   const email = $('bf_login_email')?.value.trim().toLowerCase();
   const message = $('bf_login_message');
   if(!email || !email.includes('@')){
-    if(message) message.textContent='Saisis une adresse email valide.';
+    if(message) message.textContent='Saisissez une adresse email valide.';
     return;
   }
   if(message) message.textContent='Envoi en cours…';
@@ -673,13 +673,13 @@ async function sendMagicLink(entry='owner'){
     if(error){
       console.warn('magic link', error);
       if(message){
-        message.textContent='Envoi impossible pour le moment. Réessaie dans quelques minutes.';
+        message.textContent='Envoi impossible pour le moment. Réessayez dans quelques minutes.';
       }
       return;
     }
   }
   if(message){
-    message.textContent='Le lien de connexion arrive par email dans quelques instants. Pense à vérifier les indésirables.';
+    message.textContent='Le lien de connexion arrive par email dans quelques instants. Pensez à vérifier les indésirables.';
   }
 }
 
@@ -730,7 +730,7 @@ async function completeLogin(nextUser){
 
 function showSchemaPending(){
   setDot('local', 'Préparation');
-  setSyncBanner('Ton espace sécurisé est en cours de préparation. Aucune action technique n’est nécessaire.');
+  setSyncBanner('Votre espace sécurisé est en cours de préparation. Aucune action technique n’est nécessaire.');
 }
 
 async function organizationAccess(organization){
@@ -1238,7 +1238,7 @@ window.bfReplaceSnapshot = async (snapshot, metadata={})=>{
     console.warn('replace snapshot', result.error);
     throw new Error(
       String(result.error.message||'').includes('forbidden')
-        ? 'Tu n’as pas l’autorisation de restaurer cet espace.'
+        ? 'Vous n’avez pas l’autorisation de restaurer cet espace.'
         : 'La restauration sécurisée a échoué. Les données précédentes sont conservées.'
     );
   }
