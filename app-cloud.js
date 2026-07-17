@@ -649,17 +649,34 @@ async function sendMagicLink(entry='owner'){
   }
   if(message) message.textContent='Envoi en cours…';
   localStorage.setItem(ENTRY_KEY, entry);
-  const redirectTo = `${location.origin}${location.pathname}?entry=${entry}`;
-  const {error} = await sb.auth.signInWithOtp({
-    email,
-    options:{emailRedirectTo:redirectTo, shouldCreateUser:true}
-  });
-  if(error){
-    console.warn('magic link', error);
-    if(message){
-      message.textContent='Envoi impossible pour le moment. Réessaie dans quelques minutes.';
+
+  // Envoi via notre worker (SMTP dédié, sans la limite horaire Supabase),
+  // avec repli sur le service email intégré de Supabase.
+  let sent=false;
+  try{
+    const response=await fetch('/api/login-link', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email, entry})
+    });
+    const payload=await response.json().catch(()=>({}));
+    sent=response.ok && payload.ok===true;
+  }catch(error){
+    console.warn('login link', error);
+  }
+  if(!sent){
+    const redirectTo = `${location.origin}${location.pathname}?entry=${entry}`;
+    const {error} = await sb.auth.signInWithOtp({
+      email,
+      options:{emailRedirectTo:redirectTo, shouldCreateUser:true}
+    });
+    if(error){
+      console.warn('magic link', error);
+      if(message){
+        message.textContent='Envoi impossible pour le moment. Réessaie dans quelques minutes.';
+      }
+      return;
     }
-    return;
   }
   if(message){
     message.textContent='Le lien de connexion arrive par email dans quelques instants. Pense à vérifier les indésirables.';

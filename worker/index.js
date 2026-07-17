@@ -1,3 +1,5 @@
+import {connect} from 'cloudflare:sockets';
+
 const DEFAULT_ICAL_HOSTS = [
   'airbnb.com',
   'airbnb.fr',
@@ -296,6 +298,158 @@ async function sendAccessEmail(config, email, displayName, redirectTo, fetchImpl
   );
 }
 
+/* ===== Envoi SMTP direct (contourne le service email bridé de Supabase) ===== */
+
+function b64Utf8(value){
+  const bytes=new TextEncoder().encode(value);
+  let binary='';
+  for(let i=0;i<bytes.length;i+=0x8000){
+    binary+=String.fromCharCode(...bytes.subarray(i, i+0x8000));
+  }
+  return btoa(binary);
+}
+
+function b64Wrap(value){
+  return b64Utf8(value).replace(/(.{76})/g, '$1\r\n');
+}
+
+async function smtpSendEmail(env, {to, subject, html}){
+  const user=String(env.BF_SMTP_USER || '');
+  const pass=String(env.BF_SMTP_PASS || '');
+  const host=String(env.BF_SMTP_HOST || 'smtp.mail.yahoo.com');
+  const port=Number(env.BF_SMTP_PORT || 465);
+  const fromName=String(env.BF_SMTP_FROM_NAME || 'Best Friend');
+  if(!user || !pass) throw new Error('smtp_unconfigured');
+
+  const socket=connect({hostname:host, port}, {secureTransport:'on', allowHalfOpen:false});
+  const writer=socket.writable.getWriter();
+  const reader=socket.readable.getReader();
+  const encoder=new TextEncoder();
+  const decoder=new TextDecoder();
+
+  async function command(line, expected){
+    if(line!==null) await writer.write(encoder.encode(line+'\r\n'));
+    let reply='';
+    for(;;){
+      const terminal=reply.match(/(?:^|\r\n)(\d{3}) [^\r\n]*\r\n/);
+      if(terminal){
+        const code=Number(terminal[1]);
+        if(code>=400 || (expected && code!==expected)){
+          throw new Error(`smtp_${code}`);
+        }
+        return code;
+      }
+      const {value, done}=await reader.read();
+      if(done) throw new Error('smtp_closed');
+      reply+=decoder.decode(value, {stream:true});
+    }
+  }
+
+  try{
+    await command(null, 220);
+    await command('EHLO best-friend-app.pages.dev');
+    await command('AUTH LOGIN', 334);
+    await command(btoa(user), 334);
+    await command(btoa(pass), 235);
+    await command(`MAIL FROM:<${user}>`, 250);
+    await command(`RCPT TO:<${to}>`, 250);
+    await command('DATA', 354);
+    const message=[
+      `From: =?UTF-8?B?${b64Utf8(fromName)}?= <${user}>`,
+      `To: <${to}>`,
+      `Subject: =?UTF-8?B?${b64Utf8(subject)}?=`,
+      `Date: ${new Date().toUTCString()}`,
+      `Message-ID: <${crypto.randomUUID()}@best-friend-app.pages.dev>`,
+      'MIME-Version: 1.0',
+      'Content-Type: text/html; charset=utf-8',
+      'Content-Transfer-Encoding: base64',
+      '',
+      b64Wrap(html),
+      '.'
+    ].join('\r\n');
+    await command(message, 250);
+    await writer.write(encoder.encode('QUIT\r\n'));
+  }finally{
+    try{ await socket.close(); }catch(_error){ /* déjà fermé */ }
+  }
+}
+
+const ENTRY_TITLES={
+  owner:'votre espace propriétaire',
+  concierge:'votre accès concierge',
+  provider:'votre espace prestataire'
+};
+
+function loginEmailHtml(link, entry){
+  const target=ENTRY_TITLES[entry] || ENTRY_TITLES.owner;
+  return `<!doctype html>
+<html lang="fr"><body style="margin:0;padding:32px 16px;background:#0E0E10;font-family:Helvetica,Arial,sans-serif">
+  <div style="max-width:460px;margin:0 auto;background:#16161A;border:1px solid rgba(201,162,39,.5);border-radius:16px;padding:32px 28px;color:#F2EFE9">
+    <div style="font-size:22px;font-weight:800;letter-spacing:.03em;margin-bottom:4px">BEST FRIEND<span style="color:#C1121F">.</span></div>
+    <div style="font-size:13px;color:#8A8A92;margin-bottom:24px">Pilotage propriétaire — conciergerie</div>
+    <p style="font-size:15px;line-height:1.55;margin:0 0 22px">Bonjour,<br>voici votre lien de connexion sécurisé vers ${target}. Il est personnel et expire rapidement.</p>
+    <div style="text-align:center;margin:0 0 24px">
+      <a href="${link}" style="display:inline-block;background:#C9A227;color:#0E0E10;font-weight:700;font-size:15px;text-decoration:none;padding:13px 30px;border-radius:12px">Ouvrir Best Friend</a>
+    </div>
+    <p style="font-size:12px;color:#8A8A92;line-height:1.5;margin:0">Si le bouton ne répond pas, copiez ce lien dans votre navigateur :<br><a href="${link}" style="color:#C9A227;word-break:break-all">${link}</a></p>
+    <hr style="border:none;border-top:1px solid rgba(201,162,39,.25);margin:22px 0 14px">
+    <p style="font-size:11px;color:#8A8A92;margin:0">Vous n'êtes pas à l'origine de cette demande ? Ignorez simplement cet email.</p>
+  </div>
+</body></html>`;
+}
+
+async function handleLoginLink(request, env, config, fetchImpl){
+  if(!config.serviceRoleKey) return json({ok:false, error:'service_unconfigured'}, 503);
+  const origin=request.headers.get('origin') || '';
+  const selfOrigin=new URL(request.url).origin;
+  if(origin && origin!==selfOrigin && origin!==config.siteUrl){
+    return json({ok:false, error:'origin_forbidden'}, 403);
+  }
+  let body;
+  try{ body=await readJson(request); }
+  catch(error){ return json({ok:false, error:error.message}, 400); }
+  const email=String(body.email || '').trim().toLowerCase();
+  const entry=['owner','concierge','provider'].includes(body.entry) ? body.entry : 'owner';
+  if(!validEmail(email)) return json({ok:false, error:'invalid_email'}, 400);
+
+  // Anti-abus : 1 envoi par adresse par minute (cache edge).
+  const cache=caches.default;
+  const throttleKey=new Request(`https://bf-login-throttle.invalid/${encodeURIComponent(email)}`);
+  if(await cache.match(throttleKey)){
+    return json({ok:true, emailSent:true, throttled:true});
+  }
+  await cache.put(throttleKey, new Response('1', {headers:{'Cache-Control':'max-age=60'}}));
+
+  const redirectTo=`${config.siteUrl || selfOrigin}/?entry=${entry}`;
+  try{
+    const exists=await authUserExists(config, email, fetchImpl);
+    if(!exists){
+      const created=await authAdminRequest(config, '/admin/users', {
+        method:'POST',
+        body:JSON.stringify({email, email_confirm:true})
+      }, fetchImpl);
+      if(!created.ok) throw new Error('user_creation_failed');
+    }
+    const linkResponse=await authAdminRequest(config, '/admin/generate_link', {
+      method:'POST',
+      body:JSON.stringify({type:'magiclink', email, redirect_to:redirectTo})
+    }, fetchImpl);
+    if(!linkResponse.ok) throw new Error('link_generation_failed');
+    const payload=await linkResponse.json();
+    const link=payload.action_link || payload.properties?.action_link;
+    if(!link) throw new Error('link_generation_failed');
+    await smtpSendEmail(env, {
+      to:email,
+      subject:'Votre lien de connexion Best Friend',
+      html:loginEmailHtml(link, entry)
+    });
+    return json({ok:true, emailSent:true});
+  }catch(error){
+    console.warn('login link', error?.message || error);
+    return json({ok:false, error:'login_link_failed'}, 502);
+  }
+}
+
 async function handleInvite(request, env, config, fetchImpl){
   const auth=await authenticate(request, config, fetchImpl);
   if(!auth) return json({ok:false, error:'authentication_required'}, 401);
@@ -392,6 +546,9 @@ export async function handleRequest(request, env={}){
   }
   if(url.pathname==='/api/invite' && request.method==='POST'){
     return handleInvite(request, env, config, fetchImpl);
+  }
+  if(url.pathname==='/api/login-link' && request.method==='POST'){
+    return handleLoginLink(request, env, config, fetchImpl);
   }
   if(request.method==='OPTIONS'){
     return new Response(null, {status:204, headers:apiHeaders()});

@@ -89,6 +89,7 @@ await build({
   entryPoints:[resolve(root, 'worker/index.js')],
   outfile:resolve(dist, '_worker.js'),
   bundle:true,
+  external:['cloudflare:sockets'],
   format:'esm',
   platform:'browser',
   target:['es2022'],
