@@ -151,17 +151,47 @@ function showAccessUnavailable(){
   window.MEMBERS=[];
   window.BF_RECOVERY_SNAPSHOTS=[];
   window.setMe?.({email:user?.email || null, role:'guest', apts:[], orgId:null});
-  setDot('local', 'Accès non attribué');
-  setSyncBanner('Cette adresse ne possède aucun espace attribué.');
-  setStoreNote('Contacte l’administrateur de ton espace si cet accès est attendu.');
+  setDot('local', 'Bienvenue');
+  setSyncBanner('Bienvenue ! Crée ton espace pour commencer à gérer tes biens.');
+  setStoreNote('Ton espace est privé : toi seul et les personnes que tu invites y ont accès.');
   window.openModal?.(`
-    <h2 style="margin-bottom:8px">Accès non attribué</h2>
-    <p class="hint">Cette adresse est bien connectée, mais aucun espace privé ne lui est encore ouvert.</p>
+    <h2 style="margin-bottom:8px">Bienvenue sur Best Friend</h2>
+    <p class="hint" style="margin-bottom:14px">Crée ton espace privé pour gérer tes biens, tes réservations et tes interventions. Toi seul y as accès — tu pourras ensuite inviter qui tu veux (concierge, gestionnaire…).</p>
+    <div class="form">
+      <div class="field wide"><label for="bf_org_name">Nom de ton espace</label><input id="bf_org_name" type="text" maxlength="120" placeholder="Ex. : Appartements de Sophie"></div>
+    </div>
+    <div id="bf_org_message" class="hint" style="min-height:20px"></div>
     <div class="form-actions">
-      <button class="btn primary" id="bf_no_access_logout">Se déconnecter</button>
+      <button class="btn primary" id="bf_org_create">Créer mon espace</button>
+      <button class="btn ghost" id="bf_no_access_logout">Se déconnecter</button>
     </div>
   `);
   $('bf_no_access_logout')?.addEventListener('click', logout);
+  const createOrganization=async ()=>{
+    const name=($('bf_org_name')?.value||'').trim();
+    const message=$('bf_org_message');
+    if(name.length<2){
+      if(message) message.textContent='Donne un nom à ton espace (2 caractères minimum).';
+      return;
+    }
+    const button=$('bf_org_create');
+    if(button){ button.disabled=true; button.textContent='Création…'; }
+    if(message) message.textContent='';
+    const {error}=await sb.rpc('bf_create_organization', {p_name:name});
+    if(error){
+      console.warn('create organization', error);
+      if(button){ button.disabled=false; button.textContent='Créer mon espace'; }
+      if(message) message.textContent='Création impossible pour le moment. Réessaie dans un instant.';
+      return;
+    }
+    window.closeModal?.();
+    window.toast?.(`${name} est prêt. Bienvenue !`);
+    await completeLogin(user);
+  };
+  $('bf_org_create')?.addEventListener('click', createOrganization);
+  $('bf_org_name')?.addEventListener('keydown', event=>{
+    if(event.key==='Enter') createOrganization();
+  });
 }
 
 function roleLabel(role){
@@ -345,7 +375,7 @@ function showLogin(){
 
   window.openModal?.(`
     <h2 style="margin-bottom:8px">Connexion</h2>
-    <p class="hint" style="margin-bottom:14px">Saisis l’adresse autorisée pour ton espace privé. Aucun mot de passe à retenir.</p>
+    <p class="hint" style="margin-bottom:14px">Saisis ton adresse email : tu recevras un lien de connexion. Nouveau ici ? Le même lien crée ton compte. Aucun mot de passe à retenir.</p>
     <div class="form">
       <div class="field wide"><label for="bf_login_email">Email</label><input id="bf_login_email" type="email" autocomplete="email" placeholder="toi@exemple.fr"></div>
     </div>
@@ -373,13 +403,17 @@ async function sendMagicLink(){
   const redirectTo = `${location.origin}${location.pathname}`;
   const {error} = await sb.auth.signInWithOtp({
     email,
-    options:{emailRedirectTo:redirectTo, shouldCreateUser:false}
+    options:{emailRedirectTo:redirectTo, shouldCreateUser:true}
   });
   if(error){
     console.warn('magic link', error);
+    if(message){
+      message.textContent='Envoi impossible pour le moment. Réessaie dans quelques minutes.';
+    }
+    return;
   }
   if(message){
-    message.textContent='Si cette adresse est autorisée, le lien arrive dans quelques instants.';
+    message.textContent='Le lien de connexion arrive par email dans quelques instants. Pense à vérifier les indésirables.';
   }
 }
 
