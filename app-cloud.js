@@ -194,6 +194,162 @@ function showAccessUnavailable(){
   });
 }
 
+function showConciergeWaiting(){
+  setDot('local', 'En attente d’invitation');
+  setSyncBanner('Accès concierge — en attente d’une invitation.');
+  setStoreNote('Demande au propriétaire de t’inviter dans « Biens & gens ».');
+  window.openModal?.(`
+    <div class="entry-head">${ENTRY_SVGS.concierge}<h2 style="margin:0">Les clés arrivent</h2></div>
+    <p class="hint" style="margin-bottom:12px">Aucune invitation trouvée pour <strong>${escapeHtml(user?.email||'')}</strong>. Demande au propriétaire de t’ajouter dans « Biens &amp; gens » avec cette adresse exacte, puis reviens vérifier ici.</p>
+    <div class="form-actions">
+      <button class="btn primary" id="bf_cw_refresh">J’ai été invité·e — vérifier</button>
+      <button class="btn ghost" id="bf_cw_logout">Se déconnecter</button>
+    </div>
+  `);
+  $('bf_cw_refresh')?.addEventListener('click', ()=>completeLogin(user));
+  $('bf_cw_logout')?.addEventListener('click', logout);
+}
+
+async function showProviderFlow(){
+  Store.cloudSync=null;
+  window.BF_CLOUD_CONNECTED=false;
+  Store.setNamespace('guest', {id:null,name:'',brandName:'Best Friend',ownerLabel:'Propriétaire'});
+  window.MEMBERS=[];
+  window.setMe?.({email:user?.email||null, role:'guest', apts:[], orgId:null});
+  setDot('ok', 'Prestataire');
+  setSyncBanner('Espace prestataire — annuaire des artisans Best Friend.');
+  setStoreNote('Ta fiche est privée : seule notre équipe la consulte pour la validation.');
+  let row=null;
+  try{
+    const {data, error}=await sb.from('bf_providers').select('*').eq('user_id', user.id).maybeSingle();
+    if(error) throw error;
+    row=data;
+  }catch(error){
+    console.warn('provider', error);
+    window.openModal?.(`
+      <h2 style="margin-bottom:8px">Petit contretemps</h2>
+      <p class="hint">Impossible de charger ton dossier prestataire pour le moment.</p>
+      <div class="form-actions"><button class="btn primary" id="bf_pr_retry">Réessayer</button></div>
+    `);
+    $('bf_pr_retry')?.addEventListener('click', showProviderFlow);
+    return;
+  }
+  if(!row){ renderProviderForm(null); return; }
+  if(row.status==='approved'){
+    window.openModal?.(`
+      <div class="entry-head">${ENTRY_SVGS.provider}<h2 style="margin:0">Référencé !</h2></div>
+      <p class="hint" style="margin-bottom:12px">Bienvenue parmi les artisans recommandés Best Friend, <strong>${escapeHtml(row.company)}</strong>. Ta fiche est désormais proposée à nos propriétaires. La qualité de chaque intervention entretient ta place dans l’annuaire.</p>
+      <div class="form-actions">
+        <button class="btn ghost" id="bf_pr_switch">J’ai aussi un espace propriétaire ou concierge</button>
+        <button class="btn ghost" id="bf_pr_logout2">Se déconnecter</button>
+      </div>
+    `);
+  }else if(row.status==='rejected'){
+    window.openModal?.(`
+      <div class="entry-head">${ENTRY_SVGS.provider}<h2 style="margin:0">Candidature non retenue</h2></div>
+      <p class="hint" style="margin-bottom:12px">Ta candidature n’a pas été retenue pour le moment. Tu peux mettre ta fiche à jour : chaque dossier retravaillé est réexaminé.</p>
+      <div class="form-actions">
+        <button class="btn primary" id="bf_pr_edit">Retravailler ma fiche</button>
+        <button class="btn ghost" id="bf_pr_logout2">Se déconnecter</button>
+      </div>
+    `);
+  }else{
+    window.openModal?.(`
+      <div class="entry-head">${ENTRY_SVGS.provider}<h2 style="margin:0">Candidature à l’étude</h2></div>
+      <p class="hint" style="margin-bottom:8px">Ta fiche <strong>${escapeHtml(row.company)}</strong> est entre nos mains. Nous te contactons personnellement pour confirmer les derniers détails avant ton entrée dans l’annuaire.</p>
+      <p class="hint" style="margin-bottom:12px">Les meilleurs dossiers sont recommandés en priorité à nos propriétaires : soigne ta fiche, c’est ta vitrine.</p>
+      <div class="form-actions">
+        <button class="btn primary" id="bf_pr_edit">Modifier ma fiche</button>
+        <button class="btn ghost" id="bf_pr_switch">J’ai aussi un espace propriétaire ou concierge</button>
+        <button class="btn ghost" id="bf_pr_logout2">Se déconnecter</button>
+      </div>
+    `);
+  }
+  $('bf_pr_edit')?.addEventListener('click', ()=>renderProviderForm(row));
+  $('bf_pr_switch')?.addEventListener('click', ()=>{ localStorage.setItem(ENTRY_KEY, 'owner'); completeLogin(user); });
+  $('bf_pr_logout2')?.addEventListener('click', ()=>{ localStorage.removeItem(ENTRY_KEY); logout(); });
+}
+
+function renderProviderForm(existing){
+  const v=key=>escapeHtml(existing?.[key]||'');
+  window.openModal?.(`
+    <div class="entry-head">${ENTRY_SVGS.provider}<h2 style="margin:0">${existing?'Ma fiche prestataire':'Rejoindre l’annuaire'}</h2></div>
+    <p class="hint" style="margin-bottom:12px">L’annuaire Best Friend est une sélection, pas une liste : chaque fiche est validée personnellement avant d’être recommandée à nos propriétaires. Présente-toi sous ton meilleur jour.</p>
+    <div class="form">
+      <div class="field wide"><label for="bf_pr_company">Entreprise / nom professionnel *</label><input id="bf_pr_company" maxlength="120" value="${v('company')}" placeholder="Ex. : Fayçal Rénovation"></div>
+      <div class="field wide"><label for="bf_pr_trades">Métiers / services *</label><input id="bf_pr_trades" maxlength="200" value="${v('trades')}" placeholder="Plomberie, électricité, ménage, peinture…"></div>
+      <div class="field wide"><label for="bf_pr_presentation">Présentez-vous *</label><textarea id="bf_pr_presentation" rows="4" maxlength="2000" placeholder="Ton parcours, tes spécialités, ce qui fait la différence…">${v('presentation')}</textarea></div>
+      <div class="field"><label for="bf_pr_phone">Téléphone *</label><input id="bf_pr_phone" maxlength="30" value="${v('phone')}" placeholder="06…"></div>
+      <div class="field"><label for="bf_pr_zone">Secteur d’intervention</label><input id="bf_pr_zone" maxlength="120" value="${v('zone')}" placeholder="Paris et petite couronne"></div>
+      <div class="field wide"><label for="bf_pr_website">Site web</label><input id="bf_pr_website" maxlength="200" value="${v('website')}" placeholder="https://…"></div>
+      <div class="field wide"><label for="bf_pr_files">Documents — plaquette PDF, photos, logo (3 max, 10 Mo)</label><input id="bf_pr_files" type="file" accept=".pdf,image/*" multiple></div>
+    </div>
+    <details class="hint" style="margin:10px 0">
+      <summary style="cursor:pointer">Lire la Charte d’excellence Best Friend</summary>
+      <p style="margin-top:8px">Devis clairs et honnêtes avant toute intervention. Délais annoncés, délais tenus. Travail soigné, lieux laissés impeccables. Courtoisie irréprochable envers voyageurs, concierges et propriétaires. Réponse aux sollicitations sous 24 h ouvrées. Le référencement peut être retiré à tout moment en cas de manquement.</p>
+    </details>
+    <label style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;cursor:pointer">
+      <input type="checkbox" id="bf_pr_charte" style="margin-top:3px">
+      <span class="hint">Je m’engage à respecter la Charte d’excellence Best Friend. *</span>
+    </label>
+    <div id="bf_pr_message" class="hint" style="min-height:20px"></div>
+    <div class="form-actions">
+      <button class="btn gold" id="bf_pr_submit">${existing?'Mettre à jour ma fiche':'Envoyer ma candidature'}</button>
+      <button class="btn ghost" id="bf_pr_logout">Se déconnecter</button>
+    </div>
+  `);
+  if(existing?.charte_accepted_at){ const box=$('bf_pr_charte'); if(box) box.checked=true; }
+  $('bf_pr_logout')?.addEventListener('click', ()=>{ localStorage.removeItem(ENTRY_KEY); logout(); });
+  $('bf_pr_submit')?.addEventListener('click', ()=>submitProviderForm(existing));
+}
+
+async function submitProviderForm(existing){
+  const message=$('bf_pr_message');
+  const company=($('bf_pr_company')?.value||'').trim();
+  const trades=($('bf_pr_trades')?.value||'').trim();
+  const presentation=($('bf_pr_presentation')?.value||'').trim();
+  const phone=($('bf_pr_phone')?.value||'').trim();
+  const zone=($('bf_pr_zone')?.value||'').trim();
+  const website=($('bf_pr_website')?.value||'').trim();
+  if(company.length<2 || !trades || presentation.length<10 || !phone){
+    if(message) message.textContent='Remplis les champs marqués d’une étoile (présentation : 10 caractères minimum).';
+    return;
+  }
+  if(!$('bf_pr_charte')?.checked){
+    if(message) message.textContent='La Charte d’excellence doit être acceptée pour candidater.';
+    return;
+  }
+  const button=$('bf_pr_submit');
+  if(button){ button.disabled=true; button.textContent='Envoi…'; }
+  const files=Array.isArray(existing?.files)?[...existing.files]:[];
+  try{
+    const selected=[...($('bf_pr_files')?.files||[])].slice(0,3);
+    for(const file of selected){
+      const safe=file.name.replace(/[^a-zA-Z0-9._-]+/g,'_').slice(-80);
+      const path=`${user.id}/${Date.now()}_${safe}`;
+      const {error}=await sb.storage.from('bf-providers').upload(path, file);
+      if(error) throw error;
+      files.push({path, name:file.name, type:file.type, size:file.size});
+    }
+    const {error}=await sb.from('bf_providers').upsert({
+      user_id:user.id,
+      email:user.email||'',
+      company, trades, presentation, phone, zone, website,
+      files,
+      charte_accepted_at:existing?.charte_accepted_at||new Date().toISOString(),
+      status:'pending'
+    }, {onConflict:'user_id'});
+    if(error) throw error;
+  }catch(error){
+    console.warn('provider submit', error);
+    if(button){ button.disabled=false; button.textContent=existing?'Mettre à jour ma fiche':'Envoyer ma candidature'; }
+    if(message) message.textContent='Envoi impossible pour le moment. Vérifie les fichiers (10 Mo max) et réessaie.';
+    return;
+  }
+  window.toast?.('Candidature bien reçue !');
+  showProviderFlow();
+}
+
 function roleLabel(role){
   return {
     owner:'Propriétaire',
@@ -318,6 +474,10 @@ window.bfReportBug = async function(message){
 };
 
 async function initialize(){
+  const entryParam=new URLSearchParams(location.search).get('entry');
+  if(['owner','concierge','provider'].includes(entryParam)){
+    localStorage.setItem(ENTRY_KEY, entryParam);
+  }
   if(window.BF_DEMO_MODE){
     setDot('ok', 'Démo');
     setSyncBanner('Mode démonstration — aucune donnée réelle.');
@@ -363,6 +523,62 @@ async function initialize(){
   });
 }
 
+const ENTRY_KEY='bestfriend:entry';
+
+const ENTRY_SVGS={
+  owner:`<svg viewBox="0 0 64 64" width="46" height="46" aria-hidden="true" fill="none">
+    <g fill="#C9A227">
+      <ellipse cx="20" cy="51" rx="6.5" ry="2.6" transform="rotate(35 20 51)"/>
+      <ellipse cx="13.5" cy="43" rx="6.5" ry="2.6" transform="rotate(65 13.5 43)"/>
+      <ellipse cx="10.5" cy="33" rx="6.5" ry="2.6" transform="rotate(85 10.5 33)"/>
+      <ellipse cx="11" cy="22.5" rx="6.5" ry="2.6" transform="rotate(103 11 22.5)"/>
+      <ellipse cx="15" cy="13" rx="6.5" ry="2.6" transform="rotate(125 15 13)"/>
+      <ellipse cx="44" cy="51" rx="6.5" ry="2.6" transform="rotate(-35 44 51)"/>
+      <ellipse cx="50.5" cy="43" rx="6.5" ry="2.6" transform="rotate(-65 50.5 43)"/>
+      <ellipse cx="53.5" cy="33" rx="6.5" ry="2.6" transform="rotate(-85 53.5 33)"/>
+      <ellipse cx="53" cy="22.5" rx="6.5" ry="2.6" transform="rotate(-103 53 22.5)"/>
+      <ellipse cx="49" cy="13" rx="6.5" ry="2.6" transform="rotate(-125 49 13)"/>
+    </g>
+    <path d="M32 22 L34.4 28 L40.5 28.3 L35.8 32.3 L37.5 38.4 L32 35 L26.5 38.4 L28.2 32.3 L23.5 28.3 L29.6 28 Z" fill="#C9A227"/>
+  </svg>`,
+  concierge:`<svg viewBox="0 0 64 64" width="46" height="46" aria-hidden="true" fill="none" stroke="#C9A227" stroke-linecap="round">
+    <circle cx="14" cy="50" r="7" stroke-width="3"/>
+    <circle cx="14" cy="50" r="2.6" stroke-width="2"/>
+    <path d="M19.5 45 L48 16.5" stroke-width="3.6"/>
+    <path d="M44 12.5 L51.5 20" stroke-width="3.6"/>
+    <path d="M46.5 22.5 L51 27" stroke-width="3.4"/>
+    <path d="M41 28 L45 32" stroke-width="3.4"/>
+    <circle cx="50" cy="50" r="7" stroke-width="3"/>
+    <circle cx="50" cy="50" r="2.6" stroke-width="2"/>
+    <path d="M44.5 45 L16 16.5" stroke-width="3.6"/>
+    <path d="M20 12.5 L12.5 20" stroke-width="3.6"/>
+    <path d="M17.5 22.5 L13 27" stroke-width="3.4"/>
+    <path d="M23 28 L19 32" stroke-width="3.4"/>
+  </svg>`,
+  provider:`<svg viewBox="0 0 64 64" width="46" height="46" aria-hidden="true">
+    <path d="M25 38 L20 58 L27.5 52.5 L31 60 Z" fill="#C9A227" opacity=".85"/>
+    <path d="M39 38 L44 58 L36.5 52.5 L33 60 Z" fill="#C9A227" opacity=".85"/>
+    <circle cx="32" cy="25" r="17" fill="none" stroke="#C9A227" stroke-width="2.6"/>
+    <circle cx="32" cy="25" r="12.6" fill="none" stroke="#C9A227" stroke-width="1.2" stroke-dasharray="2.6 2.6"/>
+    <path d="M32 16.2 L34.5 22.3 L41 22.6 L36 26.8 L37.8 33.2 L32 29.6 L26.2 33.2 L28 26.8 L23 22.6 L29.5 22.3 Z" fill="#C9A227"/>
+  </svg>`
+};
+
+const ENTRY_COPY={
+  owner:{
+    title:'Connexion propriétaire',
+    text:'Ton espace privé : biens, réservations, finances, équipe. Nouveau ? Le lien de connexion crée ton compte et tu ouvres ton espace dans la foulée.'
+  },
+  concierge:{
+    title:'Accès concierge',
+    text:'Les doubles clés d\'or : accède aux biens dont on t\'a confié la gestion. Connecte-toi avec l\'adresse que ton propriétaire a invitée.'
+  },
+  provider:{
+    title:'Espace prestataire',
+    text:'Plomberie, électricité, ménage, travaux… L\'annuaire Best Friend ne référence que des artisans d\'exception, recommandés directement à nos propriétaires. Si votre travail parle pour vous, votre place est ici.'
+  }
+};
+
 function showLogin(){
   if(!sb){
     window.openModal?.(`
@@ -372,27 +588,59 @@ function showLogin(){
     `);
     return;
   }
+  if(user && localStorage.getItem(ENTRY_KEY)==='provider'){
+    showProviderFlow();
+    return;
+  }
 
   window.openModal?.(`
-    <h2 style="margin-bottom:8px">Connexion</h2>
-    <p class="hint" style="margin-bottom:14px">Saisis ton adresse email : tu recevras un lien de connexion. Nouveau ici ? Le même lien crée ton compte. Aucun mot de passe à retenir.</p>
+    <h2 style="margin-bottom:4px">Bienvenue</h2>
+    <p class="hint" style="margin-bottom:14px">Choisis ton accès.</p>
+    <div class="entry-cards">
+      <button type="button" class="entry-card" data-entry="owner">
+        ${ENTRY_SVGS.owner}
+        <strong>Propriétaire</strong>
+        <span>Gère tes biens et ton équipe</span>
+      </button>
+      <button type="button" class="entry-card" data-entry="concierge">
+        ${ENTRY_SVGS.concierge}
+        <strong>Concierge</strong>
+        <span>Les clés qu'on t'a confiées</span>
+      </button>
+      <button type="button" class="entry-card" data-entry="provider">
+        ${ENTRY_SVGS.provider}
+        <strong>Prestataire</strong>
+        <span>Propose tes services</span>
+      </button>
+    </div>
+  `);
+  document.querySelectorAll('.entry-card').forEach(card=>{
+    card.addEventListener('click', ()=>showLoginEmail(card.dataset.entry));
+  });
+}
+
+function showLoginEmail(entry){
+  const copy=ENTRY_COPY[entry]||ENTRY_COPY.owner;
+  window.openModal?.(`
+    <div class="entry-head">${ENTRY_SVGS[entry]||''}<h2 style="margin:0">${copy.title}</h2></div>
+    <p class="hint" style="margin-bottom:14px">${copy.text}</p>
     <div class="form">
       <div class="field wide"><label for="bf_login_email">Email</label><input id="bf_login_email" type="email" autocomplete="email" placeholder="toi@exemple.fr"></div>
     </div>
     <div id="bf_login_message" class="hint" style="min-height:20px"></div>
     <div class="form-actions">
       <button class="btn primary" id="bf_send_link">Recevoir mon lien</button>
-      <button class="btn ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn ghost" id="bf_entry_back">Retour</button>
     </div>
   `);
-
-  $('bf_send_link')?.addEventListener('click', sendMagicLink);
+  $('bf_entry_back')?.addEventListener('click', showLogin);
+  $('bf_send_link')?.addEventListener('click', ()=>sendMagicLink(entry));
   $('bf_login_email')?.addEventListener('keydown', event=>{
-    if(event.key==='Enter') sendMagicLink();
+    if(event.key==='Enter') sendMagicLink(entry);
   });
 }
 
-async function sendMagicLink(){
+async function sendMagicLink(entry='owner'){
   const email = $('bf_login_email')?.value.trim().toLowerCase();
   const message = $('bf_login_message');
   if(!email || !email.includes('@')){
@@ -400,7 +648,8 @@ async function sendMagicLink(){
     return;
   }
   if(message) message.textContent='Envoi en cours…';
-  const redirectTo = `${location.origin}${location.pathname}`;
+  localStorage.setItem(ENTRY_KEY, entry);
+  const redirectTo = `${location.origin}${location.pathname}?entry=${entry}`;
   const {error} = await sb.auth.signInWithOtp({
     email,
     options:{emailRedirectTo:redirectTo, shouldCreateUser:true}
@@ -427,6 +676,11 @@ async function completeLogin(nextUser){
   user = nextUser;
   setDot('ok', 'Connexion…');
 
+  if(localStorage.getItem(ENTRY_KEY)==='provider'){
+    await showProviderFlow();
+    return;
+  }
+
   let organizations;
   try{
     organizations=await refreshOrganizationList();
@@ -443,7 +697,11 @@ async function completeLogin(nextUser){
 
   if(!organizations.length){
     renderOrganizationSwitcher();
-    showAccessUnavailable();
+    if(localStorage.getItem(ENTRY_KEY)==='concierge'){
+      showConciergeWaiting();
+    }else{
+      showAccessUnavailable();
+    }
     return;
   }
 
